@@ -1,5 +1,6 @@
 # openToDo
 an openToDo project: (aka Plan-it Project)
+
   creating a terminal-based calendar app for Linux environment,
   using ncurses library to manage it like GUI interactions.
 
