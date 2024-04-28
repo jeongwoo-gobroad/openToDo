@@ -63,9 +63,34 @@ typedef struct yearsLL {
 } yearsLL;
 typedef yearsLL* yearGrp;
 
+typedef struct saveData {
+    /* acts like a Linux file system */
+    toDoPtr* toDoData;
+    int maxIndex;
+} saveData;
+typedef saveData* savePtr;
+
 /*--Basic Methods----------------------------------------*/
 
-yearGrp key = NULL; // this should be global var. to abstract the processing layer
+/* Globals */
+static yearGrp key = NULL; // this should be global var. to abstract the processing layer
+static savePtr saveLink  = NULL;
+int ifAlreadyLoaded = 0;
+/**/
+const char* bin_fileName = "todos.sv";
+const char*  hr_fileName = "todos.txt"; /* hr stands for human readable */
+/**/
+
+/* saving features start */
+void resizeSaveMem(void);
+int load(void);
+int save(void);
+void initSaveMem(void);
+void putSaveData(toDoPtr target);
+toDoPtr getSaveData(void);
+/* saving features ended */
+
+void errOcc(const char* str);
 
 toDoPtr create_Node(unsigned long long date, int priority_num, const char* title, const char* info);
 void resizeArr_longer(dayPtr target);
@@ -105,9 +130,10 @@ int main(void) {
     while (r) {
         puts("Plan_it DB Core Debugger Menu");
         puts("Basic operation: ");
-        puts("(1) to insert\n(2) to print all\n(0) to quit");
-        puts("API Test menu: ");
-        puts("(3) to search by YYYYMMDD\n(4) to get today's infos for given sort type, given text area");
+        puts("(1) to insert\n(2) to print all");
+        puts("(3) to save\n(4) to load\n(0) to quit");
+        puts("  API Test menu: ");
+        puts("  (5) to search by YYYYMMDD\n  (6) to get today's infos for given sort type, given text area");
         printf("Type: ");
         //getchar();
         scanf("%d", &input);
@@ -132,17 +158,31 @@ int main(void) {
                 printf("\n\n");
                 break;
             case 3:
+                if (save() == 0) {
+                    puts("saved.");
+                }
+                break;
+            case 4:
+                if (load() == 0) {
+                    puts("loaded.");
+                }
+                else {
+                    puts("already loaded.");
+                }
+                break;
+            case 5:
                 printf("Type scan target YYYYMMDD: \n");
                 scanf("%llu", &date); //getchar();
                 printf("%llu: %d records found.\n", date / 10000, getNumOfSchedule(date));
                 printf("\n\n");
                 break;
-            case 4:
+            case 6:
                 printf("Type scan target YYYYMMDD: \n");
                 scanf("%llu", &date); //getchar();
                 date *= 10000;
                 printf("Type sorting type(2 for time first, 1 for priority first): \n");
-                getTodaySchedule(date, input, NULL, 0);
+                scanf("%d", &input);
+                getTodaySchedule(date, input, NULL, input);
                 printf("\n\n");
                 break;
             case 0:
@@ -175,7 +215,9 @@ toDoPtr create_Node(unsigned long long date, int priority_num, const char* title
 void resizeArr_longer(dayPtr target) {
     int i;
     int size = ++(target->maxIndex);
-    if ((target->toDoArr = (toDoPtr*)(realloc(target->toDoArr, sizeof(toDoPtr) * (size + 1)))));
+    if ((target->toDoArr = (toDoPtr*)(realloc(target->toDoArr, sizeof(toDoPtr) * (size + 1)))) == NULL) {
+        errOcc("realloc");
+    }
     printf("Size extended to %d->%d\n", size - 1, size);
 
     /* remap hash */
@@ -328,6 +370,7 @@ void insert(yearGrp* db, toDoPtr targetData) {
 
     /* Insert */
     insert_toDo(dd, targetData);
+    putSaveData(targetData);
 
     return;
 }
@@ -581,4 +624,107 @@ void getTodaySchedule(unsigned long long today, int sortType, char** strbuf, int
     }
     
     return;
+}
+/* saving features start */
+void resizeSaveMem(void) {
+    (saveLink->maxIndex)++;
+    saveLink->toDoData = (toDoPtr*)realloc(saveLink->toDoData, (saveLink->maxIndex + 1) * sizeof(toDoPtr));
+
+    if (saveLink->toDoData == NULL) {
+        errOcc("realloc");
+    }
+
+    return;
+}
+int load(void) {
+    int fd_bin; int chunk;
+    toDoPtr temp = NULL;
+    toDo buf;
+
+    if (ifAlreadyLoaded) {
+        return 1;
+    }
+
+    fd_bin = open(bin_fileName, O_RDONLY);
+    if (fd_bin == -1) {
+        errOcc("open");
+    }
+
+    while ((chunk = read(fd_bin, temp, sizeof(toDo))) != -1) {
+        insert(&key, temp);
+    }
+    if (chunk == -1) {
+        errOcc("read");
+    }
+    
+    ifAlreadyLoaded = 1;
+
+    close(fd_bin);
+
+    return 0;
+}
+int save(void) {
+    int fd_bin; /* hr for human readable */
+    FILE* fd_hr;
+    int written;
+
+    fd_bin = open(bin_fileName, O_CREAT | O_WRONLY | O_TRUNC, 0641);
+    fd_hr = fopen(hr_fileName, "w+");
+
+    if (fd_bin == -1 || fd_hr == NULL) {
+        errOcc("open");
+    }
+
+    /* bin */
+    for (int i = 0; i <= saveLink->maxIndex; i++) {
+        if ((written = write(fd_bin, (saveLink->toDoData)[i], sizeof(toDo))) != sizeof(toDo)) {
+            errOcc("write");
+        }
+    }
+    /* hr */
+    /** unsigned long long dateData;
+        int priority;
+        char title[31];
+        // SOCKET FEATURE {method}();
+        char details[256];
+    */
+    for (int i = 0; i <= saveLink->maxIndex; i++) {
+        fprintf(fd_hr, "%llu: Priority %d, Title: %s, Details: %s\n", (saveLink->toDoData)[i]->dateData, 
+            (saveLink->toDoData)[i]->priority, (saveLink->toDoData)[i]->title, (saveLink->toDoData)[i]->details);
+    }
+
+    fclose(fd_hr);
+    close(fd_bin);
+
+    ifAlreadyLoaded = 0;
+
+    return 0;
+}
+void initSaveMem(void) {
+    /* ? */
+}
+void putSaveData(toDoPtr target) {
+    if (!saveLink) {
+        saveLink = (savePtr)malloc(sizeof(saveData));
+        saveLink->maxIndex = 0;
+        saveLink->toDoData = (toDoPtr*)malloc(sizeof(toDoPtr));
+        (saveLink->toDoData)[0] = target;
+    }
+    else {
+        resizeSaveMem();
+        (saveLink->toDoData)[saveLink->maxIndex] = target;
+    }
+
+    return;
+}
+toDoPtr getSaveData(void) {
+
+    return NULL;
+}
+/* saving features ended */
+
+void errOcc(const char* str) {
+    fprintf(stderr, "Plan_it: ");
+    perror(str);
+    exit(1);
 }
