@@ -5,6 +5,7 @@ an openToDo project: (aka Plan-it Project)
   using ncurses library to manage it like GUI interactions.
 
 1. How To Build
+   
    gcc -Wall plnit_uxCore.c plnit_dbCore.c -o [Program Name]
 
 2. Features
