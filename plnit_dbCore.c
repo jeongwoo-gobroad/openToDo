@@ -1,0 +1,584 @@
+// KNU CSE 2021114026 Jeongwoo Kim
+// recent update: 240428 v0.0.3
+// Basic implementation of ADT:
+/**
+ * Years [Year Linked List w/index]
+ * Year  [Array of Months w/index, check if it's leap year]
+ * Month [Array of Days w/index]
+ * Week  [No need to implement; week doesn't matter]
+ * Day   [Priority Queue of ToDos]
+ * ToDo  [Currently has 6 data areas]
+ *      - hash no.
+ *      - YYYYMMDDHHMM (unsigned long long)
+ *      - Priority no.
+ *      - Title   [MAXLEN := 30 w/ null terminated string]
+ *      - Online share feature(Maybe later for Socket)
+ *      - Details [MAXLEN := 256 w/ null terminated string]
+*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+typedef struct toDo {
+    unsigned long long hashNum;
+    unsigned long long dateData;
+    int priority;
+    char title[31];
+    // SOCKET FEATURE {method}();
+    char details[256];
+} toDo;
+typedef toDo* toDoPtr;
+
+typedef struct day {
+    int maxIndex;
+    toDoPtr* toDoArr;
+} day;
+typedef day* dayPtr;
+
+typedef struct month {
+    /**
+     * [0] is used for 28/29/30/31 det.
+     *      but how???
+    */
+    dayPtr dates[32];
+} month;
+typedef month* monthPtr;
+
+typedef struct year {
+    /**
+     * [0] is used for leap year chk:
+     *      but how???
+    */
+    monthPtr months[13];
+} year;
+typedef year* yearPtr;
+
+typedef struct yearsLL {
+    int year;
+    yearPtr target;
+    struct yearsLL* prev;
+    struct yearsLL* next;
+} yearsLL;
+typedef yearsLL* yearGrp;
+
+/*--Basic Methods----------------------------------------*/
+
+yearGrp key = NULL; // this should be global var. to abstract the processing layer
+
+toDoPtr create_Node(unsigned long long date, int priority_num, const char* title, const char* info);
+void resizeArr_longer(dayPtr target);
+void insert_toDo(dayPtr when, toDoPtr target);
+dayPtr create_day(void);
+dayPtr findDay(int target, monthPtr db);
+monthPtr create_month(void);
+monthPtr findMonth(int target, yearPtr db);
+yearGrp create_yearGrp(int num);
+yearPtr findYear(int target, yearGrp* db);
+void insert(yearGrp* db, toDoPtr targetData);
+void printAll(yearGrp db);
+dayPtr search_byDate(unsigned long long target);
+int get_toDo_byForm(toDoPtr target, char** buf);
+
+void sortGivenDateToDos(dayPtr when, int sortType);
+void quickSort_byPriNum(toDoPtr* arr, int from, int to);
+void quickSort_byDate(toDoPtr* arr, int from, int to);
+
+void printToday(dayPtr when);
+
+/*--UX Layer interactive API Methods---------------------*/
+
+int getNumOfSchedule(unsigned long long targetDate);
+void getUpcomingSchedule(unsigned long long today, char** strbuf, int scrSize);
+void setSchedule(unsigned long long today, char* title, char* details, int priority);
+void getTodaySchedule(unsigned long long today, int sortType, char** strbuf, int scrSize);
+
+/*-------------------------------------------------------*/
+
+int main(void) {
+    int input;
+    unsigned long long date; int pnum; char title[30]; char details[256];
+    int r = 1;
+    int i = 0;
+
+    while (r) {
+        puts("Plan_it DB Core Debugger Menu");
+        puts("Basic operation: ");
+        puts("(1) to insert\n(2) to print all\n(0) to quit");
+        puts("API Test menu: ");
+        puts("(3) to search by YYYYMMDD\n(4) to get today's infos for given sort type, given text area");
+        printf("Type: ");
+        //getchar();
+        scanf("%d", &input);
+        switch (input) {
+            case 1:
+                printf("Type number of records: \n");
+                scanf("%d", &input);
+                for (i = 0; i < input; i++) {
+                    pnum++;
+                    printf("Type infos[YYYYMMDDHHMM PRIORITY_NUM TITLE DETAILS]: \n");
+                    scanf("%llu", &date); //getchar();//printf("%llu <- \n", date);
+                    scanf("%d", &pnum);
+                    scanf("%s", title); getchar();//printf("%s <- \n", title);
+                    scanf("%s", details); getchar();//printf("%s <- \n", details);
+
+                    setSchedule(date, title, details, pnum);
+                }
+                printf("\n\n");
+                break;
+            case 2:
+                printAll(key);
+                printf("\n\n");
+                break;
+            case 3:
+                printf("Type scan target YYYYMMDD: \n");
+                scanf("%llu", &date); //getchar();
+                printf("%llu: %d records found.\n", date / 10000, getNumOfSchedule(date));
+                printf("\n\n");
+                break;
+            case 4:
+                printf("Type scan target YYYYMMDD: \n");
+                scanf("%llu", &date); //getchar();
+                date *= 10000;
+                printf("Type sorting type(2 for time first, 1 for priority first): \n");
+                getTodaySchedule(date, input, NULL, 0);
+                printf("\n\n");
+                break;
+            case 0:
+                r = 0;
+                break;
+            default:
+                break;
+        }
+    }
+
+    return 0;
+}
+
+/*-----------------------*/
+
+toDoPtr create_Node(unsigned long long date, int priority_num, const char* title, const char* info) {
+    toDoPtr newOne;
+
+    newOne = (toDoPtr)malloc(sizeof(toDo));
+
+    newOne->hashNum = 0;
+    newOne->dateData = date;
+    newOne->priority = priority_num;
+    strcpy(newOne->title, title);
+    strcpy(newOne->details, info);
+
+    return newOne;
+}
+
+void resizeArr_longer(dayPtr target) {
+    int i;
+    int size = ++(target->maxIndex);
+    if ((target->toDoArr = (toDoPtr*)(realloc(target->toDoArr, sizeof(toDoPtr) * (size + 1)))));
+    printf("Size extended to %d->%d\n", size - 1, size);
+
+    /* remap hash */
+    for (i = 0; i < target->maxIndex; i++) {
+        (target->toDoArr)[i]->hashNum = ((target->toDoArr)[0]->dateData / 100) * 100 + i;
+    }
+
+    return;
+}
+
+void insert_toDo(dayPtr when, toDoPtr target) {
+    if (when->maxIndex == -1) {
+        when->toDoArr = (toDoPtr*)malloc(sizeof(toDoPtr));
+        when->maxIndex = 0;
+    }
+    else {
+        resizeArr_longer(when);
+    }
+    (when->toDoArr)[when->maxIndex] = target; // SUBJECT TO CHANGE: TO MAX HEAP
+
+    /* remap hash */
+    (when->toDoArr)[when->maxIndex]->hashNum = ((when->toDoArr)[0]->dateData / 100) * 100 + when->maxIndex;
+    return;
+}
+
+dayPtr create_day(void) {
+    dayPtr newOne = (dayPtr)malloc(sizeof(day));
+
+    newOne->maxIndex = -1;
+    newOne->toDoArr = NULL;
+
+    return newOne;
+}
+
+dayPtr findDay(int target, monthPtr db) {
+    if (!(db->dates[target])) {
+        db->dates[target] = create_day();
+    }
+
+    return db->dates[target];
+}
+
+monthPtr create_month(void) {
+    int i;
+    monthPtr newOne = (monthPtr)malloc(sizeof(month));
+
+    for (i = 0; i < 32; i++) {
+        (newOne->dates)[i] = NULL;
+    }
+
+    return newOne;
+}
+
+monthPtr findMonth(int target, yearPtr db) {
+    if (!(db->months[target])) {
+        db->months[target] = create_month();
+    }
+
+    return db->months[target];
+}
+
+yearGrp create_yearGrp(int num) {
+    int i;
+    yearPtr newYear;
+    yearGrp newGrp;
+
+    newYear = (yearPtr)malloc(sizeof(year));
+    newGrp = (yearGrp)malloc(sizeof(yearsLL));
+
+    newGrp->year = num;
+    newGrp->target = newYear;
+    newGrp->next = newGrp->prev = NULL;
+
+    for (i = 0; i < 13; i++) {
+        (newYear->months)[i] = NULL;
+    }
+
+    return newGrp;
+}
+
+yearPtr findYear(int target, yearGrp* db) {
+    yearGrp iterator; yearGrp newOne; yearGrp append;
+    int isFound = 0;
+
+    /* iter */
+    iterator = (*db);
+    while (iterator) {
+        if (iterator->year == target) {
+            isFound = 1;
+            break;
+        }
+        else if (iterator->year > target) {
+            isFound = -1;
+            break;
+        }
+        append = iterator;
+        iterator = iterator->next;
+        isFound = 2;
+    }
+
+    /* calc */
+    if (isFound == 1) {                     /* If exists */
+        return iterator->target;
+    }
+    else if (isFound == -1) {               /* If insertion needed */
+        newOne = create_yearGrp(target);
+        if (iterator->prev) {               /* If insertion needed: between stuffs */
+            newOne->prev = iterator->prev;
+            newOne->next = iterator;
+            newOne->prev->next = newOne;
+            newOne->next->prev = newOne;
+            return newOne->target;
+        }
+        else {                              /* If insertion needed: new start node */
+            newOne->prev = NULL;
+            newOne->next = iterator;
+            newOne->next->prev = newOne;
+            return newOne->target;
+        }
+    }
+    else if (isFound == 2) {                /* If insertion needed: need to append */
+        newOne = create_yearGrp(target);
+        newOne->prev = append;
+        newOne->prev->next = newOne;
+    }
+    else {                                  /* If creating a start node required */
+        (*db) = newOne = create_yearGrp(target);
+    }
+
+    return newOne->target;
+}
+
+void insert(yearGrp* db, toDoPtr targetData) {
+    int year, month, date; //hour, minute;
+    yearPtr   yy;
+    monthPtr  mm;
+    dayPtr    dd;
+
+    /* Split */
+    year =   (targetData->dateData) / 100000000;
+    month =  (targetData->dateData) % 100000000 / 1000000;
+    date =   (targetData->dateData) % 1000000 / 10000;
+    //hour =   (targetData->dateData) % 10000 / 100;
+    //minute = (targetData->dateData) % 100;
+
+    /* Search */
+    yy = findYear(year, db);
+    mm = findMonth(month, yy);
+    dd = findDay(date, mm);
+
+    /* Insert */
+    insert_toDo(dd, targetData);
+
+    return;
+}
+
+void printAll(yearGrp db) {
+    int i, j, k;
+    toDoPtr temp;
+
+    while (db->prev) {
+        db = db->prev;
+    }
+
+    while (db) { /* wtf */
+        printf("Records of the Year %d:\n", db->year);
+        for (i = 0; i < 13; i++) {
+            if ((db->target->months)[i]) {
+                printf("    ->Records of the Month %d:\n", i);
+                for (j = 0; j < 32; j++) {
+                    if (((db->target->months)[i]->dates)[j]) {
+                        printf("        -->Records of the Day %d:\n", j);
+                        for (k = 0; k <= ((db->target->months)[i]->dates)[j]->maxIndex; k++) {
+                            temp = (((db->target->months)[i]->dates)[j]->toDoArr)[k];
+                            printf("            %llu: %s | %s , pnum = %d hash = %llu\n", temp->dateData, temp->title, temp->details, temp->priority, temp->hashNum);
+                        }
+                        //printToday(((db->target->months)[i]->dates)[j]);
+                    }
+                }
+            }
+        }
+        db = db->next;
+    }
+
+    return;
+}
+
+dayPtr search_byDate(unsigned long long target) {
+    int year, month, date; //hour, minute;
+    yearPtr   yy = NULL;
+    monthPtr  mm = NULL;
+    dayPtr    dd = NULL;
+    yearGrp iter = key;
+
+    /* Split */
+    year =   (target) / 100000000;
+    month =  (target) % 100000000 / 1000000;
+    date =   (target) % 1000000 / 10000;
+    //hour =   (target) % 10000 / 100;
+    //minute = (target) % 100;
+
+    /* Search */
+    while (iter->prev) iter = iter->prev; /* move for first iterator */
+    while (iter) {
+        if (iter->year == year) {
+            yy = iter->target;
+            if (yy->months[month]) {
+                mm = yy->months[month];
+                if (mm->dates[date]) {
+                    dd = mm->dates[date];
+                    break;
+                }
+            }
+        }
+        iter = iter->next;
+    }
+
+    if (!dd) { /* if not found */
+        return NULL;
+    }
+
+    return dd;
+}
+
+int get_toDo_byForm(toDoPtr target, char** buf) {
+    //int hour, min;
+    /* Split */
+
+    //hour =  ((target)->dateData) % 10000 / 100;
+    //min =   ((target)->dateData) % 100;
+
+    /* \\ is considered as a new line feed in UX layer */
+    //snprintf(*buf, sizeof(char) * 50, "%d:%d \\ priority: %d \\ %s \\ %s... \\ \n", hour, min, target->priority, target->title, target->details);
+
+    return (int)strlen(*buf);
+}
+
+void quickSort_byDate(toDoPtr* arr, int from, int to) {
+    toDoPtr pivot;
+    toDoPtr swapTemp;
+    int cursor, pivAble;
+
+    if (from >= to) return;
+
+    //printf("Size: from %d to %d index.\n", from, to);
+
+    pivot = arr[from]; pivAble = from;
+    //printf("pivot: %llu\n", pivot->dateData % 10000);
+    for (cursor = from + 1; cursor <= to; cursor++) {
+        //printf("Comparing %d-%d, each data of %llu, %llu\n", cursor, pivAble, arr[cursor]->dateData % 10000, pivot->dateData % 10000);
+        if (arr[cursor]->dateData % 10000 < pivot->dateData % 10000) {
+            //printf("SWAP %d <-> %d\n", cursor, pivAble + 1);
+            swapTemp = arr[++pivAble];
+            arr[pivAble] = arr[cursor];
+            arr[cursor] = swapTemp;
+        }
+    }
+    //printf("SWAP %d <-> %d\n", from, pivAble);
+    swapTemp = arr[from];
+    arr[from] = arr[pivAble];
+    arr[pivAble] = swapTemp;
+    //printf("Phase %d->%d Safely finished.\n", from, to);
+
+    quickSort_byDate(arr, from, pivAble - 1);
+    quickSort_byDate(arr, pivAble + 1, to);
+
+    return;
+}
+
+void quickSort_byPriNum(toDoPtr* arr, int from, int to) {
+    toDoPtr pivot;
+    toDoPtr swapTemp;
+    int cursor, pivAble;
+
+    if (from >= to) return;
+
+    //printf("Size: from %d to %d index.\n", from, to);
+
+    pivot = arr[from]; pivAble = from;
+    //printf("pivot: %llu\n", pivot->dateData % 10000);
+    for (cursor = from + 1; cursor <= to; cursor++) {
+        //printf("Comparing %d-%d, each data of %llu, %llu\n", cursor, pivAble, arr[cursor]->dateData % 10000, pivot->dateData % 10000);
+        if (arr[cursor]->priority < pivot->priority) {
+            //printf("SWAP %d <-> %d\n", cursor, pivAble + 1);
+            swapTemp = arr[++pivAble];
+            arr[pivAble] = arr[cursor];
+            arr[cursor] = swapTemp;
+        }
+    }
+    //printf("SWAP %d <-> %d\n", from, pivAble);
+    swapTemp = arr[from];
+    arr[from] = arr[pivAble];
+    arr[pivAble] = swapTemp;
+    //printf("Phase %d->%d Safely finished.\n", from, to);
+
+    quickSort_byPriNum(arr, from, pivAble - 1);
+    quickSort_byPriNum(arr, pivAble + 1, to);
+
+    return;
+}
+
+void sortGivenDateToDos(dayPtr when, int sortType) {
+    /**
+     * sortType 1: priority first
+     * sortType 2: time first
+     * other numbers: regarded as priority
+    */
+
+    if (!when) {
+        return;
+    }
+
+    if (sortType == 2) {
+        quickSort_byDate(when->toDoArr, 0, when->maxIndex);
+    }
+    else {
+        quickSort_byPriNum(when->toDoArr, 0, when->maxIndex);
+    }
+
+    return;
+}
+
+void printToday(dayPtr when) {
+    int i;
+    for (i = 0; i <= when->maxIndex; i++) {
+        printf("%llu: [%d] %s || %s\n", (when->toDoArr)[i]->dateData, (when->toDoArr)[i]->priority, (when->toDoArr)[i]->title, (when->toDoArr)[i]->details);
+    }
+
+    return;
+}
+
+/*--------API------------------------------------------------------------------------------------------------------------------------------------*/
+
+int getNumOfSchedule(unsigned long long targetDate) {
+    dayPtr dd = NULL;
+
+    dd = search_byDate(targetDate * 10000); // YYYYMMDD
+
+    if (!dd) return 0;
+
+    /* we know maxIndex + 1 is an actual number of records */
+    return dd->maxIndex + 1;
+}
+void getUpcomingSchedule(unsigned long long today, char** strbuf, int scrSize) { // not made yet!
+    char* strs;
+    char* temp;
+    int limit; int i;
+    dayPtr dd = NULL;
+
+    i = 0;
+    limit = scrSize;
+    strs = (char*)malloc(sizeof(char) * scrSize); strs[0] = '\0';
+    temp = (char*)malloc(sizeof(char) * scrSize); temp[0] = '\0';
+
+    dd = search_byDate(today);
+
+    if (!dd) {
+        strcpy(*strbuf, "No data");
+    }
+    else {
+        while (limit) {
+            /* is given screen size capable of */
+            limit /= get_toDo_byForm((dd->toDoArr)[i++], &temp);
+            strcat(strs, temp);
+        }
+        strcpy(*strbuf, temp);
+    }
+    
+    return;
+}
+void setSchedule(unsigned long long today, char* title, char* details, int priority) {
+    toDoPtr in;
+
+    in = create_Node(today, priority, title, details);
+    insert(&key, in);
+
+    return;
+}
+void getTodaySchedule(unsigned long long today, int sortType, char** strbuf, int scrSize) {
+    //char* strs;
+    //char* temp;
+    //int limit;
+    dayPtr dd = NULL;
+
+    //limit = scrSize;
+    //strs = (char*)malloc(sizeof(char) * scrSize); strs[0] = '\0';
+    //temp = (char*)malloc(sizeof(char) * scrSize); temp[0] = '\0';
+
+    dd = search_byDate(today * 10000); // YYYYMMDD
+
+    if (!dd) {
+        //strcpy(*buf, "No data");
+    }
+    else {
+        sortGivenDateToDos(dd, sortType);
+        printToday(dd);
+        //while (limit) {
+        //    /* is given screen size capable of */
+        //    limit /= get_toDo_byForm(dd, temp);
+        //    strcat(strs, temp);
+        //}
+        //strcpy(*strbuf, temp);
+    }
+    
+    return;
+}
