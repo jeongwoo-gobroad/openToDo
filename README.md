@@ -10,15 +10,16 @@ an openToDo project: (aka Plan-it Project)
 1. How To Build
    
    currently, this application is not in an executable form.
+
    현재 빌드는 아직 불가능합니다.
 
-2. Features
+3. Features
 
    
 
-3. Known Issues
+4. Known Issues
 
 
-4. Features that will be added
+5. Features that will be added
 
 
