@@ -173,13 +173,12 @@ int main(void) {
             case 5:
                 printf("Type scan target YYYYMMDD: \n");
                 scanf("%llu", &date); //getchar();
-                printf("%llu: %d records found.\n", date / 10000, getNumOfSchedule(date));
+                printf("%llu: %d records found.\n", date, getNumOfSchedule(date));
                 printf("\n\n");
                 break;
             case 6:
                 printf("Type scan target YYYYMMDD: \n");
                 scanf("%llu", &date); //getchar();
-                date *= 10000;
                 printf("Type sorting type(2 for time first, 1 for priority first): \n");
                 scanf("%d", &input);
                 getTodaySchedule(date, input, NULL, input);
@@ -345,6 +344,7 @@ yearPtr findYear(int target, yearGrp* db) {
     }
     else {                                  /* If creating a start node required */
         (*db) = newOne = create_yearGrp(target);
+        key = newOne;
     }
 
     return newOne->target;
@@ -378,6 +378,11 @@ void insert(yearGrp* db, toDoPtr targetData) {
 void printAll(yearGrp db) {
     int i, j, k;
     toDoPtr temp;
+
+    if (!db) {
+        puts("No data");
+        return;
+    }
 
     while (db->prev) {
         db = db->prev;
@@ -638,8 +643,7 @@ void resizeSaveMem(void) {
 }
 int load(void) {
     int fd_bin; int chunk;
-    toDoPtr temp = NULL;
-    toDo buf;
+    toDoPtr buf = NULL;
 
     if (ifAlreadyLoaded) {
         return 1;
@@ -650,8 +654,11 @@ int load(void) {
         errOcc("open");
     }
 
-    while ((chunk = read(fd_bin, temp, sizeof(toDo))) != -1) {
-        insert(&key, temp);
+    buf = (toDoPtr)malloc(sizeof(toDo));
+    while ((chunk = read(fd_bin, buf, sizeof(toDo))) != 0) {
+        if (chunk == -1) break;
+        insert(&key, buf);
+        buf = (toDoPtr)malloc(sizeof(toDo)); // memory leak alert!!!
     }
     if (chunk == -1) {
         errOcc("read");
@@ -667,6 +674,9 @@ int save(void) {
     int fd_bin; /* hr for human readable */
     FILE* fd_hr;
     int written;
+    int time, min;
+    unsigned long long dates = 0;
+    time = 0; min = 0;
 
     fd_bin = open(bin_fileName, O_CREAT | O_WRONLY | O_TRUNC, 0641);
     fd_hr = fopen(hr_fileName, "w+");
@@ -677,7 +687,7 @@ int save(void) {
 
     /* bin */
     for (int i = 0; i <= saveLink->maxIndex; i++) {
-        if ((written = write(fd_bin, (saveLink->toDoData)[i], sizeof(toDo))) != sizeof(toDo)) {
+        if ((written = write(fd_bin, ((saveLink->toDoData)[i]), sizeof(toDo))) != sizeof(toDo)) {
             errOcc("write");
         }
     }
@@ -689,7 +699,10 @@ int save(void) {
         char details[256];
     */
     for (int i = 0; i <= saveLink->maxIndex; i++) {
-        fprintf(fd_hr, "%llu: Priority %d, Title: %s, Details: %s\n", (saveLink->toDoData)[i]->dateData, 
+        dates = (saveLink->toDoData)[i]->dateData / 10000;
+        time = (int)((saveLink->toDoData)[i]->dateData % 10000 / 100);
+        min = (int)((saveLink->toDoData)[i]->dateData % 100);
+        fprintf(fd_hr, "%llu | %d:%d -> [Priority %d], Title: %12s, Details: %s\n", dates, time, min, 
             (saveLink->toDoData)[i]->priority, (saveLink->toDoData)[i]->title, (saveLink->toDoData)[i]->details);
     }
 
