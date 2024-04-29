@@ -534,7 +534,7 @@ void sortGivenDateToDos(dayPtr when, int sortType) {
     }
 
     /* kind of radix(bucket) */
-    if (sortType == 2) {
+    if (sortType == 1) {
         quickSort_byDate(when->toDoArr, 0, when->maxIndex);
         quickSort_byPriNum(when->toDoArr, 0, when->maxIndex);
     }
