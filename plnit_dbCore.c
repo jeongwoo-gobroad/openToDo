@@ -115,9 +115,18 @@ void printToday(dayPtr when);
 /*--UX Layer interactive API Methods---------------------*/
 
 int getNumOfSchedule(unsigned long long targetDate);
-void getUpcomingSchedule(unsigned long long today, char** strbuf, int scrSize);
+void getUpcomingSchedule(unsigned long long today, char* strbuf, int scrSize);
 void setSchedule(unsigned long long today, char* title, char* details, int priority);
-void getTodaySchedule(unsigned long long today, int sortType, char** strbuf, int scrSize);
+void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int scrSize); /* debugging only feature */
+
+void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* strbuf, int maxLines, int width);
+void getTodaySchedule_withDetails(unsigned long long today, int sortType, char* strbuf, int maxLines, int width, int page);
+
+/*-------------------------------------------------------*/
+
+/*--Debug-only features----------------------------------*/
+
+void printMarkUP(char* str);
 
 /*-------------------------------------------------------*/
 
@@ -126,6 +135,7 @@ int main(void) {
     unsigned long long date; int pnum; char title[30]; char details[256];
     int r = 1;
     int i = 0;
+    char testStr[BUFSIZ];
 
     while (r) {
         puts("Plan_it DB Core Debugger Menu");
@@ -134,6 +144,8 @@ int main(void) {
         puts("(3) to save\n(4) to load\n(0) to quit");
         puts("  API Test menu: ");
         puts("  (5) to search by YYYYMMDD\n  (6) to get today's infos for given sort type, given text area");
+        puts("  (7) to print summarized info of the given date in a markup form");
+        puts("  (8) to print a markup form in a human readable form");
         printf("Type: ");
         //getchar();
         scanf("%d", &input);
@@ -151,11 +163,9 @@ int main(void) {
 
                     setSchedule(date, title, details, pnum);
                 }
-                printf("\n\n");
                 break;
             case 2:
                 printAll(key);
-                printf("\n\n");
                 break;
             case 3:
                 if (save() == 0) {
@@ -174,7 +184,6 @@ int main(void) {
                 printf("Type scan target YYYYMMDD: \n");
                 scanf("%llu", &date); //getchar();
                 printf("%llu: %d records found.\n", date, getNumOfSchedule(date));
-                printf("\n\n");
                 break;
             case 6:
                 printf("Type scan target YYYYMMDD: \n");
@@ -182,7 +191,19 @@ int main(void) {
                 printf("Type sorting type(2 for time first, 1 for priority first): \n");
                 scanf("%d", &input);
                 getTodaySchedule(date, input, NULL, input);
-                printf("\n\n");
+                break;
+            case 7:
+                printf("Type scan target YYYYMMDD: \n");
+                scanf("%llu", &date); //getchar();
+                printf("Type sorting type(2 for time first, 1 for priority first): \n");
+                scanf("%d", &input);
+                getTodaySchedule_Summarized(date, input, testStr, 10, 10);
+                printf("%s\n", testStr);
+                break;
+            case 8:
+                printf("Type target string: ");
+                scanf("%s", testStr); getchar();
+                printMarkUP(testStr);
                 break;
             case 0:
                 r = 0;
@@ -190,6 +211,7 @@ int main(void) {
             default:
                 break;
         }
+        printf("\n\n");
     }
 
     return 0;
@@ -567,7 +589,7 @@ int getNumOfSchedule(unsigned long long targetDate) {
     /* we know maxIndex + 1 is an actual number of records */
     return dd->maxIndex + 1;
 }
-void getUpcomingSchedule(unsigned long long today, char** strbuf, int scrSize) { // not made yet!
+void getUpcomingSchedule(unsigned long long today, char* strbuf, int scrSize) { // not made yet!
     char* strs;
     char* temp;
     int limit; int i;
@@ -581,7 +603,7 @@ void getUpcomingSchedule(unsigned long long today, char** strbuf, int scrSize) {
     dd = search_byDate(today);
 
     if (!dd) {
-        strcpy(*strbuf, "No data");
+        strcpy(strbuf, "No data");
     }
     else {
         while (limit) {
@@ -589,7 +611,7 @@ void getUpcomingSchedule(unsigned long long today, char** strbuf, int scrSize) {
             limit /= get_toDo_byForm((dd->toDoArr)[i++], &temp);
             strcat(strs, temp);
         }
-        strcpy(*strbuf, temp);
+        strcpy(strbuf, temp);
     }
     
     return;
@@ -602,7 +624,7 @@ void setSchedule(unsigned long long today, char* title, char* details, int prior
 
     return;
 }
-void getTodaySchedule(unsigned long long today, int sortType, char** strbuf, int scrSize) {
+void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int scrSize) {
     //char* strs;
     //char* temp;
     //int limit;
@@ -630,6 +652,36 @@ void getTodaySchedule(unsigned long long today, int sortType, char** strbuf, int
     
     return;
 }
+
+void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* strbuf, int maxLines, int width) {
+    dayPtr dd = NULL;
+    char str[BUFSIZ] = {'\0', };
+    char temp[BUFSIZ] = {'\0', };
+    int i;
+
+    dd = search_byDate(today * 10000); // YYYYMMDD
+
+    if (!dd) {
+        strcpy(str, "No data\n");
+    }
+    else { /* [: for date, ]: make new line, ^: tab inside */
+        sortGivenDateToDos(dd, sortType);
+        for (i = 0; i <= dd->maxIndex; i++) {
+            sprintf(temp, "[%04llu]^%s]", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
+            strcat(str, temp);
+        }
+    }
+
+    strcpy(strbuf, str);
+
+    return;
+}
+void getTodaySchedule_withDetails(unsigned long long today, int sortType, char* strbuf, int maxLines, int width, int page) {
+    /* ? */
+}
+
+/*------------------------------------------------------------------------------------------*/
+
 /* saving features start */
 void resizeSaveMem(void) {
     (saveLink->maxIndex)++;
@@ -741,3 +793,31 @@ void errOcc(const char* str) {
     perror(str);
     exit(1);
 }
+
+/*--Debug-only features----------------------------------*/
+
+void printMarkUP(char* str) {
+    /* [: for date, ]: make new line, ^: tab inside */
+    int cur = 0;
+
+    while (str[cur]) {
+        switch (str[cur]) {
+            case '[':
+                printf("Date: ");
+                break;
+            case ']':
+                printf("\n");
+                break;
+            case '^':
+                printf("    ");
+                break;
+            default:
+                printf("%c", str[cur]);
+        }
+        cur++;
+    }
+
+    return;
+}
+
+/*-------------------------------------------------------*/
