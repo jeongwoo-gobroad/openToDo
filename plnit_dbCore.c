@@ -376,7 +376,7 @@ void insert(yearGrp* db, toDoPtr targetData) {
 }
 
 void printAll(yearGrp db) {
-    int i, j, k;
+    int i, j;
     dayPtr temp;
 
     if (!db) {
@@ -397,7 +397,7 @@ void printAll(yearGrp db) {
                     if (((db->target->months)[i]->dates)[j]) {
                         printf("        -->Records of the Day %d:\n", j);
                         temp = ((db->target->months)[i]->dates)[j];
-                        printf("            "); printToday(temp);
+                        printToday(temp);
                     }
                 }
             }
@@ -549,7 +549,7 @@ void sortGivenDateToDos(dayPtr when, int sortType) {
 void printToday(dayPtr when) {
     int i;
     for (i = 0; i <= when->maxIndex; i++) {
-        printf("%llu: [%d] %s || %s\n", (when->toDoArr)[i]->dateData, (when->toDoArr)[i]->priority, (when->toDoArr)[i]->title, (when->toDoArr)[i]->details);
+        printf("            %llu: [%d] %s || %s\n", (when->toDoArr)[i]->dateData, (when->toDoArr)[i]->priority, (when->toDoArr)[i]->title, (when->toDoArr)[i]->details);
     }
 
     return;
