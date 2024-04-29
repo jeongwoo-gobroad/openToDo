@@ -377,7 +377,7 @@ void insert(yearGrp* db, toDoPtr targetData) {
 
 void printAll(yearGrp db) {
     int i, j, k;
-    toDoPtr temp;
+    dayPtr temp;
 
     if (!db) {
         puts("No data");
@@ -396,11 +396,8 @@ void printAll(yearGrp db) {
                 for (j = 0; j < 32; j++) {
                     if (((db->target->months)[i]->dates)[j]) {
                         printf("        -->Records of the Day %d:\n", j);
-                        for (k = 0; k <= ((db->target->months)[i]->dates)[j]->maxIndex; k++) {
-                            temp = (((db->target->months)[i]->dates)[j]->toDoArr)[k];
-                            printf("            %llu: %s | %s , pnum = %d hash = %llu\n", temp->dateData, temp->title, temp->details, temp->priority, temp->hashNum);
-                        }
-                        //printToday(((db->target->months)[i]->dates)[j]);
+                        temp = ((db->target->months)[i]->dates)[j];
+                        printf("            "); printToday(temp);
                     }
                 }
             }
@@ -536,11 +533,14 @@ void sortGivenDateToDos(dayPtr when, int sortType) {
         return;
     }
 
+    /* kind of radix(bucket) */
     if (sortType == 2) {
         quickSort_byDate(when->toDoArr, 0, when->maxIndex);
+        quickSort_byPriNum(when->toDoArr, 0, when->maxIndex);
     }
     else {
         quickSort_byPriNum(when->toDoArr, 0, when->maxIndex);
+        quickSort_byDate(when->toDoArr, 0, when->maxIndex);
     }
 
     return;
