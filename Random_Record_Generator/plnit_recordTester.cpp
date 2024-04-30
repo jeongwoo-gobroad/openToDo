@@ -15,7 +15,8 @@ int main(void) {
     unsigned long long tmp = 0;
 
     vector<string> title = {"Birthday", "Appointment", "Meeting", "Workout", "Some_stuffs"};
-    vector<string> info = {"Some_stuffs_", "Some_stuffs_Some_stuffs_", "This_stuffs_", "This_stuffs_This_stuffs_", "justforfun"};
+    vector<string> info = {"Some_stuffs_Some_stuffs_", "Some_stuffs_Some_stuffs_Some_stuffs_Some_stuffs_", 
+        "This_stuffs_This_stuffs_", "This_stuffs_This_stuffs_This_stuffs_This_stuffs_", "justforfun_justforfun_"};
 
     int size;
     int a, b;

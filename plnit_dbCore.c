@@ -223,6 +223,7 @@ int main(void) {
                 scanf("%s", testStr); getchar();
                 printf("Type target max width of the screen (input >= 9): ");
                 scanf("%d", &input);
+                puts("");
                 printMarkUP(testStr, input);
                 break;
             case 0:
@@ -722,7 +723,7 @@ int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* s
         pageIterator = (pageIterator + 1) % (dd->maxIndex + 1);
         sortGivenDateToDos(dd, sortType);
         /*        Time->NL->Title(NL)->Tab->NL->Details(NL)->Tab->NL->NL */
-        sprintf(temp, "[^%04llu[[]^^%s[[]]^%s[[[[", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
+        sprintf(temp, "[^%04llu[[]^^%s[[]]^%s[[[[\n", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
         strcat(str, temp);
     }
 
@@ -856,23 +857,44 @@ void printMarkUP(char* str, int lineLimit) {
     /* Prefix codes
         [^: for Time, [[: make new line, ^: tab inside
         ]^: for title, ]]: for details
+
+        How it is decoded
+            pseudo code:
+                algorithm PrintStringInForm <- (String target)
+                    if [ found
+                        then push [ to the stack
+                    elif ] found
+                        then push ] to the stack
+                    elif ^ found
+                        then push ^ to the stack
+                        then pop every element of the stack
+                    
+                    interpret stack instructions: [^: for Time, [[: make new line, ^: tab inside, ]^: for title, ]]: for details
+
+                    do jobs with interpreted data
+
+                end algorithm PrintStringInForm
     */
     int cur = 0;
     int isStillInLine = 0;
-    int cnter = 4;
+    int cnter = 4; /* tab space */
 
     while (str[cur]) {
         switch (str[cur]) {
+            /* simulates stack */
             case '[': 
+                cur++;
                 if (str[cur] == '^') { /* date */
                     printf("Time: ");
                 }
                 else { /* mk nl */
                     printf("\n");  
-                    isStillInLine = 0;
                 }
+                isStillInLine = 0;
+                cnter = 4;
                 break;
             case ']': 
+                cur++;
                 if (str[cur] == '^') { /* title form */
                     printf("[Title]\n");
                 }
@@ -880,6 +902,7 @@ void printMarkUP(char* str, int lineLimit) {
                     printf("[Details]\n");  
                 }
                 isStillInLine = 0;
+                cnter = 4;
                 break;
             case '^':
                 printf("    ");
@@ -888,8 +911,9 @@ void printMarkUP(char* str, int lineLimit) {
             default:  
                 if (isStillInLine) {
                     cnter++;
-                    if (cnter % (lineLimit + 1) == 0) {
-                        printf("\n    ");
+                    if (cnter == lineLimit) {
+                        puts("");
+                        printf("    ");
                         cnter = 4; /* simulates tab */
                     }
                 }
