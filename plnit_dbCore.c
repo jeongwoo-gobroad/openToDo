@@ -76,6 +76,7 @@ typedef saveData* savePtr;
 static yearGrp key = NULL; // this should be global var. to abstract the processing layer
 static savePtr saveLink  = NULL;
 int ifAlreadyLoaded = 0;
+static int pageIterator = 0; // for GUI interaction; See Codes Below -> void getTodaySchedule_withDetails
 /**/
 const char* bin_fileName = "todos.sv";
 const char*  hr_fileName = "todos.txt"; /* hr stands for human readable */
@@ -120,7 +121,7 @@ void setSchedule(unsigned long long today, char* title, char* details, int prior
 void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int scrSize); /* debugging only feature */
 
 void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* strbuf, int maxLines, int width);
-void getTodaySchedule_withDetails(unsigned long long today, int sortType, char* strbuf, int maxLines, int width, int page);
+int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* strbuf, int maxLines, int width);
 
 /*-------------------------------------------------------*/
 
@@ -679,8 +680,27 @@ void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* s
 
     return;
 }
-void getTodaySchedule_withDetails(unsigned long long today, int sortType, char* strbuf, int maxLines, int width, int page) {
-    /* ? */
+int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* strbuf, int maxLines, int width) {
+    /* implementing *pageIterator* */
+    dayPtr dd = NULL;
+    char str[BUFSIZ] = {'\0', };
+    char temp[BUFSIZ] = {'\0', };
+    int i;
+
+    dd = search_byDate(today * 10000); // YYYYMMDD
+
+    if (!dd) {
+        strcpy(str, "No data\n");
+    }
+    else { /* [: for date, ]: make new line, ^: tab inside */
+        sortGivenDateToDos(dd, sortType);
+        for (i = 0; i <= dd->maxIndex; i++) {
+            sprintf(temp, "[%04llu]^%s]", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
+            strcat(str, temp);
+        }
+    }
+
+    strcpy(strbuf, str);
 }
 
 /*------------------------------------------------------------------------------------------*/
