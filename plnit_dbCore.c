@@ -122,6 +122,7 @@ void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int 
 
 void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* strbuf, int maxLines, int width);
 int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* strbuf, int maxLines, int width);
+void getTodaySchedule_withDetails_iterEnd(void);
 
 /*-------------------------------------------------------*/
 
@@ -132,7 +133,7 @@ void printMarkUP(char* str, int lineLimit);
 /*-------------------------------------------------------*/
 
 int main(void) {
-    int input;
+    int input; int input_2;
     unsigned long long date; int pnum; char title[30]; char details[256];
     int r = 1;
     int i = 0;
@@ -146,7 +147,8 @@ int main(void) {
         puts("  API Test menu: ");
         puts("  (5) to search by YYYYMMDD\n  (6) to get today's infos for given sort type");
         puts("  (7) to print summarized info of the given date in a markup form");
-        puts("  (8) to print a markup form in a human readable form");
+        puts("  (8) to print detailed info of the given date in a markup form, with iterator index");
+        puts("  (9) to print a markup form in a human readable form");
         printf("Type: ");
         //getchar();
         scanf("%d", &input);
@@ -202,9 +204,24 @@ int main(void) {
                 printf("%s\n", testStr);
                 break;
             case 8:
+                printf("Type scan target YYYYMMDD: \n");
+                scanf("%llu", &date); //getchar();
+                printf("Type sorting type(2 for time first, 1 for priority first): \n");
+                scanf("%d", &input);
+                printf("starting iteration...\nType 1 to move to the next page, 2 to terminate: ");
+                scanf("%d", &input_2);
+                while (input_2 != 2) {
+                    getTodaySchedule_withDetails(date, input, testStr, 10, 10);
+                    printf("%s\n", testStr);
+                    printf("continuing iteration...\nType 1 to move to the next page, 2 to terminate: ");
+                    scanf("%d", &input_2);
+                }
+                getTodaySchedule_withDetails_iterEnd();
+                break;
+            case 9:
                 printf("Type target string: ");
                 scanf("%s", testStr); getchar();
-                printf("Type target max width of the screen (input >= 9)");
+                printf("Type target max width of the screen (input >= 9): ");
                 scanf("%d", &input);
                 printMarkUP(testStr, input);
                 break;
@@ -658,6 +675,10 @@ void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int 
 }
 
 void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* strbuf, int maxLines, int width) {
+    /* Prefix codes
+        [^: for date, [[: make new line, ^: tab inside
+        ]^: for title, ]]: for details
+    */
     dayPtr dd = NULL;
     char str[BUFSIZ] = {'\0', };
     char temp[BUFSIZ] = {'\0', };
@@ -668,10 +689,10 @@ void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* s
     if (!dd) {
         strcpy(str, "No data\n");
     }
-    else { /* [: for date, ]: make new line, ^: tab inside */
+    else {
         sortGivenDateToDos(dd, sortType);
         for (i = 0; i <= dd->maxIndex; i++) {
-            sprintf(temp, "[%04llu]^%s]", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
+            sprintf(temp, "[^%04llu[[]^^%s[[", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
             strcat(str, temp);
         }
     }
@@ -682,10 +703,14 @@ void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* s
 }
 int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* strbuf, int maxLines, int width) {
     /* implementing *pageIterator* */
+    /* Prefix codes
+        [^: for date, [[: make new line, ^: tab inside
+        ]^: for title, ]]: for details
+    */
     dayPtr dd = NULL;
     char str[BUFSIZ] = {'\0', };
     char temp[BUFSIZ] = {'\0', };
-    int i;
+    int i = pageIterator;
 
     dd = search_byDate(today * 10000); // YYYYMMDD
 
@@ -693,14 +718,20 @@ int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* s
         strcpy(str, "No data\n");
     }
     else { /* [: for date, ]: make new line, ^: tab inside */
+        pageIterator = (pageIterator + 1) % (dd->maxIndex + 1);
         sortGivenDateToDos(dd, sortType);
-        for (i = 0; i <= dd->maxIndex; i++) {
-            sprintf(temp, "[%04llu]^%s]", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
+            sprintf(temp, "[^%04llu^]^[[^%s]][[^%s[[", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
             strcat(str, temp);
-        }
     }
 
     strcpy(strbuf, str);
+
+    return i;
+}
+void getTodaySchedule_withDetails_iterEnd(void) {
+    pageIterator = 0;
+
+    return;
 }
 
 /*------------------------------------------------------------------------------------------*/
@@ -820,18 +851,32 @@ void errOcc(const char* str) {
 /*--Debug-only features----------------------------------*/
 
 void printMarkUP(char* str, int lineLimit) {
-    /* [: for date, ]: make new line, ^: tab inside */
+    /* Prefix codes
+        [^: for date, [[: make new line, ^: tab inside
+        ]^: for title, ]]: for details
+    */
     int cur = 0;
     int isStillInLine = 0;
     int cnter = 4;
 
     while (str[cur]) {
         switch (str[cur]) {
-            case '[':
-                printf("Date: ");
+            case '[': 
+                if (str[++cur] == '^') { /* date */
+                    printf("Time: ");
+                }
+                else { /* mk nl */
+                    printf("\n");  
+                    isStillInLine = 0;
+                }
                 break;
-            case ']':
-                printf("\n");  
+            case ']': 
+                if (str[++cur] == '^') { /* title form */
+                    printf("[Title]\n");
+                }
+                else { /* details form */
+                    printf("[Details]\n");  
+                }
                 isStillInLine = 0;
                 break;
             case '^':
