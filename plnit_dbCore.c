@@ -126,7 +126,7 @@ void getTodaySchedule_withDetails(unsigned long long today, int sortType, char* 
 
 /*--Debug-only features----------------------------------*/
 
-void printMarkUP(char* str);
+void printMarkUP(char* str, int lineLimit);
 
 /*-------------------------------------------------------*/
 
@@ -143,7 +143,7 @@ int main(void) {
         puts("(1) to insert\n(2) to print all");
         puts("(3) to save\n(4) to load\n(0) to quit");
         puts("  API Test menu: ");
-        puts("  (5) to search by YYYYMMDD\n  (6) to get today's infos for given sort type, given text area");
+        puts("  (5) to search by YYYYMMDD\n  (6) to get today's infos for given sort type");
         puts("  (7) to print summarized info of the given date in a markup form");
         puts("  (8) to print a markup form in a human readable form");
         printf("Type: ");
@@ -203,7 +203,9 @@ int main(void) {
             case 8:
                 printf("Type target string: ");
                 scanf("%s", testStr); getchar();
-                printMarkUP(testStr);
+                printf("Type target max width of the screen (input >= 9)");
+                scanf("%d", &input);
+                printMarkUP(testStr, input);
                 break;
             case 0:
                 r = 0;
@@ -637,6 +639,7 @@ void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int 
     dd = search_byDate(today * 10000); // YYYYMMDD
 
     if (!dd) {
+        puts("No data.");
         //strcpy(*buf, "No data");
     }
     else {
@@ -796,9 +799,11 @@ void errOcc(const char* str) {
 
 /*--Debug-only features----------------------------------*/
 
-void printMarkUP(char* str) {
+void printMarkUP(char* str, int lineLimit) {
     /* [: for date, ]: make new line, ^: tab inside */
     int cur = 0;
+    int isStillInLine = 0;
+    int cnter = 4;
 
     while (str[cur]) {
         switch (str[cur]) {
@@ -806,12 +811,21 @@ void printMarkUP(char* str) {
                 printf("Date: ");
                 break;
             case ']':
-                printf("\n");
+                printf("\n");  
+                isStillInLine = 0;
                 break;
             case '^':
                 printf("    ");
+                isStillInLine = 1;
                 break;
-            default:
+            default:  
+                if (isStillInLine) {
+                    cnter++;
+                    if (cnter % lineLimit == 0) {
+                        printf("\n    ");
+                        cnter = 4;
+                    }
+                }
                 printf("%c", str[cur]);
         }
         cur++;
