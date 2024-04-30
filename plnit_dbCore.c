@@ -211,9 +211,9 @@ int main(void) {
                 printf("starting iteration...\nType 1 to move to the next page, 2 to terminate: ");
                 scanf("%d", &input_2);
                 while (input_2 != 2) {
-                    getTodaySchedule_withDetails(date, input, testStr, 10, 10);
+                    input_2 = getTodaySchedule_withDetails(date, input, testStr, 10, 10);
                     printf("%s\n", testStr);
-                    printf("continuing iteration...\nType 1 to move to the next page, 2 to terminate: ");
+                    printf("Page: %d\ncontinuing iteration...\nType 1 to move to the next page, 2 to terminate: ", input_2);
                     scanf("%d", &input_2);
                 }
                 getTodaySchedule_withDetails_iterEnd();
@@ -676,7 +676,7 @@ void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int 
 
 void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* strbuf, int maxLines, int width) {
     /* Prefix codes
-        [^: for date, [[: make new line, ^: tab inside
+        [^: for Time, [[: make new line, ^: tab inside
         ]^: for title, ]]: for details
     */
     dayPtr dd = NULL;
@@ -692,7 +692,8 @@ void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* s
     else {
         sortGivenDateToDos(dd, sortType);
         for (i = 0; i <= dd->maxIndex; i++) {
-            sprintf(temp, "[^%04llu[[]^^%s[[", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
+            /*            Time->NL->Tab->NL->NL*/
+            sprintf(temp, "[^%04llu[[^%s[[[[", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
             strcat(str, temp);
         }
     }
@@ -704,7 +705,7 @@ void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* s
 int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* strbuf, int maxLines, int width) {
     /* implementing *pageIterator* */
     /* Prefix codes
-        [^: for date, [[: make new line, ^: tab inside
+        [^: for Time, [[: make new line, ^: tab inside
         ]^: for title, ]]: for details
     */
     dayPtr dd = NULL;
@@ -717,11 +718,12 @@ int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* s
     if (!dd) {
         strcpy(str, "No data\n");
     }
-    else { /* [: for date, ]: make new line, ^: tab inside */
+    else {
         pageIterator = (pageIterator + 1) % (dd->maxIndex + 1);
         sortGivenDateToDos(dd, sortType);
-            sprintf(temp, "[^%04llu^]^[[^%s]][[^%s[[", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
-            strcat(str, temp);
+        /*        Time->NL->Title(NL)->Tab->NL->Details(NL)->Tab->NL->NL */
+        sprintf(temp, "[^%04llu[[]^^%s[[]]^%s[[[[", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
+        strcat(str, temp);
     }
 
     strcpy(strbuf, str);
@@ -852,7 +854,7 @@ void errOcc(const char* str) {
 
 void printMarkUP(char* str, int lineLimit) {
     /* Prefix codes
-        [^: for date, [[: make new line, ^: tab inside
+        [^: for Time, [[: make new line, ^: tab inside
         ]^: for title, ]]: for details
     */
     int cur = 0;
@@ -862,7 +864,7 @@ void printMarkUP(char* str, int lineLimit) {
     while (str[cur]) {
         switch (str[cur]) {
             case '[': 
-                if (str[++cur] == '^') { /* date */
+                if (str[cur] == '^') { /* date */
                     printf("Time: ");
                 }
                 else { /* mk nl */
@@ -871,7 +873,7 @@ void printMarkUP(char* str, int lineLimit) {
                 }
                 break;
             case ']': 
-                if (str[++cur] == '^') { /* title form */
+                if (str[cur] == '^') { /* title form */
                     printf("[Title]\n");
                 }
                 else { /* details form */
@@ -886,9 +888,9 @@ void printMarkUP(char* str, int lineLimit) {
             default:  
                 if (isStillInLine) {
                     cnter++;
-                    if (cnter % lineLimit == 0) {
+                    if (cnter % (lineLimit + 1) == 0) {
                         printf("\n    ");
-                        cnter = 4;
+                        cnter = 4; /* simulates tab */
                     }
                 }
                 printf("%c", str[cur]);
