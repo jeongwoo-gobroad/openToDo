@@ -245,6 +245,10 @@ toDoPtr create_Node(unsigned long long date, int priority_num, const char* title
 
     newOne = (toDoPtr)malloc(sizeof(toDo));
 
+    if (newOne == NULL) {
+        errOcc("malloc"); /* err hndling */
+    }
+
     newOne->hashNum = 0;
     newOne->dateData = date;
     newOne->priority = priority_num;
@@ -260,7 +264,7 @@ void resizeArr_longer(dayPtr target) {
     if ((target->toDoArr = (toDoPtr*)(realloc(target->toDoArr, sizeof(toDoPtr) * (size + 1)))) == NULL) {
         errOcc("realloc");
     }
-    printf("Size extended to %d->%d\n", size - 1, size);
+    //printf("Size extended to %d->%d\n", size - 1, size);
 
     /* remap hash */
     for (i = 0; i < target->maxIndex; i++) {
@@ -273,6 +277,9 @@ void resizeArr_longer(dayPtr target) {
 void insert_toDo(dayPtr when, toDoPtr target) {
     if (when->maxIndex == -1) {
         when->toDoArr = (toDoPtr*)malloc(sizeof(toDoPtr));
+        if (when->toDoArr == NULL) {
+            errOcc("malloc"); /* err hndling */
+        }
         when->maxIndex = 0;
     }
     else {
@@ -287,6 +294,10 @@ void insert_toDo(dayPtr when, toDoPtr target) {
 
 dayPtr create_day(void) {
     dayPtr newOne = (dayPtr)malloc(sizeof(day));
+
+    if (newOne == NULL) {
+        errOcc("malloc"); /* err hndling */
+    }
 
     newOne->maxIndex = -1;
     newOne->toDoArr = NULL;
@@ -305,6 +316,10 @@ dayPtr findDay(int target, monthPtr db) {
 monthPtr create_month(void) {
     int i;
     monthPtr newOne = (monthPtr)malloc(sizeof(month));
+
+    if (newOne == NULL) {
+        errOcc("malloc"); /* err hndling */
+    }
 
     for (i = 0; i < 32; i++) {
         (newOne->dates)[i] = NULL;
@@ -328,6 +343,10 @@ yearGrp create_yearGrp(int num) {
 
     newYear = (yearPtr)malloc(sizeof(year));
     newGrp = (yearGrp)malloc(sizeof(yearsLL));
+
+    if (newYear == NULL || newGrp == NULL) {
+        errOcc("malloc"); /* err hndling */
+    }
 
     newGrp->year = num;
     newGrp->target = newYear;
@@ -573,6 +592,7 @@ void sortGivenDateToDos(dayPtr when, int sortType) {
     */
 
     if (!when) {
+        puts("No datas to sort");
         return;
     }
 
@@ -591,6 +611,12 @@ void sortGivenDateToDos(dayPtr when, int sortType) {
 
 void printToday(dayPtr when) {
     int i;
+
+    if (!when) {
+        puts("No data");
+        return;
+    }
+
     for (i = 0; i <= when->maxIndex; i++) {
         printf("            %llu: [%d] %s || %s\n", (when->toDoArr)[i]->dateData, (when->toDoArr)[i]->priority, (when->toDoArr)[i]->title, (when->toDoArr)[i]->details);
     }
@@ -610,8 +636,7 @@ int getNumOfSchedule(unsigned long long targetDate) {
     /* we know maxIndex + 1 is an actual number of records */
     return dd->maxIndex + 1;
 }
-void getUpcomingSchedule(unsigned long long today, char* strbuf, int scrSize) { // not made yet!
-    char* strs;
+void getUpcomingSchedule(unsigned long long today, char* strbuf, int scrSize) { /* deprecated */
     char* temp;
     int limit; int i;
     dayPtr dd = NULL;
@@ -625,6 +650,7 @@ void getUpcomingSchedule(unsigned long long today, char* strbuf, int scrSize) { 
 
     if (!dd) {
         strcpy(strbuf, "No data");
+        return;
     }
     else {
         while (limit) {
@@ -674,7 +700,7 @@ void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int 
     
     return;
 }
-
+/* active high-level APIs */
 void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* strbuf, int maxLines, int width) {
     /* Prefix codes
         [^: for Time, [[: make new line, ^: tab inside
