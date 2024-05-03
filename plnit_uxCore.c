@@ -75,6 +75,7 @@ void prev_select_highlightOff();
 void get_todo();
 int save(void);
 int load(void);
+void clearGivenCalendarArea(/*index of pos_sc_date*/int row, int col);
 
 /*--UX Layer interactive API Methods---------------------*/
 
@@ -422,12 +423,18 @@ int weeksInMonth(unsigned long long targetDate) {
 
 void print_date(unsigned long long targetDate) {
     int stt_col = stt_day_1(targetDate);
-    int isEndOfMonth = 0;
-
+    
     int year = targetDate / 100000000;
     int month = targetDate % 100000000 / 1000000;
-
     int date = 1;
+
+    for (int i = 0; i < 6; i++) {
+        for (int j = 0; j < 7; j++) {
+            clearGivenCalendarArea(i, j);
+        }
+    }
+
+    int days = daysInMonth(year * 100 + month);
     attron(COLOR_PAIR(1));
     for (int i = 0; i < 7; i++) {
         if (i >= stt_col) {
@@ -435,22 +442,19 @@ void print_date(unsigned long long targetDate) {
             date++;
         }
         else {
-            move(pos_SC_date[0][i].row, pos_SC_date[0][i].col);
-            addstr("  ");
+            clearGivenCalendarArea(0, i);
+            //move(pos_SC_date[0][i].row, pos_SC_date[0][i].col);
+            //addstr("  ");
         }
     }
     for (int i = 1; i < 6; i++) {
-        if (isEndOfMonth) {
-            break;
-        }
         for (int j = 0; j < 7; j++, date++) {
-            if (date > daysInMonth(targetDate / 1000000)) {
-                move(pos_SC_date[i][j].row, pos_SC_date[i][j].col);
-                addstr("  ");
-                isEndOfMonth = 1;
-                break;
+            if (date > days) {
+                clearGivenCalendarArea(i, j);
+                //move(pos_SC_date[i][j].row, pos_SC_date[i][j].col);
+                //addstr("  ");
             }
-            mvprintw(pos_SC_date[i][j].row, pos_SC_date[i][j].col, "%-2d", date);
+            else mvprintw(pos_SC_date[i][j].row, pos_SC_date[i][j].col, "%-2d", date);
         }
     }
     attroff(COLOR_PAIR(1));
@@ -459,44 +463,40 @@ void print_date(unsigned long long targetDate) {
 
 void print_date_NumOfSchedule(unsigned long long targetDate) {
     int stt_col = stt_day_1(targetDate);
-
-    int date = 1; /* * 10000 */
-    targetDate /= 10000ULL;
+    targetDate = targetDate / 1000000ULL * 100ULL + 1; /* to make it start from day 1 */
+    int days = daysInMonth(targetDate / 100);
     int num;
-
-    int isEndOfCount = 0;
+    int breakCondition = 0;
 
     for (int i = 0; i < 7; i++) {
         if (i >= stt_col) {
-            //mvprintw(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col, "%llu", targetDate);
             num = getNumOfSchedule(targetDate);
-            mvprintw(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col, "%d", num);
-            if (num) mvprintw(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col + 4 * nNum - 3, "%3d", num);
-            date++; targetDate++;
+            if (num) {
+                mvprintw(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col, "%s", "To-Dos:");
+                mvprintw(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col + 4 * nNum - 3, "%3d", num);
+            }
+            targetDate++;
         
         }
         else {
-            move(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col + 4 * nNum - 3);
-            addstr("   ");
+            // move(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col + 4 * nNum - 3);
+            clearGivenCalendarArea(0, i);
         }
     }
     for (int i = 1; i < 6; i++) {
-        if (isEndOfCount) {
-            break;
-        }
-        for (int j = 0; j < 7; j++, date++) {
-            if (targetDate % 100 > daysInMonth(targetDate / 100)) {
-                move(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col + 4 * nNum - 3);
-                addstr("   ");
-                isEndOfCount = 1;
-                break;
+        for (int j = 0; j < 7; j++) {
+            if (targetDate % 100 > days) {
+                //move(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col + 4 * nNum - 3);
+                clearGivenCalendarArea(i, j);
+            }
+            else {
+                num = getNumOfSchedule(targetDate);
+                if (num) {
+                    mvprintw(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col, "%s", "To-Dos:");
+                    mvprintw(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col + 4 * nNum - 3, "%3d", num);
+                }
             }
             targetDate++;
-            //printf("%d\n", targetDate);
-            //mvprintw(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col, "%llu", targetDate);
-            num = getNumOfSchedule(targetDate);
-            mvprintw(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col, "%d", num);
-            if (num) mvprintw(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col + 4 * nNum - 3, "%3d", num);
         }
     }
 }
@@ -729,4 +729,21 @@ void get_todo() {
     todoDate+=time*100;*/
     //int today=todoDate;// 시간을 0000으로 넘김
     //setSchedule(today, title, details, priority);
+}
+
+void clearGivenCalendarArea(/*index of pos_sc_date*/int row, int col) {
+    int i, j;
+    int sttRow = pos_SC_date[row][col].row;
+    int endRow = pos_SC_date[row][col].row + nNum - 1;
+    int sttCol = pos_SC_date[row][col].col;
+    int endCol = pos_SC_date[row][col].col + 4 * nNum - 1;
+    
+    for (int i = sttRow; i <= endRow; i++) {
+        for (int j = sttCol; j <= endCol; j++) {
+            move(i, j);
+            addch(' ');
+        }
+    }
+
+    return;
 }
