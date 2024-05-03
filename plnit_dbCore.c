@@ -80,6 +80,8 @@ static int pageIterator = 0; // for GUI interaction; See Codes Below -> void get
 /**/
 const char* bin_fileName = "todos.sv";
 const char*  hr_fileName = "todos.txt"; /* hr stands for human readable */
+const char*   dbDebug = "-d";
+const char* cli_input = "-in";
 /**/
 
 /* saving features start */
@@ -123,6 +125,8 @@ void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int 
 void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* strbuf, int maxLines, int width);
 int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* strbuf, int maxLines, int width);
 void getTodaySchedule_withDetails_iterEnd(void);
+void printUsage(void);
+void __launchOptions(int argc, char* argv[]);
 
 /*-------------------------------------------------------*/
 
@@ -785,7 +789,7 @@ int load(void) {
         return 1;
     }
 
-    fd_bin = open(bin_fileName, O_RDONLY);
+    fd_bin = open(bin_fileName, O_CREAT | O_RDONLY); /* if exists, then read, or not, then creat */
     if (fd_bin == -1) {
         errOcc("open");
     }
@@ -834,11 +838,13 @@ int save(void) {
         // SOCKET FEATURE {method}();
         char details[256];
     */
+    quickSort_byDate(saveLink->toDoData, 0, saveLink->maxIndex); /* sort by date, then save. */
+
     for (int i = 0; i <= saveLink->maxIndex; i++) {
         dates = (saveLink->toDoData)[i]->dateData / 10000;
         time = (int)((saveLink->toDoData)[i]->dateData % 10000 / 100);
         min = (int)((saveLink->toDoData)[i]->dateData % 100);
-        fprintf(fd_hr, "%llu | %d:%d -> [Priority %d], Title: %12s, Details: %s\n", dates, time, min, 
+        fprintf(fd_hr, "%llu | %02d:%02d -> [Priority %d], Title: %12s, Details: %s\n", dates, time, min, 
             (saveLink->toDoData)[i]->priority, (saveLink->toDoData)[i]->title, (saveLink->toDoData)[i]->details);
     }
 
@@ -947,6 +953,32 @@ void printMarkUP(char* str, int lineLimit) {
                 printf("%c", str[cur]);
         }
         cur++;
+    }
+
+    return;
+}
+
+void printUsage(void) {
+    puts("Plan_it: ./pln [options] [argument...]");
+    puts("      [options]:  -d: Launch Plan_it in Core Part Debugging Mode.");
+    puts("      [options]: -in: using CLI interface, you can insert data with arguments, ");
+
+    return;
+}
+
+void __launchOptions(int argc, char* argv[]){
+    if (argc == 2) {
+        if (strcmp(argv[1], dbDebug) == 0) {
+            __dbDebug();
+        }
+        else {
+            fprintf(stderr, "Plan_it: Unsupported command - '%s'\n", argv[1]);
+            printUsage();
+            exit(1);
+        }
+    }
+    else {
+        
     }
 
     return;
