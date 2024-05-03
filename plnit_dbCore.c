@@ -88,6 +88,7 @@ const char* cli_input = "-in";
 void resizeSaveMem(void);
 int load(void);
 int save(void);
+int save_hr(FILE* fp);
 void initSaveMem(void);
 void putSaveData(toDoPtr target);
 toDoPtr getSaveData(void);
@@ -112,6 +113,7 @@ int get_toDo_byForm(toDoPtr target, char** buf);
 void sortGivenDateToDos(dayPtr when, int sortType);
 void quickSort_byPriNum(toDoPtr* arr, int from, int to);
 void quickSort_byDate(toDoPtr* arr, int from, int to);
+void quickSort_byHashNum(toDoPtr* arr, int from, int to);
 
 void printToday(dayPtr when);
 
@@ -272,8 +274,8 @@ void resizeArr_longer(dayPtr target) {
 
     /* remap hash */
     for (i = 0; i < target->maxIndex; i++) {
-        (target->toDoArr)[i]->hashNum = ((target->toDoArr)[0]->dateData / 100) * 100 + i;
-    }
+        (target->toDoArr)[i]->hashNum = ((target->toDoArr)[0]->dateData * 1000) + (target->toDoArr)[0]->hashNum * 100 + i;
+    } /* YYYYMMDDHHMMPXX */
 
     return;
 }
@@ -588,6 +590,38 @@ void quickSort_byPriNum(toDoPtr* arr, int from, int to) {
     return;
 }
 
+void quickSort_byHashNum(toDoPtr* arr, int from, int to) {
+    toDoPtr pivot;
+    toDoPtr swapTemp;
+    int cursor, pivAble;
+
+    if (from >= to) return;
+
+    //printf("Size: from %d to %d index.\n", from, to);
+
+    pivot = arr[from]; pivAble = from;
+    //printf("pivot: %llu\n", pivot->dateData % 10000);
+    for (cursor = from + 1; cursor <= to; cursor++) {
+        //printf("Comparing %d-%d, each data of %llu, %llu\n", cursor, pivAble, arr[cursor]->dateData % 10000, pivot->dateData % 10000);
+        if (arr[cursor]->hashNum < pivot->hashNum) {
+            //printf("SWAP %d <-> %d\n", cursor, pivAble + 1);
+            swapTemp = arr[++pivAble];
+            arr[pivAble] = arr[cursor];
+            arr[cursor] = swapTemp;
+        }
+    }
+    //printf("SWAP %d <-> %d\n", from, pivAble);
+    swapTemp = arr[from];
+    arr[from] = arr[pivAble];
+    arr[pivAble] = swapTemp;
+    //printf("Phase %d->%d Safely finished.\n", from, to);
+
+    quickSort_byHashNum(arr, from, pivAble - 1);
+    quickSort_byHashNum(arr, pivAble + 1, to);
+
+    return;
+}
+
 void sortGivenDateToDos(dayPtr when, int sortType) {
     /**
      * sortType 1: priority first
@@ -818,12 +852,18 @@ int save(void) {
     unsigned long long dates = 0;
     time = 0; min = 0;
 
+    if (!key) { /* if none to save */
+        return 1;
+    }
+
     fd_bin = open(bin_fileName, O_CREAT | O_WRONLY | O_TRUNC, 0641);
     fd_hr = fopen(hr_fileName, "w+");
 
     if (fd_bin == -1 || fd_hr == NULL) {
         errOcc("open");
     }
+
+    quickSort_byHashNum(saveLink->toDoData, 0, saveLink->maxIndex); /* sort by hash, then save. */
 
     /* bin */
     for (int i = 0; i <= saveLink->maxIndex; i++) {
@@ -832,14 +872,15 @@ int save(void) {
         }
     }
     /* hr */
+    save_hr(fd_hr);
     /** unsigned long long dateData;
         int priority;
         char title[31];
         // SOCKET FEATURE {method}();
         char details[256];
     */
-    quickSort_byDate(saveLink->toDoData, 0, saveLink->maxIndex); /* sort by date, then save. */
-
+    
+    /*
     for (int i = 0; i <= saveLink->maxIndex; i++) {
         dates = (saveLink->toDoData)[i]->dateData / 10000;
         time = (int)((saveLink->toDoData)[i]->dateData % 10000 / 100);
@@ -847,6 +888,7 @@ int save(void) {
         fprintf(fd_hr, "%llu | %02d:%02d -> [Priority %d], Title: %12s, Details: %s\n", dates, time, min, 
             (saveLink->toDoData)[i]->priority, (saveLink->toDoData)[i]->title, (saveLink->toDoData)[i]->details);
     }
+    */
 
     fclose(fd_hr);
     close(fd_bin);
@@ -855,6 +897,50 @@ int save(void) {
 
     return 0;
 }
+
+int save_hr(FILE* fp) {
+    yearGrp db = key;
+    dayPtr temp;
+    toDoPtr lnk;
+    unsigned long long time;
+    int i, j, k;
+
+    if (!db) {
+        return 1;
+    }
+
+    while (db->prev) {
+        db = db->prev;
+    }
+
+    while (db) { /* wtf */
+        fprintf(fp, "Records of the Year %d:\n", db->year);
+        for (i = 0; i < 13; i++) {
+            if ((db->target->months)[i]) {
+                fprintf(fp, "    -> Records of the Month %02d:\n", i);
+                for (j = 0; j < 32; j++) {
+                    if (((db->target->months)[i]->dates)[j]) {
+                        fprintf(fp, "        --> Records of the Day %02d:\n", j);
+                        fprintf(fp, "           [ %d Record(s) in this day. ]\n", ((db->target->months)[i]->dates)[j]->maxIndex + 1);
+                        temp = ((db->target->months)[i]->dates)[j];
+                        /* Quick Sort */
+                        sortGivenDateToDos(temp, 2);
+                        for (k = 0; k <= temp->maxIndex; k++) {
+                            lnk = (temp->toDoArr)[k];
+                            time = lnk->dateData % 10000;
+                            fprintf(fp, "             > %02d:%02d -> [Priority %d], Title: %12s, Details: %s\n", time / 100, time % 100,
+                                lnk->priority, lnk->title, lnk->details);
+                        }
+                    }
+                }
+            }
+        }
+        db = db->next;
+    }
+
+    return 0;
+}
+
 void initSaveMem(void) {
     /* ? */
 }
