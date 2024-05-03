@@ -73,6 +73,8 @@ void select_date(char c);
 void select_highlightOn();
 void prev_select_highlightOff();
 void get_todo();
+int save(void);
+int load(void);
 
 int main(int argc, char* argv[]) {
     /* lcurses start */
@@ -107,6 +109,8 @@ int main(int argc, char* argv[]) {
             if (c == 's') mode++;
             if (c == 'i' || c == 'j' || c == 'k' || c == 'l')
                 select_date(c);
+            if (c=='z') save();
+            if (c=='x') load();
         }
         else if (mode == 1) {
             c = getch();
@@ -451,20 +455,16 @@ void print_commandLine(int mode) {
             addch(' ');
         }
     }
-    int size;
     char commands[150];
     char* command;
     switch(mode) {
     case 0: 
-        size = 5;
-        sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'i', "upwards", 'j', "left", 'k', "downwards", 'l', "right", 's', "select");
+        sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s\n", 'i', "upwards", 'j', "left", 'k', "downwards", 'l', "right", 's', "select", 'z', "save", 'x', "load");
         break;
     case 1:
-        size = 9;
         sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'I', "insert", 'i', "upwards", 'k', "downwards", 'd', "delete", 'm', "modify", '+', "D+", '-', "D-", 'b', "BookMark", 'e', "exit");
         break;
     case 2:
-        size = 1;
         sprintf(commands, "%c%-10s", 'e', "exit");
     }
 
