@@ -471,7 +471,7 @@ void printAll(yearGrp db) {
 }
 
 dayPtr search_byDate(unsigned long long target) {
-    int year, month, date; //hour, minute;
+    unsigned long long year, month, date; //hour, minute;
     yearPtr   yy = NULL;
     monthPtr  mm = NULL;
     dayPtr    dd = NULL;

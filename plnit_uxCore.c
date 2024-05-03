@@ -87,10 +87,19 @@ void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* s
 int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* strbuf, int maxLines, int width);
 void getTodaySchedule_withDetails_iterEnd(void);
 
+int __dbDebug(void);
+
 /*-------------------------------------------------------*/
 
 int main(int argc, char* argv[]) {
+
+    /* debuging options */
+    if (argc > 1) {
+        __dbDebug();
+    }
+
     /* lcurses start */
+    load();
     initscr();
     noecho();
 
@@ -368,12 +377,12 @@ int daysInMonth(unsigned long long targetDate) {
     unsigned long long year = targetDate / 100ULL;
     unsigned long long month = targetDate % 100ULL;
 
-    if (month < 0.5 || month > 12.5) {
+    if (month < 1 || month > 12) {
         printf("Invalid month!!!!! %llu-%llu\n", year, month);
         return -1;
     }
     int isLeapYear = ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) ? 1 : 0;
-    int days[] = { 31, 28 + isLeapYear, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    int days[] = { 31, 28 + isLeapYear, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 , 0, 0};
 
     return days[month - 1];
 }
@@ -440,26 +449,41 @@ void print_date(unsigned long long targetDate) {
     return;
 }
 
-//void print_date_NumOfSchedule(unsigned long long targetDate) {
-//    int stt_col = stt_day_1(targetDate);
-//
-//    int date = 1;
-//    targetDate /= 10000;
-//    int num = getNumOfSchedule(targetDate);
-//
-//    for (int i = stt_col; i < 7; i++, date++) {
-//        mvprintw(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col + 4 * nNum - 3, "%3d", num); 
-//    }
-//    for (int i = 1; i < 6; i++) {
-//        for (int j = 0; j < 7; j++, date++) {
-//            mvprintw(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col + 4 * nNum - 3, "%3d", num); 
-//            if (date >= daysInMonth(targetDate / 100)) {
-//                standend();
-//                return;
-//            }
-//        }
-//    }
-//}
+void print_date_NumOfSchedule(unsigned long long targetDate) {
+    int stt_col = stt_day_1(targetDate);
+
+    int date = 1; /* * 10000 */
+    targetDate /= 10000ULL;
+    int num;
+
+    for (int i = 0; i < 7; i++) {
+        if (i >= stt_col) {
+            //mvprintw(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col, "%llu", targetDate);
+            num = getNumOfSchedule(targetDate);
+            mvprintw(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col, "%d", num);
+            if (num) mvprintw(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col + 4 * nNum - 3, "%3d", num);
+            date++; targetDate++;
+        
+        }
+        else {
+            move(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col + 4 * nNum - 3);
+            addstr("   ");
+        }
+    }
+    for (int i = 1; i < 6; i++) {
+        for (int j = 0; j < 7; j++, date++) {
+            targetDate++;
+            //mvprintw(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col, "%llu", targetDate);
+            num = getNumOfSchedule(targetDate);
+            mvprintw(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col, "%d", num);
+            if (num) mvprintw(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col + 4 * nNum - 3, "%3d", num);
+            if (date > daysInMonth(targetDate / 100)) {
+                move(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col + 4 * nNum - 3);
+                addstr("   ");
+            }
+        }
+    }
+}
 
 void print_commandLine(int mode) {
     for (int i = pos_SLL_stt.row; i <= pos_SLL_end.row; i++) {
@@ -472,7 +496,7 @@ void print_commandLine(int mode) {
     char* command;
     switch(mode) {
     case 0: 
-        sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s\n", 'i', "upwards", 'j', "left", 'k', "downwards", 'l', "right", 's', "select", 'z', "save", 'x', "load");
+        sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'i', "upwards", 'j', "left", 'k', "downwards", 'l', "right", 's', "select", 'z', "save", 'x', "load");
         break;
     case 1:
         sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'I', "insert", 'i', "upwards", 'k', "downwards", 'd', "delete", 'm', "modify", '+', "D+", '-', "D-", 'b', "BookMark", 'e', "exit");
@@ -502,14 +526,12 @@ void select_highlightOn() {
     attron(COLOR_PAIR(2));
     mvprintw(pos_SC_date[selectDate_row][selectDate_col].row, pos_SC_date[selectDate_row][selectDate_col].col, "%-2d", selectDate / 10000 % 100);
     attroff(COLOR_PAIR(2));
-    //mvprintw(pos_SC_date[selectDate_row][selectDate_col].row + nNum - 1, pos_SC_date[selectDate_row][selectDate_col].col + 4 * nNum - 3, "%3d", getNumOfSchedule(selectDate));
 }
 
 void prev_select_highlightOff() {
     attron(COLOR_PAIR(1));
     mvprintw(pos_SC_date[selectDate_row][selectDate_col].row, pos_SC_date[selectDate_row][selectDate_col].col, "%-2d", selectDate / 10000 % 100);
     attroff(COLOR_PAIR(1));
-    //mvprintw(pos_SC_date[selectDate_row][selectDate_col].row + nNum - 1, pos_SC_date[selectDate_row][selectDate_col].col + 4 * nNum - 3, "%3d", getNumOfSchedule(selectDate));
 }
 
 void select_date(char c) {
@@ -537,6 +559,7 @@ void select_date(char c) {
             selectDate_row += weeksInMonth(selectDate / 1000000ULL) - 1;
             print_Year_Month(selectDate / 1000000);
             print_date(selectDate);
+            print_date_NumOfSchedule(selectDate);
         }
         break;
     case 'k':
@@ -556,6 +579,7 @@ void select_date(char c) {
             if (selectDate_col < stt_day_1(selectDate)) selectDate_row++;
             print_Year_Month(selectDate / 1000000);
             print_date(selectDate);
+            print_date_NumOfSchedule(selectDate);
         }
         break;
     case 'j': 
@@ -573,6 +597,7 @@ void select_date(char c) {
                 selectDate = year * 100000000ULL + month * 1000000ULL + day * 10000ULL;
                 print_Year_Month(selectDate / 1000000);
                 print_date(selectDate);
+                print_date_NumOfSchedule(selectDate);
             }
         }
         else {
@@ -592,6 +617,7 @@ void select_date(char c) {
                 selectDate = year * 100000000ULL + month * 1000000ULL + day * 10000ULL;
                 print_Year_Month(selectDate / 1000000);
                 print_date(selectDate);
+                print_date_NumOfSchedule(selectDate);
             }
         }
         break;
@@ -610,6 +636,7 @@ void select_date(char c) {
                 selectDate = year * 100000000 + month * 1000000 + day * 10000;
                 print_Year_Month(selectDate / 1000000);
                 print_date(selectDate);
+                print_date_NumOfSchedule(selectDate);
             }
         }
         else {
@@ -629,6 +656,8 @@ void select_date(char c) {
                 selectDate = year * 100000000ULL + month * 1000000ULL + day * 10000ULL;
                 print_Year_Month(selectDate / 1000000);
                 print_date(selectDate);
+                print_date_NumOfSchedule(selectDate);
+
             }
         }
         break;
