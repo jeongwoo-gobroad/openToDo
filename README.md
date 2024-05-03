@@ -8,18 +8,15 @@ an openToDo project: (aka Plan-it Project)
   ncurses 라이브러리를 활용한, pseudo-GUI 환경을 제공합니다.
   
 1. How To Build
-   
-   currently, this application is not in an executable form.
+    gcc -w plnit_dbCore.c plnit_uxCore.c -o plnit
 
-   현재 빌드는 아직 불가능합니다.
-
-3. Features
-
-   
-
-4. Known Issues
-
-
-5. Features that will be added
-
-
+2. Launch Options
+    Plan_it: ./pln [options] [argument 1...]
+          [options]:  NONE: Launch Plan_it in Normal Mode.
+          [options]:    -d: Launch Plan_it in Core Part Debugging Mode.
+          [options]:   -in: using CLI interface, you can insert data with arguments
+          -----------------------------------------------------------------------
+          [arguments]: [YYYYMMDD][HHMM][Priority_Num][Title][Details]
+  
+3. Version History
+    0.0.1: [Current] First Build Version
