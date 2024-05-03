@@ -27,4 +27,6 @@ an openToDo project: (aka Plan-it Project)
   
 3. Version History
 
-    0.0.1: [Current] First Build Version
+    0.0.1: First Build Version
+
+    0.0.2: [Current] Scrollable Calendar Method Implemented.
