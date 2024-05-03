@@ -132,7 +132,7 @@ void printMarkUP(char* str, int lineLimit);
 
 /*-------------------------------------------------------*/
 
-int main(void) {
+int __dbDebug(void) {
     int input; int input_2;
     unsigned long long date; int pnum; char title[30]; char details[256];
     int r = 1;
@@ -640,6 +640,7 @@ void getUpcomingSchedule(unsigned long long today, char* strbuf, int scrSize) { 
     char* temp;
     int limit; int i;
     dayPtr dd = NULL;
+    char* strs;
 
     i = 0;
     limit = scrSize;
