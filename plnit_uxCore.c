@@ -88,6 +88,7 @@ int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* s
 void getTodaySchedule_withDetails_iterEnd(void);
 
 int __dbDebug(void);
+void __launchOptions(int argc, char* argv[]);
 
 /*-------------------------------------------------------*/
 
