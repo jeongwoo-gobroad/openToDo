@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
 
     /* debuging options */
     if (argc > 1) {
-        __dbDebug();
+        __launchOptions(argc, argv);
     }
 
     /* lcurses start */
@@ -383,9 +383,10 @@ int daysInMonth(unsigned long long targetDate) {
         return -1;
     }
     int isLeapYear = ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) ? 1 : 0;
-    int days[] = { 31, 28 + isLeapYear, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 , 0, 0};
+    /* 직관성을 위해 인덱스와 월을 일치시킴 */
+    int days[] = {0, 31, 28 + isLeapYear, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-    return days[month - 1];
+    return days[month];
 }
 
 int stt_day_1(unsigned long long targetDate) {
@@ -421,6 +422,7 @@ int weeksInMonth(unsigned long long targetDate) {
 
 void print_date(unsigned long long targetDate) {
     int stt_col = stt_day_1(targetDate);
+    int isEndOfMonth = 0;
 
     int year = targetDate / 100000000;
     int month = targetDate % 100000000 / 1000000;
@@ -438,12 +440,17 @@ void print_date(unsigned long long targetDate) {
         }
     }
     for (int i = 1; i < 6; i++) {
+        if (isEndOfMonth) {
+            break;
+        }
         for (int j = 0; j < 7; j++, date++) {
-            mvprintw(pos_SC_date[i][j].row, pos_SC_date[i][j].col, "%-2d", date);
             if (date > daysInMonth(targetDate / 1000000)) {
                 move(pos_SC_date[i][j].row, pos_SC_date[i][j].col);
                 addstr("  ");
+                isEndOfMonth = 1;
+                break;
             }
+            mvprintw(pos_SC_date[i][j].row, pos_SC_date[i][j].col, "%-2d", date);
         }
     }
     attroff(COLOR_PAIR(1));
@@ -456,6 +463,8 @@ void print_date_NumOfSchedule(unsigned long long targetDate) {
     int date = 1; /* * 10000 */
     targetDate /= 10000ULL;
     int num;
+
+    int isEndOfCount = 0;
 
     for (int i = 0; i < 7; i++) {
         if (i >= stt_col) {
@@ -472,16 +481,22 @@ void print_date_NumOfSchedule(unsigned long long targetDate) {
         }
     }
     for (int i = 1; i < 6; i++) {
+        if (isEndOfCount) {
+            break;
+        }
         for (int j = 0; j < 7; j++, date++) {
+            if (targetDate % 100 > daysInMonth(targetDate / 100)) {
+                move(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col + 4 * nNum - 3);
+                addstr("   ");
+                isEndOfCount = 1;
+                break;
+            }
             targetDate++;
+            //printf("%d\n", targetDate);
             //mvprintw(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col, "%llu", targetDate);
             num = getNumOfSchedule(targetDate);
             mvprintw(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col, "%d", num);
             if (num) mvprintw(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col + 4 * nNum - 3, "%3d", num);
-            if (date > daysInMonth(targetDate / 100)) {
-                move(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col + 4 * nNum - 3);
-                addstr("   ");
-            }
         }
     }
 }

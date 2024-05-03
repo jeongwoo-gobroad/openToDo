@@ -239,7 +239,7 @@ int __dbDebug(void) {
         printf("\n\n");
     }
 
-    return 0;
+    exit(1);
 }
 
 /*-----------------------*/
@@ -789,7 +789,7 @@ int load(void) {
         return 1;
     }
 
-    fd_bin = open(bin_fileName, O_CREAT | O_RDONLY); /* if exists, then read, or not, then creat */
+    fd_bin = open(bin_fileName, O_CREAT); /* if exists, then read, or not, then creat */
     if (fd_bin == -1) {
         errOcc("open");
     }
@@ -959,9 +959,12 @@ void printMarkUP(char* str, int lineLimit) {
 }
 
 void printUsage(void) {
-    puts("Plan_it: ./pln [options] [argument...]");
-    puts("      [options]:  -d: Launch Plan_it in Core Part Debugging Mode.");
-    puts("      [options]: -in: using CLI interface, you can insert data with arguments, ");
+    puts("Plan_it: ./pln [options] [argument 1...]");
+    puts("      [options]:  NONE: Launch Plan_it in Normal Mode.");
+    puts("      [options]:    -d: Launch Plan_it in Core Part Debugging Mode.");
+    puts("      [options]:   -in: using CLI interface, you can insert data with arguments");
+    puts("      -----------------------------------------------------------------------");
+    puts("      [arguments]: [YYYYMMDD][HHMM][Priority_Num][Title][Details]");
 
     return;
 }
@@ -978,7 +981,19 @@ void __launchOptions(int argc, char* argv[]){
         }
     }
     else {
-        
+        if (argc == 7 && strcmp(argv[1], cli_input)) {
+            /* parts here */
+        }
+        else {
+            if (argc != 7) {
+                fprintf(stderr, "Plan_it: Unsupported Arguments\n", argv[1]);
+                printUsage();
+                exit(1);
+            }
+            fprintf(stderr, "Plan_it: Unsupported command - '%s'\n", argv[1]);
+            printUsage();
+            exit(1);
+        }
     }
 
     return;
