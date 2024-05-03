@@ -9,7 +9,7 @@ an openToDo project: (aka Plan-it Project)
   
 1. How To Build
 
-    gcc -w plnit_dbCore.c plnit_uxCore.c -o plnit
+    gcc -w plnit_dbCore.c plnit_uxCore.c -o [program_name] -lcurses
 
 2. Launch Options
     Plan_it: ./pln [options] [argument 1...]
