@@ -608,7 +608,7 @@ void select_date(char c) {
                 year--;
             }
             selectDate_row = 0;
-            if (selectDate_col >= stt_day_1(selectDate)) selectDate_row--;
+            if (selectDate_col >= stt_day_1(selectDate) && stt_day_1(selectDate)) selectDate_row--;
             day = daysInMonth(year * 100ULL + month) + (day - 7ULL);
             selectDate = year * 100000000ULL + month * 1000000ULL + day * 10000ULL;
             selectDate_row += weeksInMonth(selectDate / 1000000ULL) - 1;
