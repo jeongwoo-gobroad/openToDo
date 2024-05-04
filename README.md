@@ -18,7 +18,7 @@ an openToDo project: (aka Plan-it Project)
    
           [options]:    -d: Launch Plan_it in Core Part Debugging Mode.
    
-          [options]:   -in: using CLI interface, you can insert data with arguments
+          [options]:   -in: using CLI interface, you can insert data with arguments -> Cannot use now
    
           -----------------------------------------------------------------------
    
@@ -29,7 +29,7 @@ an openToDo project: (aka Plan-it Project)
 
     0.0.1: First Build Version
 
-    0.0.2: [Current] Scrollable Calendar Method Implemented.
+    0.0.2: Scrollable Calendar Method Implemented.
 
     0.0.3: [Current]
 
