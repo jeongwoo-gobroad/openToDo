@@ -818,6 +818,7 @@ void resizeSaveMem(void) {
 int load(void) {
     int fd_bin; int chunk;
     toDoPtr buf = NULL;
+    int firstCreate = 1;
 
     if (ifAlreadyLoaded) {
         return 1;
@@ -830,14 +831,24 @@ int load(void) {
 
     buf = (toDoPtr)malloc(sizeof(toDo));
     while ((chunk = read(fd_bin, buf, sizeof(toDo))) != 0) {
+        firstCreate = 0;
         if (chunk == -1) break;
         insert(&key, buf);
-        buf = (toDoPtr)malloc(sizeof(toDo)); // memory leak alert!!!
+        buf = (toDoPtr)malloc(sizeof(toDo)); // memory leak alert!!! -> freed.
     }
+
+    free(buf);
+
     if (chunk == -1) {
         errOcc("read");
     }
     
+    if (firstCreate) {
+        buf = (toDoPtr)malloc(sizeof(toDo));
+        buf->dateData = 000000000000ULL;
+        insert(&key, buf); /* creating dummy data for the first load */
+    }
+
     ifAlreadyLoaded = 1;
 
     close(fd_bin);
