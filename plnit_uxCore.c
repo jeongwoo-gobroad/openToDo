@@ -10,9 +10,8 @@
 
 #define SUL 1
 #define SUR 2
-#define SLC 3
-#define SLL 4
-#define SLR 5
+#define SLL 3
+#define SLR 4
 #define ON 1
 #define OFF 0
 
@@ -53,12 +52,13 @@ typedef struct pos {
 static pos pos_SUL_stt, pos_SUL_end;
 static pos pos_SUR_stt, pos_SUR_end;
 static pos pos_SC_stt,  pos_SC_end;
-static pos pos_SLC_stt, pos_SLC_end;
+//static pos pos_SLC_stt, pos_SLC_end;
 static pos pos_SLL_stt, pos_SLL_end;
 static pos pos_SLR_stt, pos_SLR_end;
 static pos pos_SC_date[6][7];
 
 unsigned long long selectDate;
+unsigned long long todayDate;
 int selectDate_row;
 int selectDate_col;
 int nNum;
@@ -81,6 +81,8 @@ void select_today();
 void select_date(char c);
 void select_highlightOn();
 void prev_select_highlightOff();
+void print_date_ToDoSummarized(unsigned long long targetDate);
+void print_UpcomingBookMark();
 /*-----Display control--------------------------------------------------------------*/
 void clearGivenCalendarArea(/*index of pos_sc_date*/int row, int col);
 void clearGivenRowCols(int fromRow, int fromCol, int toRow, int toCol);
@@ -98,14 +100,17 @@ int save(void);
 int save_hr(FILE* fp);
 int load(void);
 
+void coreInit(void);
+
 int getNumOfSchedule(unsigned long long targetDate);
 void getUpcomingSchedule(unsigned long long today, char* strbuf, int scrSize);
 void setSchedule(unsigned long long today, char* title, char* details, int priority);
 void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int scrSize); /* debugging only feature */
 
-void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* strbuf, int maxLines, int width);
-int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* strbuf, int maxLines, int width);
+void getTodaySchedule_Summarized(unsigned long long today, char* strbuf);
+int getTodaySchedule_withDetails(unsigned long long today, char* strbuf);
 void getTodaySchedule_withDetails_iterEnd(void);
+void getBookMarkedInDate(unsigned long long today, int counter, char* str);
 
 int __dbDebug(void);
 void __launchOptions(int argc, char* argv[]);
@@ -123,7 +128,7 @@ int main(int argc, char* argv[]) {
 
     //printf("works");
 
-    load();
+    coreInit();
 
     //printf("works");
     initscr();
@@ -228,14 +233,12 @@ void initPosVar() {
     pos_SUL_stt.row = 1; pos_SUL_stt.col = 1;
     pos_SUL_end.row = 1; pos_SUL_end.col = nNum * 14 * 2 + 6; // *2는 가시성을 높이기 위해서
     pos_SUR_stt.row = 1; pos_SUR_stt.col = pos_SUL_end.col + 2;
-    pos_SUR_end.row = 1; pos_SUR_end.col = pos_SUR_stt.col + nNum * 7 * 2; //*2는 가시성을 높이기 위해서
+    pos_SUR_end.row = 4 * nNum + 7; pos_SUR_end.col = pos_SUR_stt.col + nNum * 7 * 2; //*2는 가시성을 높이기 위해서
     pos_SC_stt.row = 3; pos_SC_stt.col = 1;
     pos_SC_end.row = 6 * nNum + 9; pos_SC_end.col = pos_SUL_end.col;
-    pos_SLC_stt.row = 3; pos_SLC_stt.col = pos_SUR_stt.col;
-    pos_SLC_end.row = 6 * nNum + 9; pos_SLC_end.col = pos_SUR_end.col;
     pos_SLL_stt.row = 6 * nNum + 11; pos_SLL_stt.col = 1; 
     pos_SLL_end.row = 6 * nNum + 12; pos_SLL_end.col = pos_SUL_end.col;
-    pos_SLR_stt.row = 6 * nNum + 11; pos_SLR_stt.col = pos_SUR_stt.col;
+    pos_SLR_stt.row = 4 * nNum + 9; pos_SLR_stt.col = pos_SUR_stt.col;
     pos_SLR_end.row = 6 * nNum + 12, pos_SLR_end.col = pos_SUR_end.col;
 
     for (int i = 0, r = 5; i < 6; i++, r += nNum + 1) {
@@ -259,38 +262,23 @@ pos_SC_date;
 */  /* remember that actual index is different from lib constant COLS, LINES*/
     int i, j;
 
-    attron(COLOR_PAIR(1)); attrset(COLOR_PAIR(1));
     standout();
     for (i = 0; i <= pos_SUR_end.col + 1; i++) {
         move(0, i); addch(' ');
     }
-    move(1, 0); addch(' ');
-    move(1, pos_SUL_end.col + 1); addch(' ');
-    move(1, pos_SUR_end.col + 1); addch(' ');
-    for (int i = 0; i <= pos_SUR_end.col + 1; i++) {
+    for (int i = 0; i <= pos_SUL_end.col + 1; i++) {
         move(2, i); addch(' ');
     }
-
-    //attron(COLOR_PAIR(2)); attrset(COLOR_PAIR(2));
-
-    for (i = 3; i <= pos_SC_end.row; i++) {
-        move(i, 0); addch(' ');
-        move(i, pos_SUL_end.col + 1); addch(' ');
-        move(i, pos_SUR_end.col + 1); addch(' ');
-    }
-
-    //attron(COLOR_PAIR(3)); attrset(COLOR_PAIR(3));
-
-    for (i = 0; i <= pos_SUR_end.col + 1; i++) {
+    for (int i = 0; i <= pos_SUL_end.col + 1; i++) {
         move(pos_SLL_stt.row - 1, i); addch(' ');
-    }
-    for (i = pos_SLL_stt.row; i <= pos_SLL_end.row; i++) {
-        move(i, 0); addch(' ');
-        move(i, pos_SUL_end.col + 1); addch(' ');
-        move(i, pos_SUR_end.col + 1); addch(' ');
     }
     for (i = 0; i <= pos_SUR_end.col + 1; i++) {
         move(pos_SLL_end.row + 1, i); addch(' ');
+    }
+    for (i = 0; i <= pos_SLL_end.row; i++) {
+        move(i, 0); addch(' ');
+        move(i, pos_SUL_end.col + 1); addch(' ');
+        move(i, pos_SUR_end.col + 1); addch(' ');
     }
     standend();
     for (i = 1; i < 7; i++) {
@@ -320,11 +308,14 @@ pos_SC_date;
     }
     attroff(A_BOLD);
     select_today();
+    todayDate = selectDate;
     print_Year_Month(selectDate / 1000000);
 
     print_date(selectDate);
     print_date_NumOfSchedule(selectDate);
     print_commandLine(0);
+    print_date_ToDoSummarized(selectDate);
+    print_UpcomingBookMark();
     return;
 }
 
@@ -473,7 +464,15 @@ void print_date(unsigned long long targetDate) {
     attron(COLOR_PAIR(1));
     for (int i = 0; i < 7; i++) {
         if (i >= stt_col) {
+            if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
+                attroff(COLOR_PAIR(1));
+                attron(COLOR_PAIR(2));
+            }
             mvprintw(pos_SC_date[0][i].row, pos_SC_date[0][i].col, "%-2d", date);
+            if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
+                attroff(COLOR_PAIR(2));
+                attron(COLOR_PAIR(1));
+            }
             date++;
         }
         else {
@@ -489,7 +488,17 @@ void print_date(unsigned long long targetDate) {
                 //move(pos_SC_date[i][j].row, pos_SC_date[i][j].col);
                 //addstr("  ");
             }
-            else mvprintw(pos_SC_date[i][j].row, pos_SC_date[i][j].col, "%-2d", date);
+            else {
+                if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
+                    attroff(COLOR_PAIR(1));
+                    attron(COLOR_PAIR(2));
+                }
+                mvprintw(pos_SC_date[i][j].row, pos_SC_date[i][j].col, "%-2d", date);
+                if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
+                    attroff(COLOR_PAIR(2));
+                    attron(COLOR_PAIR(1));
+                }
+            }
         }
     }
     attroff(COLOR_PAIR(1));
@@ -584,6 +593,7 @@ void select_highlightOn() {
 }
 
 void prev_select_highlightOff() {
+    if (selectDate == todayDate) return;
     attron(COLOR_PAIR(1));
     mvprintw(pos_SC_date[selectDate_row][selectDate_col].row, pos_SC_date[selectDate_row][selectDate_col].col, "%-2d", selectDate / 10000 % 100);
     attroff(COLOR_PAIR(1));
@@ -718,6 +728,7 @@ void select_date(char c) {
         break;
     }
     select_highlightOn();
+    print_date_ToDoSummarized(selectDate);
 }
 
 void get_todo() {
@@ -830,9 +841,8 @@ void clearGivenNonCalendarArea(/*pre-defined Macros*/int area) {
     /*
     #define SUL 1
     #define SUR 2
-    #define SLC 3
-    #define SLL 4
-    #define SLR 5
+    #define SLL 3
+    #define SLR 4
     */
     switch (area) {
         case SUL:
@@ -840,9 +850,6 @@ void clearGivenNonCalendarArea(/*pre-defined Macros*/int area) {
             break;
         case SUR:
             clearGivenRowCols(pos_SUR_stt.row, pos_SUR_stt.col, pos_SUR_end.row, pos_SUR_end.col);
-            break;
-        case SLC:
-            clearGivenRowCols(pos_SLC_stt.row, pos_SLC_stt.col, pos_SLC_end.row, pos_SLC_end.col);
             break;
         case SLL:
             clearGivenRowCols(pos_SLL_stt.row, pos_SLL_stt.col, pos_SLL_end.row, pos_SLL_end.col);
@@ -915,4 +922,56 @@ void load_UXPart(void) {
     getch();
 
     return;
+}
+
+void print_date_ToDoSummarized(unsigned long long targetDate) {
+    unsigned long long year = targetDate / 100000000;
+    unsigned long long month = targetDate % 100000000 / 1000000;
+    unsigned long long day = targetDate % 1000000 / 10000;
+    int row = pos_SUR_stt.row, col = pos_SUR_stt.col;
+    //int width = pos_SUR_end.col - pos_SUR_stt.col + 1;
+    mvprintw(row, col, "Todos | %llu-%02llu-%02llu", year, month, day);
+    row ++;
+    //char* strbuf;
+    /*getTodaySchedule_Summarized((targetDate / 10000), strbuf);
+    if (strncmp(strbuf, "No data", 7) == 0) clearGivenNonCalendarArea(2);
+    else {
+        while (strbuf[0] != '\0') {
+            row++;
+            if (strbuf[0] == '[') {
+                strbuf++;
+                if (strbuf[0] == '^') {
+                    strbuf++;
+                    mvprintw(row, col, "%.2s:", strbuf);
+                    strbuf += 2;
+                    printw("%.2s", strbuf);
+                    strbuf += 2;
+                    row++;
+                }
+            }
+            else if (strbuf[0] == '*') {
+                strbuf++;
+                attron(COLOR_PAIR(1));
+            }
+            else if (strbuf[0] == ']') {
+                strbuf++;
+                if (strbuf[0] == '^') {
+                    strbuf++;
+                    mvprintw(row, col, "-> %.*s", width - 3, strbuf);
+                    strbuf += width - 3;
+                    row++;
+                    mvprintw(row, col, "%.*s", 30 - (width - 3), strbuf);
+                    strbuf += 30 - (width - 3);
+                    row++;
+                    attroff(COLOR_PAIR(1));
+                }
+            }
+        }
+    }*/
+}
+
+void print_UpcomingBookMark() {
+    for (int i = pos_SLR_stt.col; i <= pos_SLR_end.col; i++)
+        mvprintw(pos_SLR_stt.row - 1, i, "-");
+    mvprintw(pos_SLR_stt.row, pos_SLR_stt.col, "Upcoming Book Marks..");
 }
