@@ -9,9 +9,11 @@ an openToDo project: (aka Plan-it Project)
   
 1. How To Build
 
-    gcc -w plnit_dbCore.c plnit_uxCore.c -o [program_name] -lcurses
+    gcc -Wall plnit_dbCore.c plnit_uxCore.c -o [program_name] -lcurses
 
-2. Launch Options
+    todos.sv is a save file for testing. Feel free to use it.
+
+3. Launch Options
     Plan_it: ./pln [options] [argument 1...]
    
           [options]:  NONE: Launch Plan_it in Normal Mode.
@@ -25,7 +27,7 @@ an openToDo project: (aka Plan-it Project)
           [arguments]: [YYYYMMDD][HHMM][Priority_Num][Title][Details]
    
   
-3. Version History
+4. Version History
 
     0.0.1: First Build Version
 
