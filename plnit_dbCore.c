@@ -823,7 +823,7 @@ int load(void) {
         return 1;
     }
 
-    fd_bin = open(bin_fileName, O_CREAT); /* if exists, then read, or not, then creat */
+    fd_bin = open(bin_fileName, O_CREAT | O_RDWR); /* if exists, then read, or not, then creat */
     if (fd_bin == -1) {
         errOcc("open");
     }
@@ -848,13 +848,15 @@ int save(void) {
     int fd_bin; /* hr for human readable */
     FILE* fd_hr;
     int written;
-    int time, min;
-    unsigned long long dates = 0;
-    time = 0; min = 0;
+    //int time, min;
+    //unsigned long long dates = 0;  
+    //time = 0; min = 0;
 
     if (!key) { /* if none to save */
         return 1;
     }
+
+    ifAlreadyLoaded = 0;
 
     fd_bin = open(bin_fileName, O_CREAT | O_WRONLY | O_TRUNC, 0641);
     fd_hr = fopen(hr_fileName, "w+");
@@ -928,7 +930,7 @@ int save_hr(FILE* fp) {
                         for (k = 0; k <= temp->maxIndex; k++) {
                             lnk = (temp->toDoArr)[k];
                             time = lnk->dateData % 10000;
-                            fprintf(fp, "             > %02d:%02d -> [Priority %d], Title: %12s, Details: %s\n", time / 100, time % 100,
+                            fprintf(fp, "             > %02llu:%02llu -> [Priority %d], Title: %12s, Details: %s\n", time / 100, time % 100,
                                 lnk->priority, lnk->title, lnk->details);
                         }
                     }
@@ -1072,7 +1074,7 @@ void __launchOptions(int argc, char* argv[]){
         }
         else {
             if (argc != 7) {
-                fprintf(stderr, "Plan_it: Unsupported Arguments\n", argv[1]);
+                fprintf(stderr, "Plan_it: Unsupported Arguments - %s\n", argv[1]);
                 printUsage();
                 exit(1);
             }

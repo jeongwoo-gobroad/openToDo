@@ -6,6 +6,15 @@
 #include <curses.h>
 #include <time.h>
 #include <string.h>
+#include <signal.h>
+
+#define SUL 1
+#define SUR 2
+#define SLC 3
+#define SLL 4
+#define SLR 5
+#define ON 1
+#define OFF 0
 
 /**
  * SUL: Screen Upper Left, SUR: Screen Upper Right
@@ -72,12 +81,20 @@ void select_today();
 void select_date(char c);
 void select_highlightOn();
 void prev_select_highlightOff();
-void get_todo();
-int save(void);
-int load(void);
+/*-----Display control--------------------------------------------------------------*/
 void clearGivenCalendarArea(/*index of pos_sc_date*/int row, int col);
-
+void clearGivenRowCols(int fromRow, int fromCol, int toRow, int toCol);
+void clearGivenNonCalendarArea(/*pre-defined Macros*/int area);
+/*-----Signal handling--------------------------------------------------------------*/
+void setInputModeSigHandler(int status); /* Global Variable */
+void inputMode_sigHndl(int signum);         int inputModeForceQuit;
+/*-------------------------------------------------------------------*/
+void errOcc(const char* str);
 /*--UX Layer interactive API Methods---------------------*/
+void get_todo(); /* global */ unsigned long long chosenDate = 0;
+int save(void);
+int save_hr(FILE* fp);
+int load(void);
 
 int getNumOfSchedule(unsigned long long targetDate);
 void getUpcomingSchedule(unsigned long long today, char* strbuf, int scrSize);
@@ -101,9 +118,14 @@ int main(int argc, char* argv[]) {
     }
 
     /* lcurses start */
+
+    //printf("works");
+
     load();
+
+    //printf("works");
     initscr();
-    noecho();
+    noecho(); 
 
     if (LINES < 33 || COLS < 93) { /* Minimum size */
         printf("Not enough space to render a program UI\n");
@@ -121,6 +143,7 @@ int main(int argc, char* argv[]) {
     initScreen();
     select_highlightOn(selectDate);
     
+    //printf("Works");
     //mvprintw(1, 1, "Current Screen Size: %dx%d, opt.n: %d", LINES, COLS, nNum);
 
     refresh();
@@ -128,13 +151,16 @@ int main(int argc, char* argv[]) {
     char c;
     int mode = 0;
     while (1) {
+        move(LINES - 1, COLS - 1); /* get rid of cursor */
         if (mode == 0) {
             c = getch();
             if (c == 's') mode++;
             if (c == 'i' || c == 'j' || c == 'k' || c == 'l')
                 select_date(c);
-            if (c=='z') save();
-            if (c=='x') load();
+            if (c == 'z') {
+                save();
+            }
+            if (c == 'x') load();
         }
         else if (mode == 1) {
             c = getch();
@@ -142,9 +168,10 @@ int main(int argc, char* argv[]) {
             if (c == 'e') mode--;
         }
         else if (mode == 2) {
-            if (c == 'e') mode--;
+            //if (c == 'e') mode--;
             get_todo();
-            c = getch();
+            //c = getch();
+            mode--;
         }
         print_commandLine(mode);
         refresh();
@@ -305,6 +332,7 @@ void select_today() {
     unsigned long long day = timeinfo.tm_mday;
 
     selectDate = year * 100000000ULL + month * 1000000ULL + day * 10000ULL;
+    //chosenDate = selectDate;
 
     int stt_col = stt_day_1(selectDate);
     int date = 1;
@@ -419,6 +447,8 @@ int weeksInMonth(unsigned long long targetDate) {
             if (date == day) return i + 1;
         }
     }
+
+    return 0;
 }
 
 void print_date(unsigned long long targetDate) {
@@ -466,7 +496,7 @@ void print_date_NumOfSchedule(unsigned long long targetDate) {
     targetDate = targetDate / 1000000ULL * 100ULL + 1; /* to make it start from day 1 */
     int days = daysInMonth(targetDate / 100);
     int num;
-    int breakCondition = 0;
+    //int breakCondition = 0;
 
     for (int i = 0; i < 7; i++) {
         if (i >= stt_col) {
@@ -502,6 +532,7 @@ void print_date_NumOfSchedule(unsigned long long targetDate) {
 }
 
 void print_commandLine(int mode) {
+    //printf("works");
     for (int i = pos_SLL_stt.row; i <= pos_SLL_end.row; i++) {
         for (int j = pos_SLL_stt.col; j <= pos_SLL_end.col; j++) {
             move(i, j);
@@ -518,7 +549,10 @@ void print_commandLine(int mode) {
         sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'I', "insert", 'i', "upwards", 'k', "downwards", 'd', "delete", 'm', "modify", '+', "D+", '-', "D-", 'b', "BookMark", 'e', "exit");
         break;
     case 2:
-        sprintf(commands, "%c%-10s", 'e', "exit");
+        //sprintf(commands, "%c%-10s", 'e', "exit"); /* sighandled if insertion */
+        break;
+    default:
+        break;
     }
 
     int interval = (pos_SLL_end.col - pos_SLL_stt.col + 1) / 5;
@@ -682,53 +716,76 @@ void select_date(char c) {
 }
 
 void get_todo() {
-    char t[2]; // 문자열을 위한 배열 선언
+    char t[5]; // 문자열을 위한 배열 선언
     char title[31];
     char details[256];
-    char p[2];
+    char p[2]; int priority; int time;
 
     nocbreak();  // canonical 모드로 전환
     echo();  // 입력한 키를 화면에 보이도록 설정
+    clearGivenNonCalendarArea(SLL);
+    setInputModeSigHandler(ON);
 
     standout();
-    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "Enter the time ->");
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "^C to quit insert mode");
+    sleep(2);
     standend();
+    clearGivenNonCalendarArea(SLL);
+
+    standout();
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the Time Below: (Format: HHMM)");
+    move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
+    standend();
+    if (inputModeForceQuit) return;
     getstr(t);//시각 입력
-    if (strcmp(t, "e") == 0) return;
+    //if (strcmp(t, "e") == 0) return;
 
     mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, " ");
     for (int i = 0; i < pos_SUL_end.col - 1; i++)
         printw(" ");
     standout();
-    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "Enter the title ->");
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the Title Below: (Format: String)");
+    move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
+    if (inputModeForceQuit) return;
     getstr(title);
 
     mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, " ");
     for (int i = 0; i < pos_SUL_end.col - 1; i++)
         printw(" ");
     standout();
-    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "Enter the details ->");
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the Details Below: (Format: String)");
+    move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
+    if (inputModeForceQuit) return;
     getstr(details);
 
     mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, " ");
     for (int i = 0; i < pos_SUL_end.col - 1; i++)
         printw(" ");
     standout();
-    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "Enter the priority ->");
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the Priority Number Below: (0 ~ 9)");
+    move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
+    if (inputModeForceQuit) return;
     getstr(p);
 
     cbreak();  // 다시 non-canonical 모드로 전환
     noecho();
 
-    int priority = atoi(p);
-    /*
-    int time=atoi(t);
-    todoDate+=time*100;*/
-    //int today=todoDate;// 시간을 0000으로 넘김
-    //setSchedule(today, title, details, priority);
+    priority = atoi(p);
+    time = atoi(t);
+    if (chosenDate == 0) {
+        errOcc("get_todo() Error");
+    }
+
+    selectDate += (unsigned long long)time;
+
+    setSchedule(chosenDate, title, details, priority);
+
+    setInputModeSigHandler(OFF);
+
+    return;
 }
 
 void clearGivenCalendarArea(/*index of pos_sc_date*/int row, int col) {
@@ -738,12 +795,92 @@ void clearGivenCalendarArea(/*index of pos_sc_date*/int row, int col) {
     int sttCol = pos_SC_date[row][col].col;
     int endCol = pos_SC_date[row][col].col + 4 * nNum - 1;
     
-    for (int i = sttRow; i <= endRow; i++) {
-        for (int j = sttCol; j <= endCol; j++) {
+    for (i = sttRow; i <= endRow; i++) {
+        for (j = sttCol; j <= endCol; j++) {
             move(i, j);
             addch(' ');
         }
     }
+
+    return;
+}
+
+void clearGivenRowCols(int fromRow, int fromCol, int toRow, int toCol) {
+    int i, j;
+
+    for (i = fromRow; i <= toRow; i++) {
+        for (j = fromCol; j <= toCol; j++) {
+            move(i, j);
+            addch(' ');
+        }
+    }
+
+    return;
+}
+
+void clearGivenNonCalendarArea(/*pre-defined Macros*/int area) {
+    /*
+    #define SUL 1
+    #define SUR 2
+    #define SLC 3
+    #define SLL 4
+    #define SLR 5
+    */
+    switch (area) {
+        case SUL:
+            clearGivenRowCols(pos_SUL_stt.row, pos_SUL_stt.col, pos_SUL_end.row, pos_SUL_end.col);
+            break;
+        case SUR:
+            clearGivenRowCols(pos_SUR_stt.row, pos_SUR_stt.col, pos_SUR_end.row, pos_SUR_end.col);
+            break;
+        case SLC:
+            clearGivenRowCols(pos_SLC_stt.row, pos_SLC_stt.col, pos_SLC_end.row, pos_SLC_end.col);
+            break;
+        case SLL:
+            clearGivenRowCols(pos_SLL_stt.row, pos_SLL_stt.col, pos_SLL_end.row, pos_SLL_end.col);
+            break;
+        case SLR:
+            clearGivenRowCols(pos_SLR_stt.row, pos_SLR_stt.col, pos_SLR_end.row, pos_SLR_end.col);
+            break;
+        default:
+            break;
+    }
+
+    return;
+}
+
+void setInputModeSigHandler(int status) {
+    /* static */
+    static struct sigaction inmode;
+    static struct sigaction origin;
+
+    if (status == ON) {
+        inmode.sa_handler = inputMode_sigHndl;
+        inmode.sa_flags &= ~SA_RESETHAND;
+        inmode.sa_flags &= ~SA_SIGINFO;
+
+        inputModeForceQuit = 0;
+
+        if (sigaction(SIGINT, &inmode, &origin) == -1) {
+            errOcc("sigaction");
+        }
+    }
+    else { /* OFF */
+        if (sigaction(SIGINT, &origin, NULL) == -1) {
+            errOcc("sigaction");
+        }
+    }
+
+}
+void inputMode_sigHndl(int signum) {
+    clearGivenNonCalendarArea(SLL);
+
+    move(pos_SLL_stt.row, pos_SLL_stt.col);
+    addstr("Terminating input mode...");
+
+    //sleep(3);
+    setInputModeSigHandler(OFF);
+    inputModeForceQuit = 1;
 
     return;
 }
