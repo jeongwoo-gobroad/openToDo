@@ -104,7 +104,7 @@ void coreInit(void);
 
 int getNumOfSchedule(unsigned long long targetDate);
 void getUpcomingSchedule(unsigned long long today, char* strbuf, int scrSize);
-void setSchedule(unsigned long long today, char* title, char* details, int priority);
+int setSchedule(unsigned long long today, char* title, char* details, int priority);
 void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int scrSize); /* debugging only feature */
 
 void getTodaySchedule_Summarized(unsigned long long today, char* strbuf);
