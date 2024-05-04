@@ -15,6 +15,9 @@
  *      - Online share feature(Maybe later for Socket)
  *      - Details [MAXLEN := 256 w/ null terminated string]
 */
+/** 2024-05-04 Important update
+ *      Priority Number Means [BookMark]
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,11 +30,12 @@ typedef struct toDo {
     int priority;
     char title[31];
     // SOCKET FEATURE {method}();
-    char details[256];
+    char details[61];
 } toDo;
 typedef toDo* toDoPtr;
 
 typedef struct day {
+    int isBookMarkExists;
     int maxIndex;
     toDoPtr* toDoArr;
 } day;
@@ -82,6 +86,12 @@ const char* bin_fileName = "todos.sv";
 const char*  hr_fileName = "todos.txt"; /* hr stands for human readable */
 const char*   dbDebug = "-d";
 const char* cli_input = "-in";
+/**/ /* for leap year and month limit check */
+monthPtr leapYear = NULL;
+dayPtr twenty_Eight = NULL;
+dayPtr twenty_Nine = NULL;
+dayPtr thirty = NULL;
+dayPtr thirty_one = NULL;
 /**/
 
 /* saving features start */
@@ -105,7 +115,7 @@ monthPtr create_month(void);
 monthPtr findMonth(int target, yearPtr db);
 yearGrp create_yearGrp(int num);
 yearPtr findYear(int target, yearGrp* db);
-void insert(yearGrp* db, toDoPtr targetData);
+int insert(yearGrp* db, toDoPtr targetData);
 void printAll(yearGrp db);
 dayPtr search_byDate(unsigned long long target);
 int get_toDo_byForm(toDoPtr target, char** buf);
@@ -117,16 +127,22 @@ void quickSort_byHashNum(toDoPtr* arr, int from, int to);
 
 void printToday(dayPtr when);
 
+/* For Bookmark Features */
+toDoPtr getBookMarked(unsigned long long src, int distance);
+
+
 /*--UX Layer interactive API Methods---------------------*/
 
+void coreInit(void);
 int getNumOfSchedule(unsigned long long targetDate);
 void getUpcomingSchedule(unsigned long long today, char* strbuf, int scrSize);
-void setSchedule(unsigned long long today, char* title, char* details, int priority);
+int setSchedule(unsigned long long today, char* title, char* details, int priority);
 void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int scrSize); /* debugging only feature */
 
-void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* strbuf, int maxLines, int width);
-int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* strbuf, int maxLines, int width);
+void getTodaySchedule_Summarized(unsigned long long today, char* strbuf);
+int getTodaySchedule_withDetails(unsigned long long today, char* strbuf);
 void getTodaySchedule_withDetails_iterEnd(void);
+void getBookMarkedInDate(unsigned long long today, int counter, char* str);
 void printUsage(void);
 void __launchOptions(int argc, char* argv[]);
 
@@ -145,6 +161,13 @@ int __dbDebug(void) {
     int i = 0;
     char testStr[BUFSIZ];
 
+    /* dummy datas just for leap year / month limit check */
+    leapYear     = (monthPtr)malloc(sizeof(month));
+    twenty_Eight = (dayPtr)malloc(sizeof(day));
+    twenty_Nine  = (dayPtr)malloc(sizeof(day));
+    thirty       = (dayPtr)malloc(sizeof(day));
+    thirty_one   = (dayPtr)malloc(sizeof(day));
+
     while (r) {
         puts("Plan_it DB Core Debugger Menu");
         puts("Basic operation: ");
@@ -155,6 +178,7 @@ int __dbDebug(void) {
         puts("  (7) to print summarized info of the given date in a markup form");
         puts("  (8) to print detailed info of the given date in a markup form, with iterator index");
         puts("  (9) to print a markup form in a human readable form");
+        puts("  (10) to print upcoming bookmarked todos, with user input number of it.");
         printf("Type: ");
         //getchar();
         scanf("%d", &input);
@@ -204,20 +228,20 @@ int __dbDebug(void) {
             case 7:
                 printf("Type scan target YYYYMMDD: \n");
                 scanf("%llu", &date); //getchar();
-                printf("Type sorting type(2 for time first, 1 for priority first): \n");
+                printf("Type sorting type(2 for time first, 1 for priority first): <- deleted feature, abstracted in API\n");
                 scanf("%d", &input);
-                getTodaySchedule_Summarized(date, input, testStr, 10, 10);
+                getTodaySchedule_Summarized(date, testStr);
                 printf("%s\n", testStr);
                 break;
             case 8:
                 printf("Type scan target YYYYMMDD: \n");
                 scanf("%llu", &date); //getchar();
-                printf("Type sorting type(2 for time first, 1 for priority first): \n");
+                printf("Type sorting type(2 for time first, 1 for priority first): <- deleted feature, abstracted in API\n");
                 scanf("%d", &input);
                 printf("starting iteration...\nType 1 to move to the next page, 2 to terminate: ");
                 scanf("%d", &input_2);
                 while (input_2 != 2) {
-                    input_2 = getTodaySchedule_withDetails(date, input, testStr, 10, 10);
+                    input_2 = getTodaySchedule_withDetails(date, testStr);
                     printf("%s\n", testStr);
                     printf("Page: %d\ncontinuing iteration...\nType 1 to move to the next page, 2 to terminate: ", input_2);
                     scanf("%d", &input_2);
@@ -231,6 +255,14 @@ int __dbDebug(void) {
                 scanf("%d", &input);
                 puts("");
                 printMarkUP(testStr, input);
+                break;
+            case 10:
+                printf("Type scan target YYYYMMDD: \n");
+                scanf("%llu", &date); //getchar();
+                printf("Type max bookmark count: \n");
+                scanf("%d", &input);
+                getBookMarkedInDate(date, input, testStr);
+                printf("%s\n", testStr);
                 break;
             case 0:
                 r = 0;
@@ -274,7 +306,7 @@ void resizeArr_longer(dayPtr target) {
 
     /* remap hash */
     for (i = 0; i < target->maxIndex; i++) {
-        (target->toDoArr)[i]->hashNum = ((target->toDoArr)[0]->dateData * 1000) + (target->toDoArr)[0]->hashNum * 100 + i;
+        (target->toDoArr)[i]->hashNum = ((target->toDoArr)[i]->dateData * 1000) + (target->toDoArr)[i]->priority * 100 + i;
     } /* YYYYMMDDHHMMPXX */
 
     return;
@@ -294,7 +326,8 @@ void insert_toDo(dayPtr when, toDoPtr target) {
     (when->toDoArr)[when->maxIndex] = target; // SUBJECT TO CHANGE: TO MAX HEAP
 
     /* remap hash */
-    (when->toDoArr)[when->maxIndex]->hashNum = ((when->toDoArr)[0]->dateData / 100) * 100 + when->maxIndex;
+    (when->toDoArr)[when->maxIndex]->hashNum = ((when->toDoArr)[when->maxIndex]->dateData * 1000) +
+        (when->toDoArr)[when->maxIndex]->priority * 100 + when->maxIndex;
     return;
 }
 
@@ -307,6 +340,7 @@ dayPtr create_day(void) {
 
     newOne->maxIndex = -1;
     newOne->toDoArr = NULL;
+    newOne->isBookMarkExists = 0;
 
     return newOne;
 }
@@ -339,6 +373,25 @@ monthPtr findMonth(int target, yearPtr db) {
         db->months[target] = create_month();
     }
 
+    if ((target == 2) && ((db->months)[target]->dates[0]) == NULL) {
+        /* leap year alloc */
+        if ((db->months)[0] == leapYear) {
+            ((db->months)[target]->dates[0]) = twenty_Nine;
+        }
+        else {
+            ((db->months)[target]->dates[0]) = twenty_Eight;
+        }
+    }
+    else if (((db->months)[target]->dates[0]) == NULL) {
+        /* month limit alloc */
+        if (target == 1 || (target == 3 || (target == 5 || (target == 7 || (target == 8 || (target == 10 || (target == 12))))))) {
+            ((db->months)[target]->dates[0]) = thirty_one;
+        }
+        else {
+            ((db->months)[target]->dates[0]) = thirty;
+        }
+    }
+
     return db->months[target];
 }
 
@@ -362,6 +415,17 @@ yearGrp create_yearGrp(int num) {
         (newYear->months)[i] = NULL;
     }
 
+    if (num % 4 == 0) { /* Leap year check */
+        if (num % 100 == 0) {
+            if (num % 400 == 0) {
+                (newYear->months)[0] = leapYear;
+            }
+        }
+        else {
+            (newYear->months)[0] = leapYear;
+        }
+    }
+
     return newGrp;
 }
 
@@ -370,7 +434,14 @@ yearPtr findYear(int target, yearGrp* db) {
     int isFound = 0;
 
     /* iter */
-    iterator = (*db);
+    iterator = key;
+    
+    if (iterator) {
+        while (iterator->prev) {
+            iterator = iterator->prev;
+        }
+    }
+
     while (iterator) {
         if (iterator->year == target) {
             isFound = 1;
@@ -418,7 +489,7 @@ yearPtr findYear(int target, yearGrp* db) {
     return newOne->target;
 }
 
-void insert(yearGrp* db, toDoPtr targetData) {
+int insert(yearGrp* db, toDoPtr targetData) {
     int year, month, date; //hour, minute;
     yearPtr   yy;
     monthPtr  mm;
@@ -434,13 +505,39 @@ void insert(yearGrp* db, toDoPtr targetData) {
     /* Search */
     yy = findYear(year, db);
     mm = findMonth(month, yy);
+    /* wait, we should check month limit! */
+    if ((mm->dates)[0] == thirty_one && date > 31) {
+        free(targetData); /* since it's already allocated! */
+        return 2;
+    }
+    if ((mm->dates)[0] == thirty && date > 30) {
+        free(targetData); /* since it's already allocated! */
+        return 2;
+    }
+    if ((mm->dates)[0] == twenty_Nine && date > 29) {
+        free(targetData); /* since it's already allocated! */
+        return 2;
+    }
+    if ((mm->dates)[0] == twenty_Eight && date > 28) {
+        free(targetData); /* since it's already allocated! */
+        return 2;
+    }
+    /* then save... */
     dd = findDay(date, mm);
-
+    /* one bookmark per day */
+    if ((dd->isBookMarkExists) == 0 && targetData->priority) {
+        dd->isBookMarkExists = 1;
+    }
+    else if ((dd->isBookMarkExists) && targetData->priority) {
+        free(targetData); /* since it's already allocated! */
+        return 1;
+    }
+    //puts("inserted");
     /* Insert */
     insert_toDo(dd, targetData);
     putSaveData(targetData);
 
-    return;
+    return 0;
 }
 
 void printAll(yearGrp db) {
@@ -458,10 +555,10 @@ void printAll(yearGrp db) {
 
     while (db) { /* wtf */
         printf("Records of the Year %d:\n", db->year);
-        for (i = 0; i < 13; i++) {
+        for (i = 1; i <= 12; i++) {
             if ((db->target->months)[i]) {
                 printf("    ->Records of the Month %d:\n", i);
-                for (j = 0; j < 32; j++) {
+                for (j = 1; j <= 31; j++) {
                     if (((db->target->months)[i]->dates)[j]) {
                         printf("        -->Records of the Day %d:\n", j);
                         temp = ((db->target->months)[i]->dates)[j];
@@ -702,13 +799,13 @@ void getUpcomingSchedule(unsigned long long today, char* strbuf, int scrSize) { 
     
     return;
 }
-void setSchedule(unsigned long long today, char* title, char* details, int priority) {
+int setSchedule(unsigned long long today, char* title, char* details, int priority) {
     toDoPtr in;
 
     in = create_Node(today, priority, title, details);
-    insert(&key, in);
+    //insert(&key, in);
 
-    return;
+    return insert(&key, in); /* 0: inserted. 1: Bookmarked ToDo already exists. 2: invaild date */
 }
 void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int scrSize) {
     //char* strs;
@@ -740,11 +837,12 @@ void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int 
     return;
 }
 /* active high-level APIs */
-void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* strbuf, int maxLines, int width) {
+void getTodaySchedule_Summarized(unsigned long long today, char* strbuf) {
     /* Prefix codes
         [^: for Time, [[: make new line, ^: tab inside
         ]^: for title, ]]: for details, *: Bookmarked
     */
+    
     dayPtr dd = NULL;
     char str[BUFSIZ] = {'\0', };
     char temp[BUFSIZ] = {'\0', };
@@ -756,10 +854,17 @@ void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* s
         strcpy(str, "No data\n");
     }
     else {
-        sortGivenDateToDos(dd, sortType);
+        sortGivenDateToDos(dd, 2);
         for (i = 0; i <= dd->maxIndex; i++) {
-            /*            Time->NL->Tab->NL->NL*/
-            sprintf(temp, "[^%04llu[[^%s[[[[", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
+            if ((dd->toDoArr)[i]->priority) /* if bookmarked */ {
+                /*            Time->BookMarked->Title*/
+                sprintf(temp, "[^%04llu*]^%.30s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
+            }
+            else {
+                /*            Time->Title*/
+                sprintf(temp, "[^%04llu]^%.30s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
+            }
+            /* Ver 2.0, 0504 */
             strcat(str, temp);
         }
     }
@@ -768,12 +873,13 @@ void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* s
 
     return;
 }
-int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* strbuf, int maxLines, int width) {
+int getTodaySchedule_withDetails(unsigned long long today, char* strbuf) {
     /* implementing *pageIterator* */
     /* Prefix codes
         [^: for Time, [[: make new line, ^: tab inside
-        ]^: for title, ]]: for details, *: Bookmarked
+        ]^: for title, ]]: for details, *: Bookmarked 
     */
+    /* 0504 fixed: no need to tab nor new line */
     dayPtr dd = NULL;
     char str[BUFSIZ] = {'\0', };
     char temp[BUFSIZ] = {'\0', };
@@ -786,9 +892,15 @@ int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* s
     }
     else {
         pageIterator = (pageIterator + 1) % (dd->maxIndex + 1);
-        sortGivenDateToDos(dd, sortType);
-        /*        Time->NL->Title(NL)->Tab->NL->Details(NL)->Tab->NL->NL */
-        sprintf(temp, "[^%04llu[[]^^%s[[]]^%s[[[[\n", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
+        sortGivenDateToDos(dd, 2);
+        if ((dd->toDoArr)[i]->priority) { /* if bookmarked */
+            /*         Time->BookMarked->Title(NL)->Details*/
+            sprintf(temp, "[^%04llu*]^%.30s]]%s\n", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
+        }
+        else {
+            /*         Time->Title(NL)->Details*/
+            sprintf(temp, "[^%04llu]^%.30s]]%s\n", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
+        }
         strcat(str, temp);
     }
 
@@ -804,6 +916,18 @@ void getTodaySchedule_withDetails_iterEnd(void) {
 
 /*------------------------------------------------------------------------------------------*/
 
+void coreInit(void) {
+    load();
+    /* dummy datas just for leap year / month limit check */
+    leapYear     = (monthPtr)malloc(sizeof(month));
+    twenty_Eight = (dayPtr)malloc(sizeof(day));
+    twenty_Nine  = (dayPtr)malloc(sizeof(day));
+    thirty       = (dayPtr)malloc(sizeof(day));
+    thirty_one   = (dayPtr)malloc(sizeof(day));
+
+    return;
+}
+
 /* saving features start */
 void resizeSaveMem(void) {
     (saveLink->maxIndex)++;
@@ -818,7 +942,6 @@ void resizeSaveMem(void) {
 int load(void) {
     int fd_bin; int chunk;
     toDoPtr buf = NULL;
-    int firstCreate = 1;
 
     if (ifAlreadyLoaded) {
         return 1;
@@ -831,7 +954,6 @@ int load(void) {
 
     buf = (toDoPtr)malloc(sizeof(toDo));
     while ((chunk = read(fd_bin, buf, sizeof(toDo))) != 0) {
-        firstCreate = 0;
         if (chunk == -1) break;
         insert(&key, buf);
         buf = (toDoPtr)malloc(sizeof(toDo)); // memory leak alert!!! -> freed.
@@ -843,11 +965,6 @@ int load(void) {
         errOcc("read");
     }
     
-    if (firstCreate) {
-        buf = (toDoPtr)malloc(sizeof(toDo));
-        buf->dateData = 000000000000ULL;
-        insert(&key, buf); /* creating dummy data for the first load */
-    }
 
     ifAlreadyLoaded = 1;
 
@@ -928,10 +1045,10 @@ int save_hr(FILE* fp) {
 
     while (db) { /* wtf */
         fprintf(fp, "Records of the Year %d:\n", db->year);
-        for (i = 0; i < 13; i++) {
+        for (i = 1; i <= 12; i++) {
             if ((db->target->months)[i]) {
                 fprintf(fp, "    -> Records of the Month %02d:\n", i);
-                for (j = 0; j < 32; j++) {
+                for (j = 1; j <= 31; j++) {
                     if (((db->target->months)[i]->dates)[j]) {
                         fprintf(fp, "        --> Records of the Day %02d:\n", j);
                         fprintf(fp, "           [ %d Record(s) in this day. ]\n", ((db->target->months)[i]->dates)[j]->maxIndex + 1);
@@ -946,7 +1063,7 @@ int save_hr(FILE* fp) {
                                 lnk->title, lnk->details);
                             }
                             else {
-                                fprintf(fp, "             > %02llu:%02llu -> Title: %12s, Details: %s\n", time / 100, time % 100,
+                                fprintf(fp, "             >             %02llu:%02llu -> Title: %12s, Details: %s\n", time / 100, time % 100,
                                 lnk->title, lnk->details);
                             }
                         }
@@ -994,7 +1111,7 @@ void errOcc(const char* str) {
 void printMarkUP(char* str, int lineLimit) {
     /* Prefix codes
         [^: for Time, [[: make new line, ^: tab inside
-        ]^: for title, ]]: for details
+        ]^: for title, ]]: for details, *: for bookmarks
 
         How it is decoded
             pseudo code:
@@ -1045,6 +1162,10 @@ void printMarkUP(char* str, int lineLimit) {
             case '^':
                 printf("    ");
                 isStillInLine = 1;
+                break;
+            case '*':
+                printf("\nBookmarked!\n");
+                isStillInLine = 0;
                 break;
             default:  
                 if (isStillInLine) {
@@ -1105,3 +1226,61 @@ void __launchOptions(int argc, char* argv[]){
 }
 
 /*-------------------------------------------------------*/
+
+/* For Bookmark Features */
+toDoPtr getBookMarked(unsigned long long src, int distance) {
+    toDoPtr retVal = NULL;
+    int i;
+
+    src *= 10000;
+    src *= 1000; /* to compare with hash */
+
+    /* implementing hash */
+
+    if (!saveLink) {
+        return NULL;
+    }
+
+    quickSort_byHashNum(saveLink->toDoData, 0, saveLink->maxIndex);
+
+    for (i = 0; (i <= saveLink->maxIndex && distance); i++) {
+        if ((saveLink->toDoData)[i]->hashNum >= src && (saveLink->toDoData)[i]->priority) {
+            distance--;
+            if (!distance) {
+                retVal = (saveLink->toDoData)[i];
+                break;
+            }
+        }
+    }
+
+    return retVal;
+}
+
+void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
+    /* returns *str w/bookmarked todo strings, based on today and number of bookmarks UX layer wants.
+       important: this function returns only "upcoming" bookmarks.
+        [^: for Time, [[: make new line, ^: tab inside
+        ]^: for title, ]]: for details, *: for bookmarks
+    */
+    char* retstr = NULL;
+    char tempstr[50];
+    int i;
+    toDoPtr temp;
+
+    retstr = (char*)malloc(sizeof(char) * 50 * counter); /* alloc, just to be safe */
+    if (!retstr) {
+        errOcc("malloc");
+    }
+    retstr[0] = '\0';
+
+    for (i = 1; i <= counter; i++) {
+        if ((temp = getBookMarked(today, i))) {
+            sprintf(tempstr, "*[^%04llu]^%s", temp->dateData, temp->title);
+        }
+        strcat(retstr, tempstr);
+    }
+
+    strcpy(str, retstr);
+
+    return;
+}
