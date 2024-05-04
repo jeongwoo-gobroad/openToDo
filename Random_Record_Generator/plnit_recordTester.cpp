@@ -41,7 +41,7 @@ int main(void) {
     uniform_int_distribution<unsigned long long> minute(0, 59);
     uniform_int_distribution<unsigned long long> titleCntx(0, 4);
     uniform_int_distribution<unsigned long long> infoCntx(0, 4);
-    uniform_int_distribution<int> pnum(0, 9);
+    uniform_int_distribution<int> pnum(0, 1);
 
     if (input == 1) {
         for (int i = 0; i < size; i++) {
