@@ -743,7 +743,7 @@ void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int 
 void getTodaySchedule_Summarized(unsigned long long today, int sortType, char* strbuf, int maxLines, int width) {
     /* Prefix codes
         [^: for Time, [[: make new line, ^: tab inside
-        ]^: for title, ]]: for details
+        ]^: for title, ]]: for details, *: Bookmarked
     */
     dayPtr dd = NULL;
     char str[BUFSIZ] = {'\0', };
@@ -772,7 +772,7 @@ int getTodaySchedule_withDetails(unsigned long long today, int sortType, char* s
     /* implementing *pageIterator* */
     /* Prefix codes
         [^: for Time, [[: make new line, ^: tab inside
-        ]^: for title, ]]: for details
+        ]^: for title, ]]: for details, *: Bookmarked
     */
     dayPtr dd = NULL;
     char str[BUFSIZ] = {'\0', };
@@ -941,8 +941,14 @@ int save_hr(FILE* fp) {
                         for (k = 0; k <= temp->maxIndex; k++) {
                             lnk = (temp->toDoArr)[k];
                             time = lnk->dateData % 10000;
-                            fprintf(fp, "             > %02llu:%02llu -> [Priority %d], Title: %12s, Details: %s\n", time / 100, time % 100,
-                                lnk->priority, lnk->title, lnk->details);
+                            if (lnk->priority) {
+                                fprintf(fp, "             > [BookMarked]%02llu:%02llu -> Title: %12s, Details: %s\n", time / 100, time % 100,
+                                lnk->title, lnk->details);
+                            }
+                            else {
+                                fprintf(fp, "             > %02llu:%02llu -> Title: %12s, Details: %s\n", time / 100, time % 100,
+                                lnk->title, lnk->details);
+                            }
                         }
                     }
                 }
