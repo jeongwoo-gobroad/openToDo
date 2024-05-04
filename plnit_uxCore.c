@@ -85,6 +85,8 @@ void prev_select_highlightOff();
 void clearGivenCalendarArea(/*index of pos_sc_date*/int row, int col);
 void clearGivenRowCols(int fromRow, int fromCol, int toRow, int toCol);
 void clearGivenNonCalendarArea(/*pre-defined Macros*/int area);
+void save_UXPart(void);
+void load_UXPart(void);
 /*-----Signal handling--------------------------------------------------------------*/
 void setInputModeSigHandler(int status); /* Global Variable */
 void inputMode_sigHndl(int signum);         int inputModeForceQuit;
@@ -158,9 +160,11 @@ int main(int argc, char* argv[]) {
             if (c == 'i' || c == 'j' || c == 'k' || c == 'l')
                 select_date(c);
             if (c == 'z') {
-                save();
+                save_UXPart();
             }
-            if (c == 'x') load();
+            if (c == 'x') {
+                load_UXPart();
+            }
         }
         else if (mode == 1) {
             c = getch();
@@ -172,6 +176,7 @@ int main(int argc, char* argv[]) {
             get_todo();
             //c = getch();
             mode--;
+            print_date_NumOfSchedule(selectDate); /* to refresh */
         }
         print_commandLine(mode);
         refresh();
@@ -728,7 +733,8 @@ void get_todo() {
 
     standout();
     mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "^C to quit insert mode");
-    sleep(2);
+    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "press enter to continue");
+    getch(); /* wait for user input */
     standend();
     clearGivenNonCalendarArea(SLL);
 
@@ -775,13 +781,15 @@ void get_todo() {
 
     priority = atoi(p);
     time = atoi(t);
-    if (chosenDate == 0) {
+    if (selectDate == 0) {
         errOcc("get_todo() Error");
     }
 
     selectDate += (unsigned long long)time;
 
-    setSchedule(chosenDate, title, details, priority);
+    setSchedule(selectDate, title, details, priority);
+
+    selectDate -= (unsigned long long)time;
 
     setInputModeSigHandler(OFF);
 
@@ -881,6 +889,30 @@ void inputMode_sigHndl(int signum) {
     //sleep(3);
     setInputModeSigHandler(OFF);
     inputModeForceQuit = 1;
+
+    return;
+}
+void save_UXPart(void) {
+    save(); /* need to block signals via sigprocmask; It's a critical zone here. */
+
+    clearGivenNonCalendarArea(SLL);
+    move(pos_SLL_stt.row, pos_SLL_stt.col);
+    addstr("Saved.");
+    move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
+    addstr("Press Enter to continue.");
+    getch();
+
+    return;
+}
+void load_UXPart(void) {
+    load(); /* need to block signals via sigprocmask; It's a critical zone here. */
+
+    clearGivenNonCalendarArea(SLL);
+    move(pos_SLL_stt.row, pos_SLL_stt.col);
+    addstr("Loaded.");
+    move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
+    addstr("Press Enter to continue.");
+    getch();
 
     return;
 }
