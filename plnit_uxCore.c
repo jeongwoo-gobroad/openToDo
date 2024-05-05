@@ -1,5 +1,6 @@
 // Written by: 2023011393 Nawon Kim, KNU CSE 2021114026 Jeongwoo Kim, 2023013565 Dahye Jeong
 // terminal based calendar program ux: GUI-Like program w/curses library
+// v0.0.5
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
