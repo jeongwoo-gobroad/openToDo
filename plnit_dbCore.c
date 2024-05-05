@@ -31,7 +31,10 @@
 typedef struct reminder {
     int isSet;
     int repeatCounter;
-    time_t targetTime;
+    time_t start;
+    time_t end;
+    time_t intervals;
+    char info[31];
 } reminder;
 typedef reminder* reminderPtr;
 
@@ -112,6 +115,7 @@ void resizeSaveMem(void);
 int load(void);
 int save(void);
 int save_hr(FILE* fp);
+void freeAllMem(void);
 void initSaveMem(void);
 void putSaveData(toDoPtr target);
 toDoPtr getSaveData(void);
@@ -162,14 +166,16 @@ void getUpcomingSchedule(unsigned long long today, char* strbuf, int scrSize);
 int setSchedule(unsigned long long today, char* title, char* details, int priority);
 void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int scrSize); /* debugging only feature */
 
-void getTodaySchedule_Summarized(unsigned long long today, char* strbuf);
+int getTodaySchedule_Summarized(unsigned long long today, char* strbuf);
 int getTodaySchedule_withDetails(unsigned long long today, char* strbuf);
 void getTodaySchedule_withDetails_iterEnd(void);
 void getBookMarkedInDate(unsigned long long today, int counter, char* str);
 
 void deleteWhileIterate(unsigned long long src, int pageNum);
 int editWhileIterate(unsigned long long src, int pageNum);
-int setReminder(time_t current, time_t delta, int repeatCnter);
+int setReminder(time_t current, time_t delta, int repeatCnter, char* what, int intervals);
+int isReminderSetAlready(char* str);
+void turnOffReminder(void);
 
 void printUsage(void);
 void __launchOptions(int argc, char* argv[]);
@@ -183,7 +189,7 @@ void printMarkUP(char* str, int lineLimit);
 /*-------------------------------------------------------*/
 
 int __dbDebug(void) {
-    int input; int input_2;
+    int input; int input_2; int input_3;
     unsigned long long date; int pnum; char title[30]; char details[256];
     int r = 1; 
     int i = 0;
@@ -212,6 +218,8 @@ int __dbDebug(void) {
         puts("  (10) to print upcoming bookmarked todos, with user input number of it.");
         puts("  (11) to delete a ToDo of the given date with iterator 'page' number");
         puts("  (12) to set a reminder");
+        puts("  (13) to turn off the reminder");
+        puts("  (14) to show current reminder info");
         printf("Type: ");
         //getchar();
         scanf("%d", &input);
@@ -305,12 +313,29 @@ int __dbDebug(void) {
                 deleteWhileIterate(date, input);
                 break;
             case 12:
-                printf("Type the delta 'seconds' value from the current time: \n");
+                printf("Type the delta(seconds) value from the current time: \n");
                 scanf("%d", &input);
-                printf("Type the number of '10-min-before-reminder' reiteration: \n");
+                printf("Type the count of reminder alarm 'before' expiration: \n");
                 scanf("%d", &input_2);
-                temp = setReminder(time(NULL), input, input_2);
+                printf("Type the interval(seconds) of reminder alarm 'before' expiration: \n");
+                scanf("%d", &input_3);
+                printf("Type reminder info string: ");
+                scanf("%s", testStr); getchar();
+                temp = setReminder(time(NULL), input, input_2, testStr, input_3);
                 printf("Set result: %d\n", temp);
+                break;
+            case 13:
+                turnOffReminder();
+                puts("Reminder has been cleared");
+                break;
+            case 14:
+                temp = isReminderSetAlready(testStr);
+                if (temp) {
+                    printf("Reminder Name: %s\n Expiration: %s\n", testStr, ctime(&(rmdr->end)));
+                }
+                else{
+                    puts("No data");
+                }
                 break;
             case 0:
                 r = 0;
@@ -889,7 +914,7 @@ void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int 
     return;
 }
 /* active high-level APIs */
-void getTodaySchedule_Summarized(unsigned long long today, char* strbuf) {
+int getTodaySchedule_Summarized(unsigned long long today, char* strbuf) {
     /* Prefix codes
         [^: for Time, [[: make new line, ^: tab inside
         ]^: for title, ]]: for details, *: Bookmarked
@@ -902,8 +927,9 @@ void getTodaySchedule_Summarized(unsigned long long today, char* strbuf) {
 
     dd = search_byDate(today * 10000); // YYYYMMDD
 
-    if (!dd) {
-        strcpy(str, "No data\n");
+    if (!dd || dd->maxIndex == -1) {
+        strcpy(str, "no_data\n");
+        return -1;
     }
     else {
         sortGivenDateToDos(dd, 2);
@@ -923,7 +949,7 @@ void getTodaySchedule_Summarized(unsigned long long today, char* strbuf) {
 
     strcpy(strbuf, str);
 
-    return;
+    return 0;
 }
 int getTodaySchedule_withDetails(unsigned long long today, char* strbuf) {
     /* implementing *pageIterator* */
@@ -939,8 +965,9 @@ int getTodaySchedule_withDetails(unsigned long long today, char* strbuf) {
 
     dd = search_byDate(today * 10000); // YYYYMMDD
 
-    if (!dd) {
-        strcpy(str, "No data\n");
+    if (!dd || dd->maxIndex == -1) {
+        strcpy(str, "no_data\n");
+        return -1;
     }
     else {
         pageIterator = (pageIterator + 1) % (dd->maxIndex + 1);
@@ -1000,6 +1027,9 @@ int load(void) {
     if (ifAlreadyLoaded) {
         return 1;
     }
+
+    freeAllMem(); /* erases node entry */
+    initSaveMem(); /* erases nodes and hashLinks */
 
     fd_bin = open(bin_fileName, O_CREAT | O_RDWR); /* if exists, then read, or not, then creat */
     if (fd_bin == -1) {
@@ -1098,6 +1128,13 @@ int save_hr(FILE* fp) {
     toDoPtr lnk;
     unsigned long long time;
     int i, j, k;
+    char timeSttStr[100] = {'\0', };
+    char timeEndStr[100] = {'\0', };
+    /*---------------------------------------*/
+    strcpy(timeSttStr, ctime(&(rmdr->start)));
+    strcpy(timeEndStr, ctime(&(rmdr->end)));
+    /*---------------------------------------*/
+    /* important: in C, there is no such thing like GC, so most of the syscall/lib returns static array! */
 
     if (!db) {
         return 1;
@@ -1105,6 +1142,13 @@ int save_hr(FILE* fp) {
 
     while (db->prev) {
         db = db->prev;
+    }
+
+    if (rmdr->isSet) { /* reminder */
+        fprintf(fp, "Reminder Title: %s\nReminder Start: %s | Reminder End: %s\n\n", rmdr->info, timeSttStr, timeEndStr);
+    }
+    else {
+        fprintf(fp, "Reminder has not set yet.\n\n");
     }
 
     while (db) { /* wtf */
@@ -1140,9 +1184,70 @@ int save_hr(FILE* fp) {
 
     return 0;
 }
+void freeAllMem(void) {
+    /* erases toDo "Entry", not the toDo itself; it is erased in initSaveMem() */
+    yearGrp db = key;
+    yearGrp tmp;
+    int i, j;
 
+    if (!db) {
+        return;
+    }
+
+    while (db->prev) {
+        db = db->prev;
+    }
+
+    while (db) { /* wtf */
+        for (i = 1; i <= 12; i++) {
+            if ((db->target->months)[i]) {
+                for (j = 1; j <= 31; j++) {
+                    if (((db->target->months)[i]->dates)[j]) {
+                        free(((db->target->months)[i]->dates)[j]->toDoArr);
+                        free(((db->target->months)[i]->dates)[j]);
+                    }
+                }
+            }
+            //free((db->target->months)[i]->dates);
+            free((db->target->months)[i]);
+        }
+        if (db->target) {
+            //free(db->target->months);
+            free(db->target);
+        }
+        db = db->next;
+    }
+
+    while (db) {
+        tmp = db;
+        db = db->next;
+        free(tmp);
+    }
+
+    key = NULL; /* entry reset */
+
+    return;
+}
 void initSaveMem(void) {
-    /* ? */
+    /* to free all memory before load something */
+    int i = 0;
+    toDoPtr temp;
+
+    if (!saveLink) {
+        return;
+    }
+
+    for (i = 0; i <= saveLink->maxIndex; i++) {
+        /* erasing toDos here! */
+        temp = (saveLink->toDoData)[i];
+        free(temp);
+        //(saveLink->toDoData)[i] = NULL;
+    }
+    free(saveLink);
+
+    saveLink = NULL; /* entry reset */
+
+    return;
 }
 void putSaveData(toDoPtr target) {
     if (!saveLink) {
@@ -1353,7 +1458,7 @@ void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
 void deleteRecord(dayPtr when, int index) {
     int i;
 
-    if (index > when->maxIndex) {
+    if (index > when->maxIndex || (index < 0 || when->maxIndex == -1)) {
         return; /* err hndl */
     }
 
@@ -1383,7 +1488,9 @@ void deleteWhileIterate(unsigned long long src, int pageNum) {
         return; /* nothing to del */
     }
 
+    sortGivenDateToDos(dtmp, 2);
     deleteRecord(dtmp, pageNum - 1);
+    
 
     return;
 }
@@ -1408,7 +1515,7 @@ void reminderHandler(int signum) {
         return;
     }
 
-    printf("Timer %d Minute(s) Left.\n", (rmdr->repeatCounter) * 10);
+    printf("*******[%s]: Timer %d Second(s) Left*******\n", rmdr->info, (int)(rmdr->repeatCounter) * (int)(rmdr->intervals));
     /* important */
     (rmdr->repeatCounter)--;
 
@@ -1448,6 +1555,7 @@ void setReminderHandler(int status, unsigned long init, unsigned long repeat) {
         }
     }
     else { /* OFF */
+        rmdr->isSet = 0;
         if (setitimer(ITIMER_REAL, &org, NULL) == -1) {
             errOcc("getitimer");
         }
@@ -1455,36 +1563,57 @@ void setReminderHandler(int status, unsigned long init, unsigned long repeat) {
 
     return;
 }
-int setReminder(time_t current, time_t delta, int repeatCnter) {
-    /* time_t: current, delta */
-    /* fixed time interval: 10 mins */
-    /* instead, repeatCnter = usr configurable */
-    //time_t estimated;
-    int repeat_interval = 1; /* in mins */
+int setReminder(time_t current, time_t delta, int repeatCnter, char* what, int intervals) {
+    /*      time_t: current, delta */
+    /* delta means: current + delta = reminder target time */
+    /*   intervals: in seconds form */
+    /*       delta: in seconds form*/
 
-    repeat_interval *= 60; /* then turn it into secs */
+    //intervals *= 60; /* then turn it into secs */
 
     /* if not possible */
-    if (delta < repeat_interval || repeatCnter * repeat_interval > delta) {
+    if (delta < intervals || delta < intervals * repeatCnter) {
+        //printf("err1\n");
         return 1; /* err: cannot set */
     }
 
     /* if there's already a reminder exists */
     if (rmdr->isSet) {
+        //printf("err2\n");
         return 2; /* err: already exists */
     }
 
     /* setting start */
     rmdr->isSet = 1;
-    rmdr->targetTime = delta - repeat_interval * repeatCnter;
+    rmdr->start = current;
+    rmdr->end = current + delta;
+    rmdr->intervals = intervals;
     rmdr->repeatCounter = repeatCnter;
-    setReminderHandler(1, rmdr->targetTime, repeat_interval);
-    
+    strcpy(rmdr->info, what);
+    /*                                                                                 magic number*/
+    setReminderHandler(1, rmdr->end - rmdr->start - rmdr->intervals * rmdr->repeatCounter + 1, rmdr->intervals);
+    //printf("safe\n");
     return 0; /* safely executed. */
+}
+int isReminderSetAlready(char* str) {
+    if (rmdr->isSet) {
+        strcpy(str, rmdr->info);
+    }
+
+    return rmdr->isSet;
 }
 void restoreReminder(void) {
     if (rmdr->isSet) {
-        setReminder(time(NULL), rmdr->targetTime, rmdr->repeatCounter);
+        //printf("check\n");
+        if (time(NULL) < rmdr->end) {
+            //printf("check\n");
+            rmdr->isSet = 0; /* due to the algorithm */
+            setReminder(time(NULL), rmdr->end - time(NULL), rmdr->repeatCounter, rmdr->info, rmdr->intervals);
+        }
+        else {
+            //printf("check\n");
+            turnOffReminder(); /* if it's already expired */
+        }
     }
 
     return;
@@ -1493,8 +1622,19 @@ void allocReminder(void) {
     rmdr = (reminderPtr)malloc(sizeof(reminder));
 
     rmdr->isSet = 0;
+    rmdr->start = 0;
+    rmdr->end = 0;
+    rmdr->intervals = 0;
     rmdr->repeatCounter = 0;
-    rmdr->targetTime = 0;
+    (rmdr->info)[0] = '\0';
+
+    return;
+}
+void turnOffReminder(void) {
+    setReminderHandler(0, 0, 0);
+    rmdr->isSet = 0;
+    free(rmdr);
+    allocReminder();
 
     return;
 }
