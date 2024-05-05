@@ -33,7 +33,7 @@ an openToDo project: (aka Plan-it Project)
 
     0.0.2: Scrollable Calendar Method Implemented.
 
-    0.0.3: [Current]
+    0.0.3: 
 
           Core: 삽입시 기존에 북마크가 있을 경우 새 자료 무시
    
@@ -50,3 +50,23 @@ an openToDo project: (aka Plan-it Project)
           UX: 화면 영역 새로 다듬음
    
           UX: 오늘인 날짜 하이라이트
+
+    0.0.5: [current]
+   
+          (Core) 레코드 삭제 기능 구현
+   
+          (Core) 반복 세이브/로드시 메모리 누수 문제 해결, 레코드 필드에 대한 동적 할당 해제 기능 적용
+   
+          (Core) getTodaySchedule_계열 함수 반환형 int로 업데이트, 반환 데이터가 의미를 가짐.
+   
+          (Core) sighandler 및 itimer 기반 리마인더 기능 구현
+   
+          (Core) 리마인더 세이브/로드 기능 구현(저장 파일과 함께 저장됨), Human-readable 파일 내에도 Reminder 정보 제공
+   
+          (Core) 현재 실행 중인 리마인더 삭제 / 확인 기능 구현
+   
+          (Core) 실행시 Core부 초기화 함수 coreInit() 내부적 업데이트
+   
+          (UX) Core부 함수 참조 부분에 대해 반환형 개선 및 신규 함수 추가
+   
+
