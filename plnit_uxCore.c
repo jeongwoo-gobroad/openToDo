@@ -110,10 +110,16 @@ void getUpcomingSchedule(unsigned long long today, char* strbuf, int scrSize);
 int setSchedule(unsigned long long today, char* title, char* details, int priority);
 void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int scrSize); /* debugging only feature */
 
-void getTodaySchedule_Summarized(unsigned long long today, char* strbuf);
+int getTodaySchedule_Summarized(unsigned long long today, char* strbuf);
 int getTodaySchedule_withDetails(unsigned long long today, char* strbuf);
 void getTodaySchedule_withDetails_iterEnd(void);
 void getBookMarkedInDate(unsigned long long today, int counter, char* str);
+
+void deleteWhileIterate(unsigned long long src, int pageNum);
+int editWhileIterate(unsigned long long src, int pageNum);
+int setReminder(time_t current, time_t delta, int repeatCnter, char* what, int intervals);
+int isReminderSetAlready(char* str);
+void turnOffReminder(void);
 
 int __dbDebug(void);
 void __launchOptions(int argc, char* argv[]);
@@ -201,8 +207,11 @@ int main(int argc, char* argv[]) {
 void chooseOptimal_nNum(int r, int c) {
     int rn, cn;
 
+    r -= 1; /* due to the border issues */
+    c -= 1;
+
     rn = ((r - 14) / 12) * 2;
-    cn = ((c - 10) / 42) * 2;
+    cn = ((c - 10) / 42) * 4; /* 0505 update 2->4, if issues occur, restore it please. */
     /* n = 2m (let m be an integer) */
 
     if (rn < cn) {
