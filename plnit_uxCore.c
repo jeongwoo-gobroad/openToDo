@@ -15,7 +15,7 @@
 #define ON 1
 #define OFF 0
 
-/**
+/*
  * SUL: Screen Upper Left, SUR: Screen Upper Right
  * SC : Screen Calendar,   SLC: Screen Left Calendar
  * SLL: Screen Lower Left, SLR: Screen Lower Right
@@ -23,7 +23,6 @@
  * each variable has a prefix 'pos_'
  * each variable has a suffix '_stt', '_end', respectively.
  * 
-/**
  * -------------------------------------   1
  * @           SUL          @|@   SUR      1 Line = 1
  * --------------------------|   

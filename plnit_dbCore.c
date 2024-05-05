@@ -1,7 +1,7 @@
 // KNU CSE 2021114026 Jeongwoo Kim
 // recent update: 240428 v0.0.3
 // Basic implementation of ADT:
-/**
+/*
  * Years [Year Linked List w/index]
  * Year  [Array of Months w/index, check if it's leap year]
  * Month [Array of Days w/index]
@@ -15,14 +15,25 @@
  *      - Online share feature(Maybe later for Socket)
  *      - Details [MAXLEN := 256 w/ null terminated string]
 */
-/** 2024-05-04 Important update
- *      Priority Number Means [BookMark]
+
+/* 2024-05-04 Important update
+     Priority Number Means [BookMark]
 */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <time.h>
+#include <sys/time.h>
+
+typedef struct reminder {
+    int isSet;
+    int repeatCounter;
+    time_t targetTime;
+} reminder;
+typedef reminder* reminderPtr;
 
 typedef struct toDo {
     unsigned long long hashNum;
@@ -42,7 +53,7 @@ typedef struct day {
 typedef day* dayPtr;
 
 typedef struct month {
-    /**
+    /*
      * [0] is used for 28/29/30/31 det.
      *      but how???
     */
@@ -51,7 +62,7 @@ typedef struct month {
 typedef month* monthPtr;
 
 typedef struct year {
-    /**
+    /*
      * [0] is used for leap year chk:
      *      but how???
     */
@@ -93,6 +104,8 @@ dayPtr   twenty_Nine = NULL;
 dayPtr   thirty = NULL;
 dayPtr   thirty_one = NULL;
 /**/
+reminderPtr rmdr = NULL;
+/**/
 
 /* saving features start */
 void resizeSaveMem(void);
@@ -119,6 +132,7 @@ int insert(yearGrp* db, toDoPtr targetData);
 void printAll(yearGrp db);
 dayPtr search_byDate(unsigned long long target);
 int get_toDo_byForm(toDoPtr target, char** buf);
+void deleteRecord(dayPtr when, int index);
 
 void sortGivenDateToDos(dayPtr when, int sortType);
 void quickSort_byPriNum(toDoPtr* arr, int from, int to);
@@ -127,8 +141,17 @@ void quickSort_byHashNum(toDoPtr* arr, int from, int to);
 
 void printToday(dayPtr when);
 
-/* For Bookmark Features */
+/* For Bookmark Features - 0.0.3 added */
 toDoPtr getBookMarked(unsigned long long src, int distance);
+/* For Deletion Features - 0.0.3 added */
+//void deleteWhileIterate(unsigned long long src, int pageNum);
+//int editWhileIterate(unsigned long long src, int pageNum);
+/* For Reminder Features - 0.0.5 added */
+void reminderHandler(int signum);
+void setReminderHandler(int status, unsigned long init, unsigned long repeat);
+//int setReminder(time_t current, time_t delta, int repeatCnter);
+void restoreReminder(void);
+void allocReminder(void);
 
 
 /*--UX Layer interactive API Methods---------------------*/
@@ -143,6 +166,11 @@ void getTodaySchedule_Summarized(unsigned long long today, char* strbuf);
 int getTodaySchedule_withDetails(unsigned long long today, char* strbuf);
 void getTodaySchedule_withDetails_iterEnd(void);
 void getBookMarkedInDate(unsigned long long today, int counter, char* str);
+
+void deleteWhileIterate(unsigned long long src, int pageNum);
+int editWhileIterate(unsigned long long src, int pageNum);
+int setReminder(time_t current, time_t delta, int repeatCnter);
+
 void printUsage(void);
 void __launchOptions(int argc, char* argv[]);
 
@@ -157,9 +185,12 @@ void printMarkUP(char* str, int lineLimit);
 int __dbDebug(void) {
     int input; int input_2;
     unsigned long long date; int pnum; char title[30]; char details[256];
-    int r = 1;
+    int r = 1; 
     int i = 0;
+    int temp;
     char testStr[BUFSIZ];
+
+    allocReminder();
 
     /* dummy datas just for leap year / month limit check */
     leapYear     = (monthPtr)malloc(sizeof(month));
@@ -179,6 +210,8 @@ int __dbDebug(void) {
         puts("  (8) to print detailed info of the given date in a markup form, with iterator index");
         puts("  (9) to print a markup form in a human readable form");
         puts("  (10) to print upcoming bookmarked todos, with user input number of it.");
+        puts("  (11) to delete a ToDo of the given date with iterator 'page' number");
+        puts("  (12) to set a reminder");
         printf("Type: ");
         //getchar();
         scanf("%d", &input);
@@ -264,13 +297,28 @@ int __dbDebug(void) {
                 getBookMarkedInDate(date, input, testStr);
                 printf("%s\n", testStr);
                 break;
+            case 11:
+                printf("Type scan target YYYYMMDD: \n");
+                scanf("%llu", &date); //getchar();
+                printf("Type Page Number [Alert: not an index]: \n");
+                scanf("%d", &input);
+                deleteWhileIterate(date, input);
+                break;
+            case 12:
+                printf("Type the delta 'seconds' value from the current time: \n");
+                scanf("%d", &input);
+                printf("Type the number of '10-min-before-reminder' reiteration: \n");
+                scanf("%d", &input_2);
+                temp = setReminder(time(NULL), input, input_2);
+                printf("Set result: %d\n", temp);
+                break;
             case 0:
                 r = 0;
                 break;
             default:
                 break;
         }
-        printf("\n\n");
+        printf("-----------------------------------------------------------\n");
     }
 
     exit(1);
@@ -490,6 +538,10 @@ yearPtr findYear(int target, yearGrp* db) {
 }
 
 int insert(yearGrp* db, toDoPtr targetData) {
+    /* returns 2 if its a wrong date format
+       returns 1 if a bookmarked todo already exists
+       returns 0 if done correctly
+    */
     int year, month, date; //hour, minute;
     yearPtr   yy;
     monthPtr  mm;
@@ -917,6 +969,8 @@ void getTodaySchedule_withDetails_iterEnd(void) {
 /*------------------------------------------------------------------------------------------*/
 
 void coreInit(void) {
+    allocReminder();
+
     load();
     /* dummy datas just for leap year / month limit check */
     leapYear     = (monthPtr)malloc(sizeof(month));
@@ -951,6 +1005,12 @@ int load(void) {
     if (fd_bin == -1) {
         errOcc("open");
     }
+
+    /* read reminder */
+    if ((chunk = read(fd_bin, rmdr, sizeof(reminder))) == -1) {
+        errOcc("read");
+    }
+    restoreReminder(); /* then restore it */
 
     buf = (toDoPtr)malloc(sizeof(toDo));
     while ((chunk = read(fd_bin, buf, sizeof(toDo))) != 0) {
@@ -995,6 +1055,10 @@ int save(void) {
 
     quickSort_byHashNum(saveLink->toDoData, 0, saveLink->maxIndex); /* sort by hash, then save. */
 
+    /* reminder write */
+    if ((written = write(fd_bin, rmdr, sizeof(reminder))) != sizeof(reminder)) {
+        errOcc("write");
+    }
     /* bin */
     for (int i = 0; i <= saveLink->maxIndex; i++) {
         if ((written = write(fd_bin, ((saveLink->toDoData)[i]), sizeof(toDo))) != sizeof(toDo)) {
@@ -1281,6 +1345,156 @@ void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
     }
 
     strcpy(str, retstr);
+
+    return;
+}
+
+/* For Deletion Features - 0.0.3 added */
+void deleteRecord(dayPtr when, int index) {
+    int i;
+
+    if (index > when->maxIndex) {
+        return; /* err hndl */
+    }
+
+    if ((when->toDoArr)[index]->priority == 1) {
+        when->isBookMarkExists = 0; /* erase bookmark when target has the key */
+    }
+
+    free((when->toDoArr)[index]);
+
+    for (i = index; i < when->maxIndex; i++) {
+        (when->toDoArr)[i] = (when->toDoArr)[i + 1];
+    }
+
+    --(when->maxIndex);
+
+    return;
+}
+void deleteWhileIterate(unsigned long long src, int pageNum) {
+    /* src = YYYYMMDD */
+    yearPtr ytmp; monthPtr mtmp; dayPtr dtmp;
+
+    ytmp = findYear(src / 10000, &key);
+    mtmp = findMonth(src % 10000 / 100, ytmp);
+    dtmp = findDay(src % 100, mtmp);
+
+    if (dtmp->toDoArr == NULL) {
+        return; /* nothing to del */
+    }
+
+    deleteRecord(dtmp, pageNum - 1);
+
+    return;
+}
+int editWhileIterate(unsigned long long src, int pageNum) {
+
+    return 1;
+}
+/* For Reminder Features - 0.0.5 added */
+void reminderHandler(int signum) {
+    /* this is a debug feature */
+    /* so UX team needs to implement this function in UX Environment */
+
+    /* important part start: UX Team MUST implement this part in UX Core Codes */
+
+    if (rmdr->repeatCounter == 0) {
+        setReminderHandler(0, 0, 0); /* turn off alarm */
+        /* some_UX_Actions Need Here when timer has just been expired */
+        /* below is just a sample for CLI Debugging environment */
+        printf("Timer Expired\n");
+        /* sample ended */
+
+        return;
+    }
+
+    printf("Timer %d Minute(s) Left.\n", (rmdr->repeatCounter) * 10);
+    /* important */
+    (rmdr->repeatCounter)--;
+
+    return;
+}
+void setReminderHandler(int status, unsigned long init, unsigned long repeat) {
+    /* status 1 for set, 0 for off */
+    /* static */
+    static struct sigaction inmode;
+    static struct sigaction origin;
+    static struct itimerval set;
+    static struct itimerval org;
+
+    if (status == 1) {
+        inmode.sa_handler = reminderHandler;
+        inmode.sa_flags &= ~SA_RESETHAND;
+        inmode.sa_flags &= ~SA_SIGINFO;
+
+        if (sigaction(SIGALRM, &inmode, &origin) == -1) {
+            errOcc("sigaction");
+        }
+    }
+    else { /* OFF */
+        if (sigaction(SIGALRM, &origin, NULL) == -1) {
+            errOcc("sigaction");
+        }
+    }
+
+    if (status == 1) {
+        set.it_value.tv_sec = init;
+        set.it_value.tv_usec = 0;
+        set.it_interval.tv_sec = repeat;
+        set.it_interval.tv_usec = 0;
+
+        if (setitimer(ITIMER_REAL, &set, &org) == -1) {
+            errOcc("getitimer");
+        }
+    }
+    else { /* OFF */
+        if (setitimer(ITIMER_REAL, &org, NULL) == -1) {
+            errOcc("getitimer");
+        }
+    }
+
+    return;
+}
+int setReminder(time_t current, time_t delta, int repeatCnter) {
+    /* time_t: current, delta */
+    /* fixed time interval: 10 mins */
+    /* instead, repeatCnter = usr configurable */
+    //time_t estimated;
+    int repeat_interval = 1; /* in mins */
+
+    repeat_interval *= 60; /* then turn it into secs */
+
+    /* if not possible */
+    if (delta < repeat_interval || repeatCnter * repeat_interval > delta) {
+        return 1; /* err: cannot set */
+    }
+
+    /* if there's already a reminder exists */
+    if (rmdr->isSet) {
+        return 2; /* err: already exists */
+    }
+
+    /* setting start */
+    rmdr->isSet = 1;
+    rmdr->targetTime = delta - repeat_interval * repeatCnter;
+    rmdr->repeatCounter = repeatCnter;
+    setReminderHandler(1, rmdr->targetTime, repeat_interval);
+    
+    return 0; /* safely executed. */
+}
+void restoreReminder(void) {
+    if (rmdr->isSet) {
+        setReminder(time(NULL), rmdr->targetTime, rmdr->repeatCounter);
+    }
+
+    return;
+}
+void allocReminder(void) {
+    rmdr = (reminderPtr)malloc(sizeof(reminder));
+
+    rmdr->isSet = 0;
+    rmdr->repeatCounter = 0;
+    rmdr->targetTime = 0;
 
     return;
 }
