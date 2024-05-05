@@ -88,10 +88,10 @@ const char*   dbDebug = "-d";
 const char* cli_input = "-in";
 /**/ /* for leap year and month limit check */
 monthPtr leapYear = NULL;
-dayPtr twenty_Eight = NULL;
-dayPtr twenty_Nine = NULL;
-dayPtr thirty = NULL;
-dayPtr thirty_one = NULL;
+dayPtr   twenty_Eight = NULL;
+dayPtr   twenty_Nine = NULL;
+dayPtr   thirty = NULL;
+dayPtr   thirty_one = NULL;
 /**/
 
 /* saving features start */
@@ -1275,7 +1275,7 @@ void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
 
     for (i = 1; i <= counter; i++) {
         if ((temp = getBookMarked(today, i))) {
-            sprintf(tempstr, "*[^%04llu]^%s", temp->dateData, temp->title);
+            sprintf(tempstr, "*[^%04llu]^%s", temp->dateData % 10000, temp->title);
         }
         strcat(retstr, tempstr);
     }
