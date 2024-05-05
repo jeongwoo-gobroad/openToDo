@@ -23,20 +23,24 @@
  * each variable has a prefix 'pos_'
  * each variable has a suffix '_stt', '_end', respectively.
  * 
+/**
  * -------------------------------------   1
- * @           SUL          @|@   SUR  @   1 Line = 1
- * -------------------------------------   1
- * @                         |@            6 Lines  + 1(worst case: some months can have 6 weeks)
+ * @           SUL          @|@   SUR      1 Line = 1
+ * --------------------------|   
+ * @                         |             6 Lines  + 1(worst case: some months can have 6 weeks)
  *                           |              = 6n + 7
- *             SC            |    SLC
- *                           | 
- *                           | 
- *                          @|         @
- * -------------------------------------   1
- * @           SLL           |@   SLR      2 Lines (command key presentation area)
+ *             SC            |   
+ *                           |         @
+ *                           |----------   1 
+ *                          @|@         
+ * --------------------------|   
+ * @           SLL           |    SLR      2 Lines (command key presentation area)
  *                          @|         @    = 2
  * -------------------------------------   1
  * 1           14n + 6       1   7n + 1    1
+ *          
+ * n = MIN_of_n(LINES = 6n + 14, COLS = 21n + 10))
+ * remember that actual index is different from lib constant COLS, LINES
  *          
  * n = MIN_of_n(LINES = 12n + 9, COLS = 21n + 10))
  * n should be a multiple of 2.
@@ -214,16 +218,16 @@ void chooseOptimal_nNum(int r, int c) {
 void initPosVar() {
 /**
  * -------------------------------------   1
- * @           SUL          @|@   SUR  @   1 Line = 1
- * -------------------------------------   1
- * @                         |@            6 Lines  + 1(worst case: some months can have 6 weeks)
+ * @           SUL          @|@   SUR      1 Line = 1
+ * --------------------------|   
+ * @                         |             6 Lines  + 1(worst case: some months can have 6 weeks)
  *                           |              = 6n + 7
- *             SC            |    SLC
- *                           | 
- *                           | 
- *                          @|         @
- * -------------------------------------   1
- * @           SLL           |@   SLR      2 Lines (command key presentation area)
+ *             SC            |   
+ *                           |         @
+ *                           |----------   1 
+ *                          @|@         
+ * --------------------------|   
+ * @           SLL           |    SLR      2 Lines (command key presentation area)
  *                          @|         @    = 2
  * -------------------------------------   1
  * 1           14n + 6       1   7n + 1    1
