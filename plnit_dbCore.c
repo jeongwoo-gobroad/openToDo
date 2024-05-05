@@ -1503,18 +1503,19 @@ void reminderHandler(int signum) {
     /* this is a debug feature */
     /* so UX team needs to implement this function in UX Environment */
 
-    /* important part start: UX Team MUST implement this part in UX Core Codes */
+    /* UX Team MUST implement parts below in UX Core Codes */
 
     if (rmdr->repeatCounter == 0) {
         setReminderHandler(0, 0, 0); /* turn off alarm */
-        /* some_UX_Actions Need Here when timer has just been expired */
+        /* some_UX_Actions Need Here when the timer has just been expired */
         /* below is just a sample for CLI Debugging environment */
         printf("Timer Expired\n");
         /* sample ended */
 
         return;
     }
-
+    
+    /* sample output */
     printf("*******[%s]: Timer %d Second(s) Left*******\n", rmdr->info, (int)(rmdr->repeatCounter) * (int)(rmdr->intervals));
     /* important */
     (rmdr->repeatCounter)--;
