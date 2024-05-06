@@ -670,8 +670,8 @@ dayPtr search_byDate(unsigned long long target) {
         if (iter->year == year) {
             yy = iter->target;
             if (yy->months[month]) {
-                mm = yy->months[month];
-                if (mm->dates[date]) {
+                mm = yy->months[month]; /* support for the easier deletion; no need to back traverse. */
+                if (mm->dates[date] || (mm->dates[date]->maxIndex == -1)) {
                     dd = mm->dates[date];
                     break;
                 }
@@ -829,7 +829,7 @@ void printToday(dayPtr when) {
         return;
     }
 
-    for (i = 0; i <= when->maxIndex; i++) {
+    for (i = 0; i <= when->maxIndex; i++) { /* safe approach */
         printf("            %llu: [%d] %s || %s\n", (when->toDoArr)[i]->dateData, (when->toDoArr)[i]->priority, (when->toDoArr)[i]->title, (when->toDoArr)[i]->details);
     }
 
@@ -1171,7 +1171,7 @@ int save_hr(FILE* fp) {
                                 lnk->title, lnk->details);
                             }
                             else {
-                                fprintf(fp, "             >             %02llu:%02llu -> Title: %12s, Details: %s\n", time / 100, time % 100,
+                                fprintf(fp, "             > \t\t\t%02llu:%02llu -> Title: %12s, Details: %s\n", time / 100, time % 100,
                                 lnk->title, lnk->details);
                             }
                         }
@@ -1457,7 +1457,17 @@ void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
 /* For Deletion Features - 0.0.3 added */
 void deleteRecord(dayPtr when, int index) {
     int i;
+    int svidx = -1;
 
+    /* prepare for the back structure adjustment */
+    for (i = 0; i <= saveLink->maxIndex; i++) {
+        if ((saveLink->toDoData)[i] == (when->toDoArr)[index]) {
+            svidx = i;
+            break;
+        }
+    }
+
+    /* free in the tree structure */
     if (index > when->maxIndex || (index < 0 || when->maxIndex == -1)) {
         return; /* err hndl */
     }
@@ -1470,6 +1480,15 @@ void deleteRecord(dayPtr when, int index) {
 
     for (i = index; i < when->maxIndex; i++) {
         (when->toDoArr)[i] = (when->toDoArr)[i + 1];
+    }
+
+    /* free in the back array structure and adjust */
+    
+    if (svidx != -1) { /* just to be safe */
+        for (i = svidx; i < saveLink->maxIndex; i++) {
+            (saveLink->toDoData)[i] = (saveLink->toDoData)[i + 1];
+        }
+        --(saveLink->maxIndex);
     }
 
     --(when->maxIndex);
