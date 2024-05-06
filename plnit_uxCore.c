@@ -140,8 +140,8 @@ int main(int argc, char* argv[]) {
 
     coreInit();
 
-    //printf("works");
     initscr();
+
     noecho(); 
 
     if (LINES < 33 || COLS < 93) { /* Minimum size */
@@ -323,7 +323,7 @@ pos_SC_date;
     select_today();
     todayDate = selectDate;
     print_Year_Month(selectDate / 1000000);
-
+    
     print_date(selectDate);
     print_date_NumOfSchedule(selectDate);
     print_commandLine(0);

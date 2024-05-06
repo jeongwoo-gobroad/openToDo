@@ -671,7 +671,7 @@ dayPtr search_byDate(unsigned long long target) {
             yy = iter->target;
             if (yy->months[month]) {
                 mm = yy->months[month]; /* support for the easier deletion; no need to back traverse. */
-                if (mm->dates[date] || (mm->dates[date]->maxIndex == -1)) {
+                if (mm->dates[date] && (mm->dates[date]->maxIndex != -1)) {
                     dd = mm->dates[date];
                     break;
                 }
