@@ -122,6 +122,7 @@ toDoPtr getSaveData(void);
 /* saving features ended */
 
 void errOcc(const char* str);
+void myscanf(FILE* fd, char* target); /* to allow spaces */
 
 toDoPtr create_Node(unsigned long long date, int priority_num, const char* title, const char* info);
 void resizeArr_longer(dayPtr target);
@@ -232,9 +233,12 @@ int __dbDebug(void) {
                     printf("Type infos[YYYYMMDDHHMM PRIORITY_NUM TITLE DETAILS]: \n");
                     scanf("%llu", &date); //getchar();//printf("%llu <- \n", date);
                     scanf("%d", &pnum);
-                    scanf("%s", title); getchar();//printf("%s <- \n", title);
-                    scanf("%s", details); getchar();//printf("%s <- \n", details);
-
+                    scanf(" %[^\n]s\n", title); //getchar();//printf("%s <- \n", title);
+                    //myscanf(stdin, title);
+                    //fgets(title, 30, stdin);
+                    scanf(" %[^\n]s\n", details); //getchar();//printf("%s <- \n", details);
+                    //myscanf(stdin, details);
+                    //fgets(title, 60, stdin);
                     setSchedule(date, title, details, pnum);
                 }
                 break;
@@ -1684,6 +1688,21 @@ void turnOffReminder(void) {
     rmdr->isSet = 0;
     free(rmdr);
     allocReminder();
+
+    return;
+}
+void myscanf(FILE* fd, char* target) {
+    /* assume that fd is stdin, so we don't open() */
+    char c = '\0';
+    char temp[BUFSIZ] = {'\0', }; /* warning: max len: SYSBUFSIZ - 1 */
+    int idx = 0;
+
+    while ((c = getchar()) != EOF) {
+        temp[idx++] = c;
+    }
+    temp[idx] = '\0';
+
+    strcpy(target, temp);
 
     return;
 }

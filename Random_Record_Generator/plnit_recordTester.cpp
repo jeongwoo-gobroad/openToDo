@@ -14,9 +14,10 @@ int main(void) {
     const unsigned long long hourmult = 100;
     unsigned long long tmp = 0;
 
-    vector<string> title = {"Birthday", "Appointment", "Meeting", "Workout", "Some_stuffs"};
-    vector<string> info = {"Some_stuffs_Some_stuffs_", "Some_stuffs_Some_stuffs_Some_stuffs_Some_stuffs_", 
-        "This_stuffs_This_stuffs_", "This_stuffs_This_stuffs_This_stuffs_This_stuffs_", "justforfun_justforfun_"};
+    vector<string> title = {"Birthday", "Appointment", "Meeting", "Workout", "bonorum", "malorum", "consectetur", "exercitation"};
+    vector<string> info = {"Lorem ipsum dolor sit amet, consectetur adipiscing elit", "sed do eiusmo tempo incidunt ut labore et dolor magna aliq", 
+        " ullamco laboris nisi ut aliquip ex ea commodo consequat", "Duis aute irure dolor in rehendert in volupate velit esse", "cillum dolore eu fugiat nulla pariatur",
+        "Excepteur sint occaecat cupidatat non proident", "sunt in culpa qui offici desunt molit aim id est laborum."};
 
     int size;
     int a, b;
@@ -39,8 +40,8 @@ int main(void) {
     uniform_int_distribution<unsigned long long> dayA(8, 8);
     uniform_int_distribution<unsigned long long> hour(0, 23);
     uniform_int_distribution<unsigned long long> minute(0, 59);
-    uniform_int_distribution<unsigned long long> titleCntx(0, 4);
-    uniform_int_distribution<unsigned long long> infoCntx(0, 4);
+    uniform_int_distribution<unsigned long long> titleCntx(0, 7);
+    uniform_int_distribution<unsigned long long> infoCntx(0, 6);
     uniform_int_distribution<int> pnum(0, 1);
 
     if (input == 1) {
@@ -48,7 +49,7 @@ int main(void) {
             tmp = year(gen) * yearmult + month(gen) * monthmult + day(gen) * daymult + hour(gen) * hourmult + minute(gen);
             //cout << year(gen) * yearmult << endl;
             //cout << "1" << endl;
-            cout << tmp << " " << pnum(gen) << " " << title[titleCntx(gen)] << " " << info[infoCntx(gen)] << endl;
+            cout << tmp << "\n" << pnum(gen) << "\n" << title[titleCntx(gen)] << "\n" << info[infoCntx(gen)] << endl;
             //printf("%lu %s %s\n", tmp, title[titleCntx(gen)], info[infoCntx(gen)]);
         }
     }
@@ -57,7 +58,7 @@ int main(void) {
             tmp = yearA(gen) * yearmult + monthA(gen) * monthmult + dayA(gen) * daymult + hour(gen) * hourmult + minute(gen);
             //cout << year(gen) * yearmult << endl;
             //cout << "1" << endl;
-            cout << tmp << " " << pnum(gen) << " " << title[titleCntx(gen)] << " " << info[infoCntx(gen)] << endl;
+            cout << tmp << "\n" << pnum(gen) << "\n" << title[titleCntx(gen)] << "\n" << info[infoCntx(gen)] << endl;
             //printf("%lu %s %s\n", tmp, title[titleCntx(gen)], info[infoCntx(gen)]);
         }
     }
