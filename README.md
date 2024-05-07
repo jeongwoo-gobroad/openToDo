@@ -51,7 +51,7 @@ an openToDo project: (aka Plan-it Project)
    
           UX: 오늘인 날짜 하이라이트
 
-    0.0.5: [current]
+    0.0.5: 
    
           (Core) 레코드 삭제 기능 구현
    
@@ -70,7 +70,7 @@ an openToDo project: (aka Plan-it Project)
           (UX) Core부 함수 참조 부분에 대해 반환형 개선 및 신규 함수 추가
    
 
-    0.0.5: [current]
+    0.0.6: [current]
    
           (Core) UX 화면 뿐만 아니라 -d 옵션으로 진입 가능한 디버깅 메뉴에서도 띄어쓰기가 포함된 문자열 입력 가능
    
