@@ -172,7 +172,7 @@ void getTodaySchedule_withDetails_iterEnd(void);
 void getBookMarkedInDate(unsigned long long today, int counter, char* str);
 
 void deleteWhileIterate(unsigned long long src, int pageNum);
-int editWhileIterate(unsigned long long src, int pageNum);
+int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_day, char* t_title, char* t_details, int t_priority);
 int setReminder(time_t current, time_t delta, int repeatCnter, char* what, int intervals);
 int isReminderSetAlready(char* str);
 void turnOffReminder(void);
@@ -1503,19 +1503,48 @@ void deleteWhileIterate(unsigned long long src, int pageNum) {
     mtmp = findMonth(src % 10000 / 100, ytmp);
     dtmp = findDay(src % 100, mtmp);
 
-    if (dtmp->toDoArr == NULL) {
+    if (dtmp->toDoArr == NULL || pageNum < 0 || pageNum > dtmp->maxIndex) { /* just to be safe */
         return; /* nothing to del */
     }
 
-    sortGivenDateToDos(dtmp, 2);
+    sortGivenDateToDos(dtmp, 2); /* being ready for index-based iteration */
+    if ((dtmp->toDoArr)[pageNum - 1]->priority == 1) { /* if bookmarked... */
+        dtmp->isBookMarkExists = 0;
+    }
+
     deleteRecord(dtmp, pageNum - 1);
     
 
     return;
 }
-int editWhileIterate(unsigned long long src, int pageNum) {
+int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_day, char* t_title, char* t_details, int t_priority) {
+    /* being able to edit bookmark, date, time, title, details */
+    /* src = YYYYMMDD */
+    yearPtr ytmp; monthPtr mtmp; dayPtr dtmp;
 
-    return 1;
+    ytmp = findYear(src / 10000, &key);
+    mtmp = findMonth(src % 10000 / 100, ytmp);
+    dtmp = findDay(src % 100, mtmp);
+
+    if (dtmp->toDoArr == NULL || pageNum < 0 || pageNum > dtmp->maxIndex) { /* just to be safe */
+        return 2; /* nothing to del */
+    }
+
+    sortGivenDateToDos(dtmp, 2); /* being ready for index-based iteration */
+    if (t_priority == 1 && dtmp->isBookMarkExists == 1 && (dtmp->toDoArr)[pageNum - 1]->priority != 1) {
+        return 1; /* if already bookmarked todo exists */
+    }
+
+    if ((dtmp->toDoArr)[pageNum - 1]->priority == 1) { /* if tries to edit what's bookmarked... */
+        dtmp->isBookMarkExists = 0;
+    }
+
+    deleteRecord(dtmp, pageNum - 1);
+
+    /* insert does the thing about bookmark check */
+    insert(&key, create_Node(t_day, t_priority, t_title, t_details));
+
+    return 0; /* safely executed: 0 */
 }
 /* For Reminder Features - 0.0.5 added */
 void reminderHandler(int signum) {
