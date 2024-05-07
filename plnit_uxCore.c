@@ -86,6 +86,7 @@ void select_date(char c);
 void select_highlightOn();
 void prev_select_highlightOff();
 void print_date_ToDoSummarized(unsigned long long targetDate);
+void print_date_ToDoWithdetails(unsigned long long targetDate);
 void print_UpcomingBookMark();
 /*-----Display control--------------------------------------------------------------*/
 void clearGivenCalendarArea(/*index of pos_sc_date*/int row, int col);
@@ -170,21 +171,41 @@ int main(int argc, char* argv[]) {
     while (1) {
         move(LINES - 1, COLS - 1); /* get rid of cursor */
         if (mode == 0) {
-            c = getch();
-            if (c == 's') mode++;
-            if (c == 'i' || c == 'j' || c == 'k' || c == 'l')
-                select_date(c);
-            if (c == 'z') {
-                save_UXPart();
-            }
-            if (c == 'x') {
-                load_UXPart();
+            while (1) {
+                c = getch();
+                if (c == 's') {
+                    mode++;
+                    break;
+                }
+                else if (c == 'i' || c == 'j' || c == 'k' || c == 'l') {
+                    select_date(c);
+                    break;
+                }
+                else if (c == 'z') {
+                    save_UXPart();
+                    break;
+                }
+                else if (c == 'x') {
+                    load_UXPart();
+                    break;
+                }
+                else continue;
             }
         }
         else if (mode == 1) {
-            c = getch();
-            if (c == 'I') mode++;
-            if (c == 'e') mode--;
+            print_date_ToDoWithdetails(selectDate);
+            while (1) {
+                c = getch();
+                if (c == 'I') {
+                    mode++;
+                    break;
+                }
+                else if (c == 'e') {
+                    mode--;
+                    break;
+                }
+                else continue;
+            }
         }
         else if (mode == 2) {
             //if (c == 'e') mode--;
@@ -938,19 +959,23 @@ void load_UXPart(void) {
 }
 
 void print_date_ToDoSummarized(unsigned long long targetDate) {
-    unsigned long long year = targetDate / 100000000;
-    unsigned long long month = targetDate % 100000000 / 1000000;
-    unsigned long long day = targetDate % 1000000 / 10000;
+    int year = targetDate / 100000000;
+    int month = targetDate % 100000000 / 1000000;
+    int day = targetDate % 1000000 / 10000;
     int row = pos_SUR_stt.row, col = pos_SUR_stt.col;
-    //int width = pos_SUR_end.col - pos_SUR_stt.col + 1;
-    mvprintw(row, col, "Todos | %llu-%02llu-%02llu", year, month, day);
-    row ++;
-    //char* strbuf;
-    /*getTodaySchedule_Summarized((targetDate / 10000), strbuf);
-    if (strncmp(strbuf, "No data", 7) == 0) clearGivenNonCalendarArea(2);
+    int width = pos_SUR_end.col - pos_SUR_stt.col + 1;
+    clearGivenNonCalendarArea(2);
+    mvprintw(row, col, "Todos | %d-%02d-%02d", year, month, day);
+    row += 2;
+    char *strbuf = malloc(1000 * sizeof(char));
+    int numofsche = getNumOfSchedule(targetDate / 10000), count = 0;
+    if (getTodaySchedule_Summarized((targetDate / 10000), strbuf) == -1)return;
     else {
         while (strbuf[0] != '\0') {
-            row++;
+            if (row >= pos_SUR_end.row - 1) {
+                mvprintw(pos_SUR_end.row, col, "+%d more...", numofsche - count);
+                break;
+            }
             if (strbuf[0] == '[') {
                 strbuf++;
                 if (strbuf[0] == '^') {
@@ -970,17 +995,135 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
                 strbuf++;
                 if (strbuf[0] == '^') {
                     strbuf++;
-                    mvprintw(row, col, "-> %.*s", width - 3, strbuf);
-                    strbuf += width - 3;
-                    row++;
-                    mvprintw(row, col, "%.*s", 30 - (width - 3), strbuf);
-                    strbuf += 30 - (width - 3);
-                    row++;
+                    if (width - 3 >= 30) {
+                        mvprintw(row, col, "-> %.30s", strbuf);
+                        row++;
+                        strbuf += 30;
+                    }
+                    else {
+                        mvprintw(row, col, "-> %.*s", width - 3, strbuf);
+                        strbuf += width - 3;
+                        row++;
+                        if (strncmp(strbuf, "   ", 3) != 0) {
+                            mvprintw(row, col, "%.*s", 30 - (width - 3), strbuf);
+                            row++;
+                        }
+                        strbuf += 30 - (width - 3);
+                    }
                     attroff(COLOR_PAIR(1));
+                    row++;
+                    count++;
                 }
             }
         }
-    }*/
+    }
+}
+
+void print_date_ToDoWithdetails(unsigned long long targetDate) {
+    int year = targetDate / 100000000;
+    int month = targetDate % 100000000 / 1000000;
+    int day = targetDate % 1000000 / 10000;
+    int width = pos_SUR_end.col - pos_SUR_stt.col + 1;
+    int input_2 = 1;
+    int page = 1;
+    char* strbuf = malloc(1000 * sizeof(char));
+    int numofsche = getNumOfSchedule(targetDate / 10000);
+    echo();
+
+    while (input_2 != 2 && page <= numofsche) {
+        int row = pos_SUR_stt.row, col = pos_SUR_stt.col;
+        clearGivenNonCalendarArea(2);
+        mvprintw(pos_SUR_stt.row, pos_SUR_stt.col, "ToDos | %d-%02d-%02d", year, month, day);
+        row += 2;
+        /*detail 출력*/
+
+        if ((page = getTodaySchedule_withDetails(targetDate / 10000, strbuf) + 1) == 0) return;
+        else {
+            while (1) {
+                if (strbuf[0] == '[') {
+                    strbuf++;
+                    if (strbuf[0] == '^') {
+                        strbuf++;
+                        mvprintw(row, col, "%.2s:", strbuf);
+                        strbuf += 2;
+                        printw("%.2s", strbuf);
+                        strbuf += 2;
+                        row++;
+                    }
+                }
+                else if (strbuf[0] == '*') {
+                    strbuf++;
+                    attron(COLOR_PAIR(1));
+                }
+                else if (strbuf[0] == ']') {
+                    strbuf++;
+                    if (strbuf[0] == '^') {
+                        strbuf++;
+                        if (width - 3 >= 30) {
+                            mvprintw(row, col, "-> %.30s", strbuf);
+                            row++;
+                            strbuf += 30;
+                        }
+                        else {
+                            mvprintw(row, col, "-> %.*s", width - 3, strbuf);
+                            strbuf += width - 3;
+                            row++;
+                            if (strncmp(strbuf, "   ", 3) != 0) {
+                                mvprintw(row, col, "%.*s", 30 - (width - 3), strbuf);
+                                row++;
+                            }
+                            strbuf += 30 - (width - 3);
+                        }
+                        attroff(COLOR_PAIR(1));
+                        row++;
+                    }
+                    else if (strbuf[0] == ']') {
+                        strbuf++;
+                        mvprintw(row, col, "Details...");
+                        row++;
+                        char delimiters[] = "!\"#$%&\'()*+,-./:;<=>?@[\\]^_{|}~ ";
+                        char* ptr;
+                        int length;
+                        if (strbuf[0] != '\0') 
+                            mvprintw(row, col, "empty..");
+                        while (strbuf[0] != '\0') {
+                            ptr = strpbrk(strbuf, delimiters);
+                            if (ptr != NULL) length = ptr - strbuf;
+                            else length = strlen(strbuf);
+                            if (pos_SUR_end.col - col + 1 < length) {
+                                row++;
+                                col = pos_SUR_stt.col;
+                            }
+                            mvprintw(row, col, "%.*s", length, strbuf);
+                            col += length;
+                            strbuf += length;
+                            if (col > pos_SUR_end.col) {
+                                row++;
+                                col = pos_SUR_stt.col;
+                            }
+                            if (ptr != NULL && length != 0){
+                                mvprintw(row, col, "%c", strbuf[0]);
+                                col++;
+                                strbuf++;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        mvprintw(pos_SUR_end.row - 2, pos_SUR_stt.col, "Page: %d/%d", page, numofsche);
+        if (numofsche != 1) {
+            mvprintw(pos_SUR_end.row - 1, pos_SUR_stt.col, "Type 1-move to the next page");
+        }
+        mvprintw(pos_SUR_end.row, pos_SUR_stt.col, "Type 2-terminate: ");
+        mvscanw(pos_SUR_end.row, pos_SUR_stt.col + 18, "%d", &input_2);
+        clearGivenNonCalendarArea(SUR);
+    }
+    getTodaySchedule_withDetails_iterEnd();
+    noecho();
+
+    return;
 }
 
 void print_UpcomingBookMark() {

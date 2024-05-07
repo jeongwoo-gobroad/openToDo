@@ -936,11 +936,11 @@ int getTodaySchedule_Summarized(unsigned long long today, char* strbuf) {
         for (i = 0; i <= dd->maxIndex; i++) {
             if ((dd->toDoArr)[i]->priority) /* if bookmarked */ {
                 /*            Time->BookMarked->Title*/
-                sprintf(temp, "[^%04llu*]^%.30s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
+                sprintf(temp, "[^%04llu*]^%-30s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
             }
             else {
                 /*            Time->Title*/
-                sprintf(temp, "[^%04llu]^%.30s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
+                sprintf(temp, "[^%04llu]^%-30s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
             }
             /* Ver 2.0, 0504 */
             strcat(str, temp);
@@ -974,11 +974,11 @@ int getTodaySchedule_withDetails(unsigned long long today, char* strbuf) {
         sortGivenDateToDos(dd, 2);
         if ((dd->toDoArr)[i]->priority) { /* if bookmarked */
             /*         Time->BookMarked->Title(NL)->Details*/
-            sprintf(temp, "[^%04llu*]^%.30s]]%s\n", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
+            sprintf(temp, "[^%04llu*]^%-30s]]%s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
         }
         else {
             /*         Time->Title(NL)->Details*/
-            sprintf(temp, "[^%04llu]^%.30s]]%s\n", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
+            sprintf(temp, "[^%04llu]^%-30s]]%s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
         }
         strcat(str, temp);
     }
@@ -1444,7 +1444,7 @@ void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
 
     for (i = 1; i <= counter; i++) {
         if ((temp = getBookMarked(today, i))) {
-            sprintf(tempstr, "*[^%04llu]^%s", temp->dateData % 10000, temp->title);
+            sprintf(tempstr, "*[^%04llu]^%-30s", temp->dateData % 10000, temp->title);
         }
         strcat(retstr, tempstr);
     }
