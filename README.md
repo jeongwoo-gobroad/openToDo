@@ -70,3 +70,15 @@ an openToDo project: (aka Plan-it Project)
           (UX) Core부 함수 참조 부분에 대해 반환형 개선 및 신규 함수 추가
    
 
+    0.0.5: [current]
+   
+          (Core) UX 화면 뿐만 아니라 -d 옵션으로 진입 가능한 디버깅 메뉴에서도 띄어쓰기가 포함된 문자열 입력 가능
+   
+          (Core) 수정 기능 관련 함수 구현 중
+   
+          (Core) 양방향 iterator 기반 상세 일정 순회 기능으로 확장
+   
+          (UX) 일정 세부사항 조회 기능 추가
+   
+          (UX) 일정 세부사항 조회에 양방향 iterator 기반 양방향 순회 추가
+   
