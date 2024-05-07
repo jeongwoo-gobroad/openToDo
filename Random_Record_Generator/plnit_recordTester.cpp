@@ -16,7 +16,7 @@ int main(void) {
 
     vector<string> title = {"Birthday", "Appointment", "Meeting", "Workout", "bonorum", "malorum", "consectetur", "exercitation"};
     vector<string> info = {"Lorem ipsum dolor sit amet, consectetur adipiscing elit", "sed do eiusmo tempo incidunt ut labore et dolor magna aliq", 
-        " ullamco laboris nisi ut aliquip ex ea commodo consequat", "Duis aute irure dolor in rehendert in volupate velit esse", "cillum dolore eu fugiat nulla pariatur",
+        "ullamco laboris nisi ut aliquip ex ea commodo consequat", "Duis aute irure dolor in rehendert in volupate velit esse", "cillum dolore eu fugiat nulla pariatur",
         "Excepteur sint occaecat cupidatat non proident", "sunt in culpa qui offici desunt molit aim id est laborum."};
 
     int size;

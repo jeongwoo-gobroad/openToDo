@@ -24,6 +24,7 @@
  * each variable has a prefix 'pos_'
  * each variable has a suffix '_stt', '_end', respectively.
  * 
+ * 
  * -------------------------------------   1
  * @           SUL          @|@   SUR      1 Line = 1
  * --------------------------|   
@@ -113,7 +114,7 @@ int setSchedule(unsigned long long today, char* title, char* details, int priori
 void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int scrSize); /* debugging only feature */
 
 int getTodaySchedule_Summarized(unsigned long long today, char* strbuf);
-int getTodaySchedule_withDetails(unsigned long long today, char* strbuf);
+int getTodaySchedule_withDetails(unsigned long long today, char* strbuf, int direction);
 void getTodaySchedule_withDetails_iterEnd(void);
 void getBookMarkedInDate(unsigned long long today, int counter, char* str);
 
@@ -202,6 +203,8 @@ int main(int argc, char* argv[]) {
                 }
                 else if (c == 'e') {
                     mode--;
+                    clearGivenNonCalendarArea(SUR);
+                    print_date_ToDoSummarized(selectDate); /* to refresh */
                     break;
                 }
                 else continue;
@@ -214,6 +217,7 @@ int main(int argc, char* argv[]) {
             mode--;
             print_date_NumOfSchedule(selectDate); /* to refresh */
         }
+        
         print_commandLine(mode);
         refresh();
     }
@@ -967,18 +971,20 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
     clearGivenNonCalendarArea(2);
     mvprintw(row, col, "Todos | %d-%02d-%02d", year, month, day);
     row += 2;
-    char *strbuf = malloc(1000 * sizeof(char));
+    char str[BUFSIZ] = {'\0', };
+    char *strbuf = str;//malloc(1000 * sizeof(char));
     int numofsche = getNumOfSchedule(targetDate / 10000), count = 0;
-    if (getTodaySchedule_Summarized((targetDate / 10000), strbuf) == -1)return;
+    if (getTodaySchedule_Summarized((targetDate / 10000), str) == -1)return;
     else {
-        while (strbuf[0] != '\0') {
+        strbuf = str;
+        while (*strbuf != '\0') {
             if (row >= pos_SUR_end.row - 1) {
                 mvprintw(pos_SUR_end.row, col, "+%d more...", numofsche - count);
                 break;
             }
-            if (strbuf[0] == '[') {
+            if (*strbuf == '[') {
                 strbuf++;
-                if (strbuf[0] == '^') {
+                if (*strbuf == '^') {
                     strbuf++;
                     mvprintw(row, col, "%.2s:", strbuf);
                     strbuf += 2;
@@ -987,13 +993,13 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
                     row++;
                 }
             }
-            else if (strbuf[0] == '*') {
+            else if (*strbuf == '*') {
                 strbuf++;
                 attron(COLOR_PAIR(1));
             }
-            else if (strbuf[0] == ']') {
+            else if (*strbuf == ']') {
                 strbuf++;
-                if (strbuf[0] == '^') {
+                if (*strbuf == '^') {
                     strbuf++;
                     if (width - 3 >= 30) {
                         mvprintw(row, col, "-> %.30s", strbuf);
@@ -1015,6 +1021,11 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
                     count++;
                 }
             }
+
+            /* err hndling */
+            if (strbuf > &str[BUFSIZ]) {
+                perror("overflow");
+            }
         }
     }
 }
@@ -1024,104 +1035,159 @@ void print_date_ToDoWithdetails(unsigned long long targetDate) {
     int month = targetDate % 100000000 / 1000000;
     int day = targetDate % 1000000 / 10000;
     int width = pos_SUR_end.col - pos_SUR_stt.col + 1;
-    int input_2 = 1;
+    //int input_2 = 1;
+    int direction;
+    char inputChar = '\0';
     int page = 1;
-    char* strbuf = malloc(1000 * sizeof(char));
+    char str[BUFSIZ] = {'\0', };
+    char* strbuf = str;//malloc(1000 * sizeof(char));
+    /* malloc은 주의해서 다루어야 합니다. 코드를 보니 prefix 코드의 인식과 진행을 직관적으로 정말 잘 다루신 것 같습니다.
+     * 별도의 자료구조 없이, 포인터 자체를 이동시킴을 통해서 구현하신 사고가 멋집니다. 다만, 포인터 객체를 원래의 코드처럼 다루는 것은
+     * 위험성이 상당히 높고, 페이지를 일정 이상 순환시키면 실제로 seg fault, aborted 등의 문제가 발생하였습니다. 
+     * gdb를 통해 콜 스택을 관찰한 결과, strbuf의 잘못된 메모리 참조가 원인이었습니다. 간단히 비유하자면, 집에서 내 방으로 이동 할 수록
+     * 지금까지 이동해 왔던 면적이 사라지는 이상한 현상을 내포한다고 볼 수 있습니다.
+     * strbuf를 이동시키다가 범위를 초과하게 되면 문제가 발생하며(더이상 문자열 저장소를 가리키지 못하므로), free() 또한 정상적으로 불가능합니다.
+     * 일단 malloc이 필요한 일 자체가 없도록 정적 할당을 해 주시는게 좋습니다.(함수가 종료되면 알아서 콜 스택에서 지워집니다)
+     * malloc은 사용자가 free 해 주지 않는 이상 함수가 종료되어도 살아있습니다.
+     * 소규모의 프로그램에서 free가 필요한가, 생각 될 수도 있는데, 문제는 버려진 메모리 공간이 떠돌다가 다른 무언가가 이 영역을 가리키게 되면
+     * seg fault 또는 aborted가 발생합니다. (해당 객체에는 허가되지 않은 영역이었으므로)
+     * 결론적으로, malloc이 정말 필요한 상황에만 사용하되, 반드시 상응하는 free가 와야 하며,
+     * 문자열 큐 탐색을 원본 코드와 같이 하신 것은 정말 잘 하셨지만 아래와 같이 고치면 오류 없이 더욱 좋을 것 같습니다:
+     * char queue[BUFSIZ];
+     * char* queuePtr = queue (queue 메모리의 시작을 가리킵니다)
+     * while (iterate til exit) { queuePtr = queue; while (scan queue) {queuePtr++ unless queuePtr >= &queue[BUFSIZ]} }
+     * char로 접근할 때는 *queuePtr, 문자열로 접근 할 때는 queuePtr 해 주시면 됩니다.
+     * 일단 위쪽의 요약 출력 함수는 수정하긴 하였으나, 혹여 제가 미숙하게 수정했거나 또는 코드 전반에 malloc이 사용된 부분을 봐주시면 감사하겠습니다.
+     * 
+     * 장황하게 써 봤는데, 사실 제가 C를 그렇게 잘 하는 편이 아니라서 혹시 제 생각이 잘못되었다면 다시 알려주시면 감사하겠습니다.
+     * 
+     * +) 로직 뿐만 아니라 출력도 살짝 손보았는데, 혹시 마음에 들지 않으시거나 의도한게 아니시라면 솔직하게 말씀 해 주셔도 됩니다.
+     * 항상 모든 버전 가지고 있어서 롤백 가능합니다.
+     */
     int numofsche = getNumOfSchedule(targetDate / 10000);
-    echo();
+    //echo();
 
-    while (input_2 != 2 && page <= numofsche) {
+    /* no-data에 상응하는 말이 있어야 할 것 같습니다. */
+    //if (getTodaySchedule_withDetails(targetDate / 10000, str, direction) == -1) print_some_err_msg;
+    if (getTodaySchedule_withDetails(targetDate / 10000, str, 0) == -1) return;
+
+    while (inputChar != 'k' /*&& page <= numofsche*/) {
+        //move(LINES - 1, COLS - 1);
+
         int row = pos_SUR_stt.row, col = pos_SUR_stt.col;
         clearGivenNonCalendarArea(2);
         mvprintw(pos_SUR_stt.row, pos_SUR_stt.col, "ToDos | %d-%02d-%02d", year, month, day);
         row += 2;
         /*detail 출력*/
+        if (inputChar == 'j') direction = 2;
+        else if (inputChar == 'l') direction = 1;
+        else direction = 0;
+        //puts("test");
+        //
 
-        if ((page = getTodaySchedule_withDetails(targetDate / 10000, strbuf) + 1) == 0) return;
-        else {
-            while (1) {
-                if (strbuf[0] == '[') {
+        /* 영역 초기화는 먼저 오는 것이 좋을 듯 합니다. 마지막에 조회 한 것을 수정하고자 하면 그 대상이 계속 떠 있는 것이 더 직관적일 것 같습니다. */
+        clearGivenNonCalendarArea(SUR);
+
+        /* no data를 위에서 처리한다면 여기서 리턴 할 필요가 없어보입니다. */
+        page = getTodaySchedule_withDetails(targetDate / 10000, str, direction) + 1;
+        strbuf = str;
+        while (*strbuf != '\0') { /* 이게 있어야 뭔가 알 수 없는 프리징이 생기지 않는 것 같습니다. */
+            if (*strbuf == '[') {
+                strbuf++;
+                if (*strbuf == '^') {
                     strbuf++;
-                    if (strbuf[0] == '^') {
-                        strbuf++;
-                        mvprintw(row, col, "%.2s:", strbuf);
-                        strbuf += 2;
-                        printw("%.2s", strbuf);
-                        strbuf += 2;
-                        row++;
-                    }
+                    mvprintw(row, col, "%.2s:", strbuf);
+                    strbuf += 2;
+                    printw("%.2s", strbuf);
+                    strbuf += 2;
+                    row++;
                 }
-                else if (strbuf[0] == '*') {
+            }
+            else if (*strbuf == '*') {
+                strbuf++;
+                attron(COLOR_PAIR(1));
+            }
+            else if (*strbuf == ']') {
+                strbuf++;
+                if (*strbuf == '^') {
                     strbuf++;
-                    attron(COLOR_PAIR(1));
+                    if (width - 3 >= 30) {
+                        mvprintw(row, col, "-> %.30s", strbuf);
+                        row++;
+                        strbuf += 30;
+                    }
+                    else {
+                        mvprintw(row, col, "-> %.*s", width - 3, strbuf);
+                        strbuf += width - 3;
+                        row++;
+                        if (strncmp(strbuf, "   ", 3) != 0) {
+                            mvprintw(row, col, "%.*s", 30 - (width - 3), strbuf);
+                            row++;
+                        }
+                        strbuf += 30 - (width - 3);
+                    }
+                    attroff(COLOR_PAIR(1));
+                    row++;
                 }
-                else if (strbuf[0] == ']') {
+                else if (*strbuf == ']') {
                     strbuf++;
-                    if (strbuf[0] == '^') {
-                        strbuf++;
-                        if (width - 3 >= 30) {
-                            mvprintw(row, col, "-> %.30s", strbuf);
+                    mvprintw(row, col, "Details...");
+                    row++;
+                    char delimiters[] = "!\"#$%&\'()*+,-./:;<=>?@[\\]^_{|}~ ";
+                    char* ptr;
+                    int length;
+                    if (*strbuf != '\0') 
+                        mvprintw(row, col, "empty..");
+                    while (*strbuf != '\0') {
+                        ptr = strpbrk(strbuf, delimiters);
+                        if (ptr != NULL) {
+                            length = (ptr - strbuf);
+                            if (length == 0) /* space */ { /* 제가 gdb로 오류 확인한 부분이 여기입니다. */
+                                length = 1;
+                            }
+                        }
+                        else length = strlen(strbuf);
+                        if (pos_SUR_end.col - col + 1 < length) {
                             row++;
-                            strbuf += 30;
+                            col = pos_SUR_stt.col;
                         }
-                        else {
-                            mvprintw(row, col, "-> %.*s", width - 3, strbuf);
-                            strbuf += width - 3;
+                        mvprintw(row, col, "%.*s", length, strbuf);
+                        col += length;
+                        strbuf += length;
+                        if (col > pos_SUR_end.col) {
                             row++;
-                            if (strncmp(strbuf, "   ", 3) != 0) {
-                                mvprintw(row, col, "%.*s", 30 - (width - 3), strbuf);
-                                row++;
-                            }
-                            strbuf += 30 - (width - 3);
+                            col = pos_SUR_stt.col;
                         }
-                        attroff(COLOR_PAIR(1));
-                        row++;
-                    }
-                    else if (strbuf[0] == ']') {
-                        strbuf++;
-                        mvprintw(row, col, "Details...");
-                        row++;
-                        char delimiters[] = "!\"#$%&\'()*+,-./:;<=>?@[\\]^_{|}~ ";
-                        char* ptr;
-                        int length;
-                        if (strbuf[0] != '\0') 
-                            mvprintw(row, col, "empty..");
-                        while (strbuf[0] != '\0') {
-                            ptr = strpbrk(strbuf, delimiters);
-                            if (ptr != NULL) length = ptr - strbuf;
-                            else length = strlen(strbuf);
-                            if (pos_SUR_end.col - col + 1 < length) {
-                                row++;
-                                col = pos_SUR_stt.col;
-                            }
-                            mvprintw(row, col, "%.*s", length, strbuf);
-                            col += length;
-                            strbuf += length;
-                            if (col > pos_SUR_end.col) {
-                                row++;
-                                col = pos_SUR_stt.col;
-                            }
-                            if (ptr != NULL && length != 0){
-                                mvprintw(row, col, "%c", strbuf[0]);
-                                col++;
-                                strbuf++;
-                            }
+                        if (ptr != NULL && length != 0){
+                            mvprintw(row, col, "%c", *strbuf);
+                            col++;
+                            strbuf++;
                         }
-                        break;
                     }
+                    break;
+                }
+
+                /* err hndl */
+                if (strbuf > &str[BUFSIZ]) {
+                    perror("overflow");
                 }
             }
         }
         mvprintw(pos_SUR_end.row - 2, pos_SUR_stt.col, "Page: %d/%d", page, numofsche);
         if (numofsche != 1) {
-            mvprintw(pos_SUR_end.row - 1, pos_SUR_stt.col, "Type 1-move to the next page");
+            mvprintw(pos_SUR_end.row - 1, pos_SUR_stt.col, "<-[j] | [l]->");
         }
-        mvprintw(pos_SUR_end.row, pos_SUR_stt.col, "Type 2-terminate: ");
-        mvscanw(pos_SUR_end.row, pos_SUR_stt.col + 18, "%d", &input_2);
-        clearGivenNonCalendarArea(SUR);
+        mvprintw(pos_SUR_end.row, pos_SUR_stt.col, "press [k] to exit");
+        inputChar = getch();
+        //mvscanw(pos_SUR_end.row, pos_SUR_stt.col + 18, "%d", &input_2);
     }
     getTodaySchedule_withDetails_iterEnd();
-    noecho();
+    /* for GUI-like interaction */
+    mvprintw(pos_SUR_end.row - 2, pos_SUR_stt.col, "           ");
+    mvprintw(pos_SUR_end.row - 1, pos_SUR_stt.col, "             ");
+    mvprintw(pos_SUR_end.row, pos_SUR_stt.col, "                 ");
+    //noecho();
+    move(LINES - 1, COLS - 1);
 
     return;
 }

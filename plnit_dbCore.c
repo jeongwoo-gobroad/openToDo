@@ -168,7 +168,7 @@ int setSchedule(unsigned long long today, char* title, char* details, int priori
 void getTodaySchedule(unsigned long long today, int sortType, char* strbuf, int scrSize); /* debugging only feature */
 
 int getTodaySchedule_Summarized(unsigned long long today, char* strbuf);
-int getTodaySchedule_withDetails(unsigned long long today, char* strbuf);
+int getTodaySchedule_withDetails(unsigned long long today, char* strbuf, int direction);
 void getTodaySchedule_withDetails_iterEnd(void);
 void getBookMarkedInDate(unsigned long long today, int counter, char* str);
 
@@ -283,12 +283,12 @@ int __dbDebug(void) {
                 scanf("%llu", &date); //getchar();
                 printf("Type sorting type(2 for time first, 1 for priority first): <- deleted feature, abstracted in API\n");
                 scanf("%d", &input);
-                printf("starting iteration...\nType 1 to move to the next page, 2 to terminate: ");
+                printf("starting iteration...\nType 1 to move to the next page, 2 to prev, 0 to cur, 3 to exit: ");
                 scanf("%d", &input_2);
-                while (input_2 != 2) {
-                    input_2 = getTodaySchedule_withDetails(date, testStr);
+                while (input_2 != 3) {
+                    input_2 = getTodaySchedule_withDetails(date, testStr, input_2);
                     printf("%s\n", testStr);
-                    printf("Page: %d\ncontinuing iteration...\nType 1 to move to the next page, 2 to terminate: ", input_2);
+                    printf("Page: %d\ncontinuing iteration...\nType 1 to move to the next page, 2 to prev, 0 to cur, 3 to exit: ", input_2 + 1);
                     scanf("%d", &input_2);
                 }
                 getTodaySchedule_withDetails_iterEnd();
@@ -955,17 +955,18 @@ int getTodaySchedule_Summarized(unsigned long long today, char* strbuf) {
 
     return 0;
 }
-int getTodaySchedule_withDetails(unsigned long long today, char* strbuf) {
+int getTodaySchedule_withDetails(unsigned long long today, char* strbuf, int direction) {
     /* implementing *pageIterator* */
     /* Prefix codes
         [^: for Time, [[: make new line, ^: tab inside
         ]^: for title, ]]: for details, *: Bookmarked 
     */
     /* 0504 fixed: no need to tab nor new line */
+    /* 0508 added: direction 0: init(start) 1: forward, direction 2: backward */
     dayPtr dd = NULL;
     char str[BUFSIZ] = {'\0', };
     char temp[BUFSIZ] = {'\0', };
-    int i = pageIterator;
+    int i = 0;;
 
     dd = search_byDate(today * 10000); // YYYYMMDD
 
@@ -974,8 +975,22 @@ int getTodaySchedule_withDetails(unsigned long long today, char* strbuf) {
         return -1;
     }
     else {
-        pageIterator = (pageIterator + 1) % (dd->maxIndex + 1);
+        if (direction == 1) { /* forward */
+            pageIterator = (pageIterator + 1) % (dd->maxIndex + 1);
+        }
+        else if (direction == 2) { /* backward */
+            pageIterator = (pageIterator - 1);
+            if (pageIterator < 0) {
+                pageIterator = dd->maxIndex;
+            }
+        }
+        else { /* init start */
+            pageIterator = 0;
+        }
+        i = pageIterator;
+
         sortGivenDateToDos(dd, 2);
+
         if ((dd->toDoArr)[i]->priority) { /* if bookmarked */
             /*         Time->BookMarked->Title(NL)->Details*/
             sprintf(temp, "[^%04llu*]^%-30s]]%s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
