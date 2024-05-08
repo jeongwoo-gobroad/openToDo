@@ -192,6 +192,7 @@ void printMarkUP(char* str, int lineLimit);
 int __dbDebug(void) {
     int input; int input_2; int input_3;
     unsigned long long date; int pnum; char title[30]; char details[256];
+    unsigned long long date_2;
     int r = 1; 
     int i = 0;
     int temp;
@@ -221,6 +222,7 @@ int __dbDebug(void) {
         puts("  (12) to set a reminder");
         puts("  (13) to turn off the reminder");
         puts("  (14) to show current reminder info");
+        puts("  (15) to edit records with YYYYMMDD and iterator 'page' number");
         printf("Type: ");
         //getchar();
         scanf("%d", &input);
@@ -340,6 +342,20 @@ int __dbDebug(void) {
                 else{
                     puts("No data");
                 }
+                break;
+            case 15:
+                printf("Type scan target YYYYMMDD: \n");
+                scanf("%llu", &date); //getchar();
+                printf("Type Page Number [Alert: not an index]: \n");
+                scanf("%d", &input);
+                printf("Type edited infos for given record: [YYYYMMDDHHMM PRIORITY_NUM TITLE DETAILS]: \n");
+                printf("date:=1234: no edit, pnum:=-1: no edit title||details:=Blank no edit\n");
+                scanf("%llu", &date_2); //getchar();//printf("%llu <- \n", date);
+                scanf("%d", &pnum);
+                scanf(" %[^\n]s\n", title); //getchar();//printf("%s <- \n", title);
+                scanf(" %[^\n]s\n", details); //getchar();//printf("%s <- \n", details);
+                input_2 = editWhileIterate(date, input, date_2, title, details, pnum);
+                printf("result value: %d\n2: no such record 1: bookmark collision 0: success\n", input_2);
                 break;
             case 0:
                 r = 0;
@@ -1522,7 +1538,7 @@ void deleteWhileIterate(unsigned long long src, int pageNum) {
     mtmp = findMonth(src % 10000 / 100, ytmp);
     dtmp = findDay(src % 100, mtmp);
 
-    if (dtmp->toDoArr == NULL || pageNum < 0 || pageNum > dtmp->maxIndex) { /* just to be safe */
+    if (dtmp->toDoArr == NULL || pageNum < 1 || pageNum > dtmp->maxIndex + 1) { /* just to be safe */
         return; /* nothing to del */
     }
 
@@ -1538,6 +1554,10 @@ void deleteWhileIterate(unsigned long long src, int pageNum) {
 }
 int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_day, char* t_title, char* t_details, int t_priority) {
     /* being able to edit bookmark, date, time, title, details */
+    /* if t_day := 1234        user doesn't want to edit this section of the record */
+    /* if t_title[0] := NULL   user doesn't want to edit this section of the record */
+    /* if t_details[0] := NULL user doesn't want to edit this section of the record */
+    /* if t_priority := -1     user doesn't want to edit this section of the record */
     /* src = YYYYMMDD */
     yearPtr ytmp; monthPtr mtmp; dayPtr dtmp;
 
@@ -1545,11 +1565,12 @@ int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_d
     mtmp = findMonth(src % 10000 / 100, ytmp);
     dtmp = findDay(src % 100, mtmp);
 
-    if (dtmp->toDoArr == NULL || pageNum < 0 || pageNum > dtmp->maxIndex) { /* just to be safe */
+    if (dtmp->toDoArr == NULL || pageNum < 1 || pageNum > dtmp->maxIndex + 1) { /* just to be safe */
         return 2; /* nothing to del */
     }
 
     sortGivenDateToDos(dtmp, 2); /* being ready for index-based iteration */
+
     if (t_priority == 1 && dtmp->isBookMarkExists == 1 && (dtmp->toDoArr)[pageNum - 1]->priority != 1) {
         return 1; /* if already bookmarked todo exists */
     }
@@ -1558,10 +1579,21 @@ int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_d
         dtmp->isBookMarkExists = 0;
     }
 
-    deleteRecord(dtmp, pageNum - 1);
+    /* actual editing start */
+    if (t_day != 1234)              (dtmp->toDoArr)[pageNum - 1]->dateData = t_day;
+    if (t_title[0] != '\0')         strcpy((dtmp->toDoArr)[pageNum - 1]->title, t_title);
+    if (t_details[0] != '\0')       strcpy((dtmp->toDoArr)[pageNum - 1]->details, t_details);
+    if (t_priority != -1)           (dtmp->toDoArr)[pageNum - 1]->priority = t_priority;
+    /* actual editing ended */
+    if ((dtmp->toDoArr)[pageNum - 1]->priority == 1) {
+        dtmp->isBookMarkExists = 1; /* if it has passed the test at the first */
+    }
+    
+    /* don't use deletion based editing anymore; we actually edit it */
+    //deleteRecord(dtmp, pageNum - 1);
 
     /* insert does the thing about bookmark check */
-    insert(&key, create_Node(t_day, t_priority, t_title, t_details));
+    //insert(&key, create_Node(t_day, t_priority, t_title, t_details));
 
     return 0; /* safely executed: 0 */
 }
