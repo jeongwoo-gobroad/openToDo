@@ -248,6 +248,8 @@ int main(int argc, char* argv[]) {
                 else {
                     continue;
                 }
+                print_commandLine(mode);
+                refresh();
             }
             getTodaySchedule_withDetails_iterEnd(); /* iterator init */
         }
