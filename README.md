@@ -70,7 +70,7 @@ an openToDo project: (aka Plan-it Project)
           (UX) Core부 함수 참조 부분에 대해 반환형 개선 및 신규 함수 추가
    
 
-    0.0.6: [current]
+    0.0.6: 
    
           (Core) UX 화면 뿐만 아니라 -d 옵션으로 진입 가능한 디버깅 메뉴에서도 띄어쓰기가 포함된 문자열 입력 가능
    
@@ -82,3 +82,21 @@ an openToDo project: (aka Plan-it Project)
    
           (UX) 일정 세부사항 조회에 양방향 iterator 기반 양방향 순회 추가
    
+
+    0.0.7: [current]
+   
+          (Core) 띄어쓰기가 포함된 문자열 기능 안정화
+   
+          (Core) 동적 할당 해제 알고리즘 개선
+   
+          (Core) UX레이어와의 상호작용을 위해 일부 함수 내부 구조 개선
+   
+          (UX) 메뉴 심도 3단계 -> 2단계로 단순화
+   
+          (UX) 양방향 순회 방식 일자 탐색, 선택되어 있는 대상을 바로바로 지울 수 있도록 개선 (메뉴 심도의 단축과도 관련 있는 기능)
+   
+          (UX) 삽입 함수를 낮취진 심도인 2단계에 삽입
+   
+          (UX) 일정 개수 출력 함수의 string refresh 관련 알고리즘 개선
+   
+          (UX) details string parser 알고리즘 개선
