@@ -1534,6 +1534,8 @@ void deleteWhileIterate(unsigned long long src, int pageNum) {
     /* src = YYYYMMDD */
     yearPtr ytmp; monthPtr mtmp; dayPtr dtmp;
 
+    src /= 10000;
+
     ytmp = findYear(src / 10000, &key);
     mtmp = findMonth(src % 10000 / 100, ytmp);
     dtmp = findDay(src % 100, mtmp);
@@ -1559,6 +1561,9 @@ int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_d
     /* if t_details[0] := NULL user doesn't want to edit this section of the record */
     /* if t_priority := -1     user doesn't want to edit this section of the record */
     /* src = YYYYMMDD */
+
+    src /= 10000;
+
     yearPtr ytmp; monthPtr mtmp; dayPtr dtmp;
 
     ytmp = findYear(src / 10000, &key);
