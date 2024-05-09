@@ -202,7 +202,6 @@ int main(int argc, char* argv[]) {
             while (1) {
                 move(LINES - 1, COLS - 1); /* get rid of cursor */
                 c = getch();
-                /* insert mode -> need to be improved */
                 if (c == 'I') { /* to insert */
                     get_todo();
                     print_date_NumOfSchedule(selectDate); /* refresh screen */
