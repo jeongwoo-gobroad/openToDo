@@ -8,6 +8,8 @@
 #include <time.h>
 #include <string.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define SUL 1
 #define SUR 2
@@ -98,6 +100,8 @@ void load_UXPart(void);
 /*-----Signal handling--------------------------------------------------------------*/
 void setInputModeSigHandler(int status); /* Global Variable */
 void inputMode_sigHndl(int signum);         int inputModeForceQuit;
+/*-----Event control--------------------------------------------------------------*/
+void popup(char* title, char* str1, char* str2, int delay); /* delay in secs */
 /*-------------------------------------------------------------------*/
 void errOcc(const char* str);
 /*--UX Layer interactive API Methods---------------------*/
@@ -853,6 +857,8 @@ void get_todo() {
     mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "^C to quit insert mode");
     mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "press enter to continue");
     getch(); /* wait for user input */
+
+    if (inputModeForceQuit) return;
     standend();
     clearGivenNonCalendarArea(SLL);
 
@@ -860,8 +866,9 @@ void get_todo() {
     mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the Time Below: (Format: HHMM)");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
-    if (inputModeForceQuit) return;
+    
     getstr(t);//시각 입력
+    if (inputModeForceQuit) return;
     //if (strcmp(t, "e") == 0) return;
 
     mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, " ");
@@ -871,8 +878,9 @@ void get_todo() {
     mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the Title Below: (Format: String)");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
-    if (inputModeForceQuit) return;
+    
     getstr(title);
+    if (inputModeForceQuit) return;
 
     mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, " ");
     for (int i = 0; i < pos_SUL_end.col - 1; i++)
@@ -881,8 +889,9 @@ void get_todo() {
     mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the Details Below: (Format: String)");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
-    if (inputModeForceQuit) return;
+    
     getstr(details);
+    if (inputModeForceQuit) return;
 
     mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, " ");
     for (int i = 0; i < pos_SUL_end.col - 1; i++)
@@ -891,8 +900,9 @@ void get_todo() {
     mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the Priority Number Below: (0 ~ 9)");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
-    if (inputModeForceQuit) return;
+    
     getstr(p);
+    if (inputModeForceQuit) return;
 
     cbreak();  // 다시 non-canonical 모드로 전환
     noecho();
@@ -905,7 +915,19 @@ void get_todo() {
 
     selectDate += (unsigned long long)time;
 
-    setSchedule(selectDate, title, details, priority);
+    /* 에러 메시지에 따른 return value assigning */
+    switch (setSchedule(selectDate, title, details, priority)) {
+        case 0: /* safe */
+            break;
+        case 1: /* bc */
+            popup("Cannot Save", "Bookmark Collision!", NULL, 3);
+            break;
+        case 2: /* nsdf */
+            popup("Cannot Save", "No such date format!", NULL, 3);
+            break;
+        default:
+            break;
+    }
 
     selectDate -= (unsigned long long)time;
 
@@ -997,12 +1019,14 @@ void setInputModeSigHandler(int status) {
 void inputMode_sigHndl(int signum) {
     clearGivenNonCalendarArea(SLL);
 
-    move(pos_SLL_stt.row, pos_SLL_stt.col);
-    addstr("Terminating input mode...");
+    //move(pos_SLL_stt.row, pos_SLL_stt.col);
+    //addstr("Terminating input mode...");
 
     //sleep(3);
     setInputModeSigHandler(OFF);
     inputModeForceQuit = 1;
+    cbreak();  // 다시 non-canonical 모드로 전환
+    noecho();
 
     return;
 }
@@ -1236,4 +1260,118 @@ void print_UpcomingBookMark() {
     for (int i = pos_SLR_stt.col; i <= pos_SLR_end.col; i++)
         mvprintw(pos_SLR_stt.row - 1, i, "-");
     mvprintw(pos_SLR_stt.row, pos_SLR_stt.col, "Upcoming Book Marks..");
+}
+
+void popup(char* title, char* str1, char* str2, int delay) {
+    /*
+    ---------------------------------------
+    * @           SUL          @|@   SUR      
+    * --------------------------|   
+    * @                         |             
+    *                           |              
+    *             SC            |   
+    *                           |         @
+    *                           |----------  
+    *                          @|@         
+    * --------------------------|   
+    * @           SLL           |    SLR      
+    *                          @|         @   
+    * -------------------------------------   
+    */
+    /* implementation of mvinch, which saves current state of the screen */
+    /* implementation of mvaddch, which saves current state of the screen */
+    chtype** save; int i; int j;
+    int lineAxis, colAxis, size; int ftemp; int stemp;
+
+    /* nothing to print */
+    if (title == NULL || (str1 == NULL && str2 == NULL)) return;
+
+    lineAxis   = (pos_SUL_stt.row + pos_SLR_end.row) / 2;
+    colAxis  = (pos_SUL_stt.col + pos_SLR_end.col) / 2;
+    size      = nNum * 16;
+
+    save = (chtype**)malloc(sizeof(chtype*) * LINES);
+    if (!save) errOcc("malloc");
+    for (i = 0; i < LINES; i++) {
+        save[i] = (chtype*)malloc(sizeof(chtype) * COLS);
+        if (!save[i]) errOcc("malloc");
+    }
+
+    for (i = 0; i < LINES; i++) {
+        for (j = 0; j < COLS; j++) {
+            save[i][j] = mvinch(i, j); /* actual action */
+        }
+    }
+
+    /* printting boundaries */
+    /* since LINES are longer than COLS, /= 4. */
+    for (i = lineAxis - size / 4; i <= lineAxis + size / 4; i++) {\
+        move(i, colAxis - size); standout(); addch(' '); standend(); 
+        move(i, colAxis + size); standout(); addch(' '); standend();
+        for (j = colAxis - size + 1; j <= colAxis + size - 1; j++) {
+            if (i == lineAxis - size / 4 || i == lineAxis + size / 4) {
+                move(i, j);
+                standout(); addch(' '); standend();
+            }
+            else {
+                move(i, j);
+                addch(' ');
+            }
+        }
+    }
+
+    /* printing popup titles */
+    move(lineAxis - 1, colAxis - strlen(title) / 2 - 1);
+    addch('[');
+    addstr(title);
+    addch(']');
+    move(LINES - 1, COLS - 1);
+
+    /* printing details - str1*/
+    if (str1) {
+        move(lineAxis, colAxis - strlen(str1) / 2 - 1);
+        addch('#');
+        addstr(str1);
+        addch('#');
+    }
+    move(LINES - 1, COLS - 1);
+    /* printing details - str2*/
+    if (str2) {
+        move(lineAxis + 1, colAxis - strlen(str2) / 2 - 1);
+        addch('#');
+        addstr(str2);
+        addch('#');
+    }
+    move(LINES - 1, COLS - 1);
+
+    refresh();
+
+    /* to get EXACT delay (since this process can have its own timer) */
+    if ((ftemp = fork()) == -1) {
+        errOcc("fork");
+    }
+    else if (ftemp == 0) {
+        sleep(delay);
+        exit(0);
+    }
+    else {
+        wait(&stemp);
+    }
+
+    /* then restore */
+    for (i = 0; i < LINES - 1; i++) {
+        for (j = 0; j < COLS - 1; j++) {
+            mvaddch(i, j, save[i][j]); /* actual action */
+        }
+    }
+
+    refresh();
+
+    /* freeing is important */
+    for (i = 0; i < LINES; i++) {
+        free(save[i]);
+    }
+    free(save);
+
+    return;
 }
