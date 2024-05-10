@@ -632,17 +632,17 @@ void print_date(unsigned long long targetDate) {
     }
 
     int days = daysInMonth(year * 100 + month);
-    attron(COLOR_PAIR(1));
+    attron(A_DIM);
     for (int i = 0; i < 7; i++) {
         if (i >= stt_col) {
             if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
-                attroff(COLOR_PAIR(1));
-                attron(COLOR_PAIR(2));
+                attroff(A_DIM);
+                attron(A_BOLD);
             }
             mvprintw(pos_SC_date[0][i].row, pos_SC_date[0][i].col, "%-2d", date);
             if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
-                attroff(COLOR_PAIR(2));
-                attron(COLOR_PAIR(1));
+                attroff(A_BOLD);
+                attron(A_DIM);
             }
             date++;
         }
@@ -661,18 +661,18 @@ void print_date(unsigned long long targetDate) {
             }
             else {
                 if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
-                    attroff(COLOR_PAIR(1));
-                    attron(COLOR_PAIR(2));
+                    attroff(A_DIM);
+                    attron(A_BOLD);
                 }
                 mvprintw(pos_SC_date[i][j].row, pos_SC_date[i][j].col, "%-2d", date);
                 if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
-                    attroff(COLOR_PAIR(2));
-                    attron(COLOR_PAIR(1));
+                    attroff(A_BOLD);
+                    attron(A_DIM);
                 }
             }
         }
     }
-    attroff(COLOR_PAIR(1));
+    attroff(A_DIM);
     return;
 }
 
@@ -776,13 +776,19 @@ void print_commandLine(int mode) {
 }
 
 void select_highlightOn() {
-    attron(COLOR_PAIR(2));
+    standout();
     mvprintw(pos_SC_date[selectDate_row][selectDate_col].row, pos_SC_date[selectDate_row][selectDate_col].col, "%-2d", selectDate / 10000 % 100);
-    attroff(COLOR_PAIR(2));
+    standend();
 }
 
 void prev_select_highlightOff() {
-    if (selectDate == todayDate) return;
+    //if (selectDate == todayDate) return;
+    if (selectDate == todayDate) {
+        attron(COLOR_PAIR(1) | A_UNDERLINE);
+        mvprintw(pos_SC_date[selectDate_row][selectDate_col].row, pos_SC_date[selectDate_row][selectDate_col].col, "%-2d", selectDate / 10000 % 100);
+        attroff(COLOR_PAIR(1) | A_UNDERLINE);
+        return;
+    }
     attron(COLOR_PAIR(1));
     mvprintw(pos_SC_date[selectDate_row][selectDate_col].row, pos_SC_date[selectDate_row][selectDate_col].col, "%-2d", selectDate / 10000 % 100);
     attroff(COLOR_PAIR(1));
@@ -936,8 +942,8 @@ void get_todo() {
     mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "press enter to continue");
     getch(); /* wait for user input */
 
-    if (inputModeForceQuit) return;
     standend();
+    if (inputModeForceQuit) return;
     clearGivenNonCalendarArea(SLL);
 
     standout();
@@ -1141,7 +1147,7 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
     int row = pos_SUR_stt.row, col = pos_SUR_stt.col;
     int width = pos_SUR_end.col - pos_SUR_stt.col + 1;
     clearGivenNonCalendarArea(2);
-    mvprintw(row, col, "Todos | %d-%02d-%02d", year, month, day);
+    mvprintw(row, col, "ToDos | %d-%02d-%02d", year, month, day);
     row += 2;
     char str[BUFSIZ] = {'\0', };
     char *strbuf = str;//malloc(1000 * sizeof(char));
@@ -1173,23 +1179,10 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
                 strbuf++;
                 if (*strbuf == '^') {
                     strbuf++;
-                    if (width - 3 >= 30) {
-                        mvprintw(row, col, "-> %.30s", strbuf);
-                        row++;
-                        strbuf += 30;
-                    }
-                    else {
-                        mvprintw(row, col, "-> %.*s", width - 3, strbuf);
-                        strbuf += width - 3;
-                        row++;
-                        if (strncmp(strbuf, "   ", 3) != 0) {
-                            mvprintw(row, col, "%.*s", 30 - (width - 3), strbuf);
-                            row++;
-                        }
-                        strbuf += 30 - (width - 3);
-                    }
+                    mvprintw(row, col, "-> %.25s", strbuf);
+                    row += 2;
+                    strbuf += 25;
                     attroff(COLOR_PAIR(1));
-                    row++;
                     count++;
                 }
             }
@@ -1253,23 +1246,10 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
             strbuf++;
             if (*strbuf == '^') {
                 strbuf++;
-                if (width - 3 >= 30) {
-                    mvprintw(row, col, "-> %.30s", strbuf);
-                    row++;
-                    strbuf += 30;
-                }
-                else {
-                    mvprintw(row, col, "-> %.*s", width - 3, strbuf);
-                    strbuf += width - 3;
-                    row++;
-                    if (strncmp(strbuf, "   ", 3) != 0) {
-                        mvprintw(row, col, "%.*s", 30 - (width - 3), strbuf);
-                        row++;
-                    }
-                    strbuf += 30 - (width - 3);
-                }
+                mvprintw(row, col, "-> %.25s", strbuf);
+                row += 2;
+                strbuf += 25;
                 attroff(COLOR_PAIR(1));
-                row++;
             }
             else if (*strbuf == ']') {
                 strbuf++;
