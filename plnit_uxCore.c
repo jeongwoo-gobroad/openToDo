@@ -233,12 +233,13 @@ int main(int argc, char* argv[]) {
                 else if (c == 'm' && page != 0) {
                     edit_plan(selectDate, &page);
                     print_date_NumOfSchedule(selectDate); /* refresh screen */
+                    print_date_ToDoWithdetails(selectDate, 0, &page);
                     /* don't break */
                 }
                 /* delete record */
                 else if (c == 'd' && page != 0) {
                     deleteWhileIterate(selectDate, page); /* del */
-                    getTodaySchedule_withDetails_iterEnd(); /* refresh */
+                    //getTodaySchedule_withDetails_iterEnd(); /* refresh */
                     print_date_NumOfSchedule(selectDate); /* refresh screen */
                     print_date_ToDoWithdetails(selectDate, 0, &page); /* show */
                     /* delete related functions */
@@ -751,10 +752,7 @@ void print_commandLine(int mode) {
         sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'i', "upwards", 'j', "left", 'k', "downwards", 'l', "right", 's', "select", 'z', "save", 'x', "load");
         break;
     case 1:
-        sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'I', "insert", 'i', "upwards", 'k', "downwards", 'd', "delete", 'm', "modify", '+', "D+", '-', "D-", 'b', "BookMark", 'e', "exit");
-        break;
-    case 2:
-        //sprintf(commands, "%c%-10s", 'e', "exit"); /* sighandled if insertion */
+        sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'I', "insert", 'd', "delete", 'm', "modify", '+', "D+", '-', "D-", 'b', "BookMark", 'e', "exit");
         break;
     default:
         break;
@@ -1217,18 +1215,18 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
     move(LINES - 1, COLS - 1);
 
     int row = pos_SUR_stt.row, col = pos_SUR_stt.col;
-    clearGivenNonCalendarArea(2);
+    clearGivenNonCalendarArea(SUR); // 여기서 날짜를 출력하기 전에 영역 초기화를 해줍니다
     mvprintw(pos_SUR_stt.row, pos_SUR_stt.col, "ToDos | %d-%02d-%02d", year, month, day);
     row += 2;
 
     /* 영역 초기화는 먼저 오는 것이 좋을 듯 합니다. 마지막에 조회 한 것을 수정하고자 하면 그 대상이 계속 떠 있는 것이 더 직관적일 것 같습니다. */
-    clearGivenNonCalendarArea(SUR);
+    //clearGivenNonCalendarArea(SUR); 이미 날짜 출력하기 전에 영역초기화를 해주어서 여기서 또 안해도 될것같습니다. 날짜 출력하기 전에 한 것은 날짜를 출력해서 선택된 날짜를 직관적으로 알 수 있게 하기 위함이었습니다.
 
     *page = getTodaySchedule_withDetails(targetDate / 10000, str, status) + 1;
 
     /* no data 처리 */
     if (*page == 0) { /* warn: when it's 0, there's no record */
-        clearGivenNonCalendarArea(2);
+        //clearGivenNonCalendarArea(2); 여기서도 위에서 이미 영역 초기화를 해주어서 또 안해주어도 될것같습니다
         mvprintw((pos_SUR_stt.row + pos_SUR_end.row) / 2, (pos_SUR_stt.col + pos_SUR_end.col) / 2 - 8, "#No details data#");
         return;
     }
