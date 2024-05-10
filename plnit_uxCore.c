@@ -91,6 +91,7 @@ void prev_select_highlightOff();
 void print_date_ToDoSummarized(unsigned long long targetDate);
 void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* page); 
 void print_UpcomingBookMark();
+void edit_plan(unsigned long long targetDate, int* page);
 /*-----Display control--------------------------------------------------------------*/
 void clearGivenCalendarArea(/*index of pos_sc_date*/int row, int col);
 void clearGivenRowCols(int fromRow, int fromCol, int toRow, int toCol);
@@ -123,7 +124,7 @@ void getTodaySchedule_withDetails_iterEnd(void);
 void getBookMarkedInDate(unsigned long long today, int counter, char* str);
 
 void deleteWhileIterate(unsigned long long src, int pageNum);
-int editWhileIterate(unsigned long long src, int pageNum);
+int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_day, char* t_title, char* t_details, int t_priority);
 int setReminder(time_t current, time_t delta, int repeatCnter, char* what, int intervals);
 int isReminderSetAlready(char* str);
 void turnOffReminder(void);
@@ -230,7 +231,7 @@ int main(int argc, char* argv[]) {
                 }
                 /* edit record */
                 else if (c == 'm' && page != 0) {
-                    /* edit related functions */
+                    edit_plan(selectDate, &page);
                     print_date_NumOfSchedule(selectDate); /* refresh screen */
                     /* don't break */
                 }
@@ -274,6 +275,85 @@ int main(int argc, char* argv[]) {
     endwin();
 
     return 0;
+}
+
+void edit_plan(unsigned long long targetDate, int* page){
+    char t[13]; // 문자열을 위한 배열 선언
+    char title[31];
+    char details[256];
+    char p[2]; int priority; 
+    unsigned long long date_2;
+    int input_2; 
+    int input_1 = *page;
+
+    nocbreak();  // canonical 모드로 전환
+    echo();  // 입력한 키를 화면에 보이도록 설정
+    clearGivenNonCalendarArea(SLL);
+
+    standout();
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Date&Time Below (Format: YYYYMMDDHHMM, Date&Time=1234: no edit) :");
+    move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
+    standend();
+    getstr(t);//날짜, 시간 입력
+    //if (strcmp(t, "e") == 0) return;
+
+    clearGivenNonCalendarArea(SLL);
+    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, " ");
+    for (int i = 0; i < pos_SUL_end.col - 1; i++)
+        printw(" ");
+    standout();
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Title Below (Format: String, Title=Blank: no edit) :");
+    move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
+    standend();
+    getstr(title);
+
+    clearGivenNonCalendarArea(SLL);
+    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, " ");
+    for (int i = 0; i < pos_SUL_end.col - 1; i++)
+        printw(" ");
+    standout();
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Details Below (Format: String, Details=Blank: no edit) :");
+    move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
+    standend();
+    getstr(details);
+
+
+    clearGivenNonCalendarArea(SLL);
+    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, " ");
+    for (int i = 0; i < pos_SUL_end.col - 1; i++)
+        printw(" ");
+    standout();
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Priority Number Below: (0/1, Priority Number=-1: no edit) :");
+    move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
+    standend();
+    getstr(p);
+    clearGivenNonCalendarArea(SLL);
+     
+    priority = atoi(p);
+    date_2 = strtoull(t, NULL, 10);
+
+    input_2 = editWhileIterate(targetDate, input_1 , date_2, title, details, priority);
+        
+    //mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "result value: %d", input_2);
+    switch (input_2) {
+        case 1:
+            popup("Cannot edit!", NULL, "Bookmark Collision!", 5);
+            break;
+        case 2:
+            popup("Cannot edit!", NULL, "No such record", 5);
+            break;
+        case 0:
+            popup("Success", NULL, "Edits applied.", 5);
+            break;
+        default:
+            break;
+    }
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Press ENTER to comtinue");
+    getch();
+    
+    cbreak();  // 다시 non-canonical 모드로 전환
+    noecho();
+    return;
 }
 
 void chooseOptimal_nNum(int r, int c) {
@@ -918,12 +998,13 @@ void get_todo() {
     /* 에러 메시지에 따른 return value assigning */
     switch (setSchedule(selectDate, title, details, priority)) {
         case 0: /* safe */
+            popup("Success", NULL, "Saved.", 5);
             break;
         case 1: /* bc */
-            popup("Cannot Save", "Bookmark Collision!", NULL, 3);
+            popup("Cannot Save", NULL, "Bookmark Collision!", 5);
             break;
         case 2: /* nsdf */
-            popup("Cannot Save", "No such date format!", NULL, 3);
+            popup("Cannot Save", NULL, "No such date format!", 5);
             break;
         default:
             break;
