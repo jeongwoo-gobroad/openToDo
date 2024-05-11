@@ -115,7 +115,11 @@ an openToDo project: (aka Plan-it Project)
           (Core) 공휴일 DB화: 프로그램 default 레코드를 저장하는 읽기 전용의 .dsv 파일 제공, 이를 통해 '삭제 할 수 없는' 공휴일 일정 구현
    
           (Core) 특정 일이 공휴일인지 알 수 있는 메서드 구현
-   
+
+          (UX)   컬러 스트립(스티커 기반 북마크) 기능 구현
+
+          (UX)   공휴일 일정에 대한 특수한 스트링 출력 기능 구현
+
           (기타) randomRecordGenerator의 샘플 개수를 20개로 늘리고, 타이틀 및 텍스트를 로렘 입숨에서 그럴듯 한 텍스트로 바꾸었음
 
           (기타) .dsv 파일을 생성 가능한 defaultRecordGenerator 제공.
