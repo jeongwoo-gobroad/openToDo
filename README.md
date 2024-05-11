@@ -83,7 +83,7 @@ an openToDo project: (aka Plan-it Project)
           (UX) 일정 세부사항 조회에 양방향 iterator 기반 양방향 순회 추가
    
 
-    0.0.7: [current]
+    0.0.7: 
    
           (Core) 띄어쓰기가 포함된 문자열 기능 안정화
    
@@ -99,4 +99,23 @@ an openToDo project: (aka Plan-it Project)
    
           (UX) 일정 개수 출력 함수의 string refresh 관련 알고리즘 개선
    
-          (UX) details string parser 알고리즘 개선
+
+    0.0.8: [current]
+   
+          (Core) 북마크의 스티커 색을 지정할 수 있게 됨, 따라서 일자에 따른 북마크의 색을 get 할 수 있는 API 및 내부 로직 추가.
+   
+          (Core) D-day 관련 기능 대폭 추가
+   
+              (D-day feature) Page Iterator 기반으로, 어떠한 일정을 바로 D-day 대상으로 삼을 수 있도록 하였음
+   
+              (D-day feature) 지정된 D-day에 대해, getter 방식 메서드를 구현하여, 내용과 D-day 수를 취할 수 있음
+   
+              (D-day feature) Stack 기반으로 저장되며, 이론상 무한개를 저장 할 수 있지만, UX 구현의 한계상 최대 2개로 제한하였음. 자세한 정보는 도큐멘트 참조 바람.
+   
+          (Core) 공휴일 DB화: 프로그램 default 레코드를 저장하는 읽기 전용의 .dsv 파일 제공, 이를 통해 '삭제 할 수 없는' 공휴일 일정 구현
+   
+          (Core) 특정 일이 공휴일인지 알 수 있는 메서드 구현
+   
+          (기타) randomRecordGenerator의 샘플 개수를 20개로 늘리고, 타이틀 및 텍스트를 로렘 입숨에서 그럴듯 한 텍스트로 바꾸었음
+
+          (기타) .dsv 파일을 생성 가능한 defaultRecordGenerator 제공.
