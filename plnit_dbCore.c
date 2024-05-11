@@ -42,15 +42,22 @@ typedef struct toDo {
     unsigned long long hashNum;
     unsigned long long dateData;
     int priority;
-    char title[31];
+    char title[26];
     // SOCKET FEATURE {method}();
     char details[61];
 } toDo;
 typedef toDo* toDoPtr;
 
+typedef struct dDay {
+    toDoPtr* toDoStack;
+    int stackTop;
+} dDay;
+typedef dDay* dDayPtr;
+
 typedef struct day {
     int isBookMarkExists;
     int maxIndex;
+    int isHoliday;
     toDoPtr* toDoArr;
 } day;
 typedef day* dayPtr;
@@ -98,6 +105,7 @@ static int pageIterator = 0; // for GUI interaction; See Codes Below -> void get
 /**/
 const char* bin_fileName = "todos.sv";
 const char*  hr_fileName = "todos.txt"; /* hr stands for human readable */
+const char* pub_fileName = "public.dsv"; /* dsv := default save file for public holidays */
 const char*   dbDebug = "-d";
 const char* cli_input = "-in";
 /**/ /* for leap year and month limit check */
@@ -108,6 +116,21 @@ dayPtr   thirty = NULL;
 dayPtr   thirty_one = NULL;
 /**/
 reminderPtr rmdr = NULL;
+/**/
+dDayPtr     dStack = NULL;
+/**/
+int Julian_A[12] = { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+int Julian_M[12] = { 10, 11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+int julian_day(struct tm *date) {
+    int a = Julian_A[date->tm_mon];
+    int m = Julian_M[date->tm_mon];
+    int y = date->tm_year + 1900 + 4800 - a;
+
+    return date->tm_mday + ((153*m + 2) / 5) + 365*y + y/4 - y/100 + y/400 - 32045;
+}
+/* https://stackoverflow.com/questions/13932909/difference-between-two-dates-in-c */
+/* https://stackoverflow.com/questions/1442116/how-to-get-the-date-and-time-values-in-a-c-program */
 /**/
 
 /* saving features start */
@@ -157,7 +180,20 @@ void setReminderHandler(int status, unsigned long init, unsigned long repeat);
 //int setReminder(time_t current, time_t delta, int repeatCnter);
 void restoreReminder(void);
 void allocReminder(void);
-
+/* 0511 added: D-day settings, holiday */
+//void setDday(unsigned long long target, int adjust); /* YYYYMMDD, adjust := 1 to D+, adjust := 2 to D- */
+//int getDday(int adjust); /* adjust := 1 to D+, adjust := 2 to D- */
+//int isHoliday(unsigned long long target);
+void getHolidayInfos(int fd); /* time: 9999 fixed */
+void saveDday(int* fd);
+void loadDday(int* fd);
+//void getDday(int* slot1, char* title1, int* slot2, char* title2);
+void popDday(void);
+//int setDdayWhileIterate(unsigned long long src, int pageNum);
+int pushDday(toDoPtr target);
+void freeDdayStack(void);
+void allocDdayStack(toDoPtr target);
+void initDday(void);
 
 /*--UX Layer interactive API Methods---------------------*/
 
@@ -180,6 +216,13 @@ void turnOffReminder(void);
 
 void printUsage(void);
 void __launchOptions(int argc, char* argv[]);
+/* 0511 added */
+int isBookMarked(unsigned long long targetDate); /* YYYYMMDD */
+/* 0511 added: D-day settings, holiday */
+void getDday(int* slot1, char* title1, int* slot2, char* title2);
+void popDday(void);
+int setDdayWhileIterate(unsigned long long src, int pageNum);
+int isHoliday(unsigned long long target);
 
 /*-------------------------------------------------------*/
 
@@ -197,8 +240,10 @@ int __dbDebug(void) {
     int i = 0;
     int temp;
     char testStr[BUFSIZ];
+    int dday1, dday2; char dday1_str[30]; char dday2_str[30];
 
     allocReminder();
+    initDday();
 
     /* dummy datas just for leap year / month limit check */
     leapYear     = (monthPtr)malloc(sizeof(month));
@@ -223,6 +268,11 @@ int __dbDebug(void) {
         puts("  (13) to turn off the reminder");
         puts("  (14) to show current reminder info");
         puts("  (15) to edit records with YYYYMMDD and iterator 'page' number");
+        puts("  (16) to get Bookmark designator with YYYYMMDD");
+        puts("  (17) to determine whether a given day(YYYYMMDD) is a public holiday");
+        puts("  (18) to set a D-day with YYYYMMDD and page number");
+        puts("  (19) to pop a pushed D-day");
+        puts("  (20) to show the D-day list");
         printf("Type: ");
         //getchar();
         scanf("%d", &input);
@@ -339,7 +389,7 @@ int __dbDebug(void) {
                 if (temp) {
                     printf("Reminder Name: %s\n Expiration: %s\n", testStr, ctime(&(rmdr->end)));
                 }
-                else{
+                else {
                     puts("No data");
                 }
                 break;
@@ -356,6 +406,36 @@ int __dbDebug(void) {
                 scanf(" %[^\n]s\n", details); //getchar();//printf("%s <- \n", details);
                 input_2 = editWhileIterate(date, input, date_2, title, details, pnum);
                 printf("result value: %d\n2: no such record 1: bookmark collision 0: success\n", input_2);
+                break;
+            case 16:
+                printf("Type scan target YYYYMMDD: \n");
+                scanf("%llu", &date); //getchar();
+                printf("result: %d\n", isBookMarked(date));
+                break;
+            case 17:
+                printf("Type scan target YYYYMMDD: \n");
+                scanf("%llu", &date); //getchar();
+                printf("result: %d\n", isHoliday(date));
+                break;
+            case 18:
+                printf("Type scan target YYYYMMDD: \n");
+                scanf("%llu", &date); //getchar();
+                printf("Type Page Number [Alert: not an index]: \n");
+                scanf("%d", &input);
+                printf("result: %d\n", setDdayWhileIterate(date, input));
+                break;
+            case 19:
+                popDday();
+                puts("Popped or the stack is already empty");
+                break;
+            case 20:
+                getDday(&dday1, dday1_str, &dday2, dday2_str);
+                if (dday1_str[0] != '\0') {
+                    printf("D%+d: %s\n", dday1, dday1_str);
+                }
+                if (dday2_str[0] != '\0') {
+                    printf("D%+d: %s\n", dday2, dday2_str);
+                }
                 break;
             case 0:
                 r = 0;
@@ -434,6 +514,7 @@ dayPtr create_day(void) {
     newOne->maxIndex = -1;
     newOne->toDoArr = NULL;
     newOne->isBookMarkExists = 0;
+    newOne->isHoliday = 0;
 
     return newOne;
 }
@@ -629,6 +710,11 @@ int insert(yearGrp* db, toDoPtr targetData) {
         free(targetData); /* since it's already allocated! */
         return 1;
     }
+
+    if (targetData->dateData % 10000 == 9999) {
+        dd->isHoliday = 1; /* set holiday */
+    }
+
     //puts("inserted");
     /* Insert */
     insert_toDo(dd, targetData);
@@ -822,6 +908,7 @@ void sortGivenDateToDos(dayPtr when, int sortType) {
      * sortType 2: time first
      * other numbers: regarded as priority
     */
+    toDoPtr temp = NULL;
 
     if (!when) {
         puts("No datas to sort");
@@ -830,12 +917,22 @@ void sortGivenDateToDos(dayPtr when, int sortType) {
 
     /* kind of radix(bucket) */
     if (sortType == 1) {
-        quickSort_byDate(when->toDoArr, 0, when->maxIndex);
         quickSort_byPriNum(when->toDoArr, 0, when->maxIndex);
+        if ((when->toDoArr)[when->maxIndex]->dateData % 10000 == 9999) { /* support for public holiday-sort */
+            temp = (when->toDoArr)[when->maxIndex];
+            (when->toDoArr)[when->maxIndex] = (when->toDoArr)[0];
+            (when->toDoArr)[0] = temp;
+            quickSort_byPriNum(when->toDoArr, 1, when->maxIndex);
+        }
     }
     else {
-        quickSort_byPriNum(when->toDoArr, 0, when->maxIndex);
         quickSort_byDate(when->toDoArr, 0, when->maxIndex);
+        if ((when->toDoArr)[when->maxIndex]->dateData % 10000 == 9999) { /* support for public holiday-sort */
+            temp = (when->toDoArr)[when->maxIndex];
+            (when->toDoArr)[when->maxIndex] = (when->toDoArr)[0];
+            (when->toDoArr)[0] = temp;
+            quickSort_byDate(when->toDoArr, 1, when->maxIndex);
+        }
     }
 
     return;
@@ -956,17 +1053,17 @@ int getTodaySchedule_Summarized(unsigned long long today, char* strbuf) {
         for (i = 0; i <= dd->maxIndex; i++) {
             if ((dd->toDoArr)[i]->priority) /* if bookmarked */ {
                 /*            Time->BookMarked->Title*/
-                sprintf(temp, "[^%04llu*]^%-30s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
+                sprintf(temp, "[^%04llu*%d]^%-25s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->priority, (dd->toDoArr)[i]->title);
             }
             else {
                 /*            Time->Title*/
-                sprintf(temp, "[^%04llu]^%-30s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
+                sprintf(temp, "[^%04llu]^%-25s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title);
             }
             /* Ver 2.0, 0504 */
             strcat(str, temp);
         }
     }
-
+    strcat(str, "\0");
     strcpy(strbuf, str);
 
     return 0;
@@ -1009,11 +1106,11 @@ int getTodaySchedule_withDetails(unsigned long long today, char* strbuf, int dir
 
         if ((dd->toDoArr)[i]->priority) { /* if bookmarked */
             /*         Time->BookMarked->Title(NL)->Details*/
-            sprintf(temp, "[^%04llu*]^%-30s]]%s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
+            sprintf(temp, "[^%04llu*%d]^%-25s]]%s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->priority, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
         }
         else {
             /*         Time->Title(NL)->Details*/
-            sprintf(temp, "[^%04llu]^%-30s]]%s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
+            sprintf(temp, "[^%04llu]^%-25s]]%s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
         }
         strcat(str, temp);
     }
@@ -1032,6 +1129,7 @@ void getTodaySchedule_withDetails_iterEnd(void) {
 
 void coreInit(void) {
     allocReminder();
+    initDday();
 
     load();
     /* dummy datas just for leap year / month limit check */
@@ -1065,6 +1163,7 @@ int load(void) {
 
     freeAllMem(); /* erases node entry */
     initSaveMem(); /* erases nodes and hashLinks */
+    initDday();
 
     fd_bin = open(bin_fileName, O_CREAT | O_RDWR); /* if exists, then read, or not, then creat */
     if (fd_bin == -1) {
@@ -1076,6 +1175,8 @@ int load(void) {
         errOcc("read");
     }
     restoreReminder(); /* then restore it */
+    /* read D-day */
+    loadDday(&fd_bin); /* file descriptor gets refreshed when keep reading/accessing to the file: at the point where last access occured. */
 
     buf = (toDoPtr)malloc(sizeof(toDo));
     while ((chunk = read(fd_bin, buf, sizeof(toDo))) != 0) {
@@ -1092,6 +1193,15 @@ int load(void) {
     
 
     ifAlreadyLoaded = 1;
+
+    close(fd_bin);
+
+    fd_bin = open(pub_fileName, O_RDONLY);
+    if (fd_bin == -1) {
+        errOcc("load");
+    }
+
+    getHolidayInfos(fd_bin);
 
     close(fd_bin);
 
@@ -1124,6 +1234,9 @@ int save(void) {
     if ((written = write(fd_bin, rmdr, sizeof(reminder))) != sizeof(reminder)) {
         errOcc("write");
     }
+    /* D-day write */
+    saveDday(&fd_bin);
+
     /* bin */
     for (int i = 0; i <= saveLink->maxIndex; i++) {
         if ((written = write(fd_bin, ((saveLink->toDoData)[i]), sizeof(toDo))) != sizeof(toDo)) {
@@ -1184,6 +1297,15 @@ int save_hr(FILE* fp) {
     }
     else {
         fprintf(fp, "Reminder has not set yet.\n\n");
+    }
+
+    if (dStack->stackTop == -1) { /* D-day */
+        fprintf(fp, "D-day has not set yet.\n\n");
+    }
+    else {
+        for (i = 0; i <= dStack->stackTop; i++) {
+            fprintf(fp, "#%d: %llu, %s\n", i, (dStack->toDoStack)[i]->dateData / 10000, (dStack->toDoStack)[i]->title);
+        }
     }
 
     while (db) { /* wtf */
@@ -1479,7 +1601,7 @@ void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
 
     for (i = 1; i <= counter; i++) {
         if ((temp = getBookMarked(today, i))) {
-            sprintf(tempstr, "*[^%04llu]^%-30s", temp->dateData % 10000, temp->title);
+            sprintf(tempstr, "*%d[^%04llu]^%-25s", temp->priority, temp->dateData % 10000, temp->title);
         }
         strcat(retstr, tempstr);
     }
@@ -1507,7 +1629,7 @@ void deleteRecord(dayPtr when, int index) {
         return; /* err hndl */
     }
 
-    if ((when->toDoArr)[index]->priority == 1) {
+    if ((when->toDoArr)[index]->priority != 0) { /* to support multi colored bookmarks */
         when->isBookMarkExists = 0; /* erase bookmark when target has the key */
     }
 
@@ -1545,7 +1667,11 @@ void deleteWhileIterate(unsigned long long src, int pageNum) {
     }
 
     sortGivenDateToDos(dtmp, 2); /* being ready for index-based iteration */
-    if ((dtmp->toDoArr)[pageNum - 1]->priority == 1) { /* if bookmarked... */
+
+    /* don't delete public holiday */
+    if ((dtmp->toDoArr)[pageNum - 1]->dateData % 10000 == 9999) return;
+
+    if ((dtmp->toDoArr)[pageNum - 1]->priority != 0) { /* if bookmarked... */
         dtmp->isBookMarkExists = 0;
     }
 
@@ -1576,11 +1702,11 @@ int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_d
 
     sortGivenDateToDos(dtmp, 2); /* being ready for index-based iteration */
 
-    if (t_priority == 1 && dtmp->isBookMarkExists == 1 && (dtmp->toDoArr)[pageNum - 1]->priority != 1) {
+    if (t_priority == 1 && dtmp->isBookMarkExists != 0 && (dtmp->toDoArr)[pageNum - 1]->priority != 1) {
         return 1; /* if already bookmarked todo exists */
     }
 
-    if ((dtmp->toDoArr)[pageNum - 1]->priority == 1) { /* if tries to edit what's bookmarked... */
+    if ((dtmp->toDoArr)[pageNum - 1]->priority != 0) { /* if tries to edit what's bookmarked... */
         dtmp->isBookMarkExists = 0;
     }
 
@@ -1755,6 +1881,239 @@ void myscanf(FILE* fd, char* target) {
     temp[idx] = '\0';
 
     strcpy(target, temp);
+
+    return;
+}
+
+int isBookMarked(unsigned long long targetDate) { /* YYYYMMDD */
+    yearPtr ytmp; monthPtr mtmp; dayPtr dtmp;
+    int i;
+
+    ytmp = findYear(targetDate / 10000, &key);
+    mtmp = findMonth(targetDate % 10000 / 100, ytmp);
+    dtmp = findDay(targetDate % 100, mtmp);
+
+    if (dtmp->toDoArr == NULL) { /* just to be safe */
+        return 0; /* no record existed at the date at first */
+    }
+
+    for (i = 0; i <= dtmp->maxIndex; i++) {
+        if ((dtmp->toDoArr)[i]->priority) {
+            return (dtmp->toDoArr)[i]->priority; /* return bookmark number */
+        }
+    }
+
+    /* if no bookmarks exists */
+    return 0;
+}
+
+/* For further implementations: Basic search algorithm
+    yearPtr ytmp; monthPtr mtmp; dayPtr dtmp;
+
+    ytmp = findYear(src / 10000, &key);
+    mtmp = findMonth(src % 10000 / 100, ytmp);
+    dtmp = findDay(src % 100, mtmp);
+*/
+void initDday(void) {
+    if (dStack) {
+        free(dStack->toDoStack);
+        free(dStack);
+    }
+
+    dStack = (dDayPtr)malloc(sizeof(dDay));
+    dStack->stackTop = -1;
+    dStack->toDoStack = NULL;
+}
+void allocDdayStack(toDoPtr target) {
+    if (dStack->stackTop == -1) {
+        dStack->toDoStack = (toDoPtr*)malloc(sizeof(toDoPtr));
+        if (!dStack->toDoStack) {
+            errOcc("allocDdayStack");
+        }
+        /* memcpy */
+        (dStack->toDoStack)[0] = (toDoPtr)malloc(sizeof(toDo));
+        memcpy((dStack->toDoStack)[0], target, sizeof(toDo));
+        dStack->stackTop += 1;
+        return;
+    }
+
+    dStack->stackTop += 1;
+    dStack->toDoStack = (toDoPtr*)realloc(dStack->toDoStack, dStack->stackTop + 1);
+    if (!dStack->toDoStack) {
+        errOcc("allocDdayStack");
+    }
+    /* memcpy */
+    (dStack->toDoStack)[dStack->stackTop] = (toDoPtr)malloc(sizeof(toDo));
+    memcpy((dStack->toDoStack)[dStack->stackTop], target, sizeof(toDo));
+
+    return;
+}
+void freeDdayStack(void) {
+    if (dStack->stackTop == -1) {
+        return;
+    }
+
+    dStack->stackTop -= 1;
+    if (dStack->stackTop == -1) { /* empty stack handling */
+        free(dStack->toDoStack);
+        dStack->toDoStack = NULL;
+        return;
+    }
+
+    dStack->toDoStack = (toDoPtr*)realloc(dStack->toDoStack, dStack->stackTop + 1);
+    if (!dStack->toDoStack) {
+        errOcc("freeDdayStack");
+    }
+}
+int pushDday(toDoPtr target) {
+    if (dStack->stackTop >= 1) {
+        return 1; /* cannot add more! */
+    }
+
+    allocDdayStack(target);
+
+    return 0;
+}
+int setDdayWhileIterate(unsigned long long src, int pageNum) {
+    /* src = YYYYMMDD */
+    yearPtr ytmp; monthPtr mtmp; dayPtr dtmp;
+
+    ytmp = findYear(src / 10000, &key);
+    mtmp = findMonth(src % 10000 / 100, ytmp);
+    dtmp = findDay(src % 100, mtmp);
+
+    if (dtmp->toDoArr == NULL || pageNum < 1 || pageNum > dtmp->maxIndex + 1) { /* just to be safe */
+        return 2; /* no such data- */
+    }
+
+    sortGivenDateToDos(dtmp, 2); /* being ready for index-based iteration */
+
+    return pushDday((dtmp->toDoArr)[pageNum - 1]);
+}
+void popDday(void) { /* LIFO */
+    freeDdayStack();
+
+    return;
+}
+void getDday(int* slot1, char* title1, int* slot2, char* title2) { /* returns -1 if no existence, returns date diff if exists. -2 if err.*/
+    struct tm dt, *today;
+    time_t curdat;
+
+    time(&curdat);
+    today = localtime(&curdat);
+
+    if (dStack->stackTop == -1) {
+        title1[0] = '\0';
+        title2[0] = '\0';
+        return;
+    }
+    else if (dStack->stackTop == 0) {
+        /* deprecated
+        sprintf(str1, "%04llu-%02llu-%02llu\n", (dStack->toDoStack)[0]->dateData / 10000, (dStack->toDoStack)[0]->dateData % 10000 / 100,
+            (dStack->toDoStack)[0]->dateData % 100);
+        strptime(str1, "%F", &dt);
+        */
+        dt.tm_year = ((dStack->toDoStack)[0]->dateData / 10000) / 10000 - 1900;
+        dt.tm_mon = (((dStack->toDoStack)[0]->dateData / 10000) % 10000) / 100 - 1; /* struct tm's day range: [1, 31], but month: [0, 11] why??? */
+        dt.tm_mday = ((dStack->toDoStack)[0]->dateData / 10000) % 100;
+        *slot1 = julian_day(today) - julian_day(&dt);
+        //printf("%d %d %d to %d %d %d\n", dt.tm_year, dt.tm_mon, dt.tm_mday, today->tm_year, today->tm_mon, today->tm_mday);
+        strcpy(title1, (dStack->toDoStack)[0]->title);
+        title2[0] = '\0';
+
+        return;
+    }
+    else if (dStack->stackTop == 1) {
+        /* deprecated
+        sprintf(str1, "%04llu-%02llu-%02llu\n", (dStack->toDoStack)[0]->dateData / 10000, ((dStack->toDoStack)[0]->dateData % 10000) / 100,
+            (dStack->toDoStack)[0]->dateData % 100);
+        strptime(str1, "%F", &dt);
+        */
+        dt.tm_year = ((dStack->toDoStack)[0]->dateData / 10000) / 10000 - 1900;
+        dt.tm_mon = (((dStack->toDoStack)[0]->dateData / 10000) % 10000) / 100 - 1; /* struct tm's day range: [1, 31], but month: [0, 11] why??? */
+        dt.tm_mday = ((dStack->toDoStack)[0]->dateData / 10000) % 100;
+        //printf("%d %d %d to %d %d %d\n", dt.tm_year, dt.tm_mon, dt.tm_mday, today->tm_year, today->tm_mon, today->tm_mday);
+        *slot1 = julian_day(today) - julian_day(&dt);
+        strcpy(title1, (dStack->toDoStack)[0]->title);
+        /* deprecated
+        sprintf(str1, "%04llu-%02llu-%02llu\n", (dStack->toDoStack)[1]->dateData / 10000, ((dStack->toDoStack)[1]->dateData % 10000) / 100,
+            (dStack->toDoStack)[1]->dateData % 100);
+        strptime(str1, "%F", &dt);
+        */
+        dt.tm_year = ((dStack->toDoStack)[1]->dateData / 10000) / 10000 - 1900;
+        dt.tm_mon = (((dStack->toDoStack)[1]->dateData / 10000) % 10000) / 100 - 1; /* struct tm's day range: [1, 31], but month: [0, 11] why??? */
+        dt.tm_mday = ((dStack->toDoStack)[1]->dateData / 10000) % 100;
+        //printf("%d %d %d to %d %d %d\n", dt.tm_year, dt.tm_mon, dt.tm_mday, today->tm_year, today->tm_mon, today->tm_mday);
+        *slot2 = julian_day(today) - julian_day(&dt);
+        strcpy(title2, (dStack->toDoStack)[1]->title);
+
+        return;
+    }
+
+    *slot1 = -2;
+    *slot2 = -2;
+    return;
+}
+void saveDday(int* fd) {
+    int i = 0; int btw = 0;
+
+    btw = write(*fd, &(dStack->stackTop), sizeof(int));
+    if (btw == -1) {
+        errOcc("saveDday");
+    }
+    for (i = dStack->stackTop; i > -1; i--) {
+        btw = write(*fd, (dStack->toDoStack)[i], sizeof(toDo));
+        if (btw == -1) {
+            errOcc("saveDday");
+        }
+    }
+}
+void loadDday(int *fd) {
+    int i = 0; int btw = 0;
+    toDoPtr buf;
+
+    btw = read(*fd, &i, sizeof(int));
+    if (btw == -1) errOcc("loadDday");
+
+    //dStack->stackTop = i;
+    
+    for (; i > -1; i--) {
+        buf = (toDoPtr)malloc(sizeof(toDo));
+        btw = read(*fd, buf, sizeof(toDo));
+        //printf("%llu %s\n", buf->dateData, buf->title);
+        if (btw == -1) errOcc("loadDday");
+        pushDday(buf);
+    }
+    
+    return;
+}
+int isHoliday(unsigned long long target) { /* YYYYMMDD */
+    yearPtr ytmp; monthPtr mtmp; dayPtr dtmp;
+
+    ytmp = findYear(target / 10000, &key);
+    mtmp = findMonth(target % 10000 / 100, ytmp);
+    dtmp = findDay(target % 100, mtmp);
+
+    if (!dtmp) return 0; /* no record at first */
+
+    return dtmp->isHoliday;
+}
+void getHolidayInfos(int fd) { /* let fp := "public.dsv", dsv stands for default save */
+    int bytesRead = 0;
+    toDoPtr buf;
+
+    if (!fd) {
+        errOcc("getHolidayInfos");
+    }
+
+    buf = (toDoPtr)malloc(sizeof(toDo));
+    while ((bytesRead = read(fd, buf, sizeof(toDo))) != 0) {
+        if (bytesRead == -1) {
+            errOcc("getHolidayInfos");
+        }
+        insert(&key, buf);
+        buf = (toDoPtr)malloc(sizeof(toDo));
+    } free(buf); /* last dummy one */
 
     return;
 }
