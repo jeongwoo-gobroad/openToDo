@@ -1145,7 +1145,7 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
     int month = targetDate % 100000000 / 1000000;
     int day = targetDate % 1000000 / 10000;
     int row = pos_SUR_stt.row, col = pos_SUR_stt.col;
-    int width = pos_SUR_end.col - pos_SUR_stt.col + 1;
+    //int width = pos_SUR_end.col - pos_SUR_stt.col + 1;
     clearGivenNonCalendarArea(2);
     mvprintw(row, col, "ToDos | %d-%02d-%02d", year, month, day);
     row += 2;
@@ -1200,7 +1200,7 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
     int year = targetDate / 100000000;
     int month = targetDate % 100000000 / 1000000;
     int day = targetDate % 1000000 / 10000;
-    int width = pos_SUR_end.col - pos_SUR_stt.col + 1;
+    //int width = pos_SUR_end.col - pos_SUR_stt.col + 1;
     char str[BUFSIZ] = {'\0', };
     char* strbuf = str;
     int numofsche = getNumOfSchedule(targetDate / 10000);
