@@ -92,6 +92,7 @@ void print_date_ToDoSummarized(unsigned long long targetDate);
 void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* page); 
 void print_UpcomingBookMark();
 void edit_plan(unsigned long long targetDate, int* page);
+void printColorStrip(int colorNum);
 /*-----Display control--------------------------------------------------------------*/
 void clearGivenCalendarArea(/*index of pos_sc_date*/int row, int col);
 void clearGivenRowCols(int fromRow, int fromCol, int toRow, int toCol);
@@ -162,6 +163,12 @@ int main(int argc, char* argv[]) {
     start_color();
     init_pair(1, COLOR_RED, COLOR_BLACK);
     init_pair(2, COLOR_RED, COLOR_WHITE);
+    /* for bookmark strips */
+    init_pair(3, COLOR_GREEN, COLOR_GREEN);
+    init_pair(4, COLOR_CYAN, COLOR_CYAN);
+    init_pair(5, COLOR_MAGENTA, COLOR_MAGENTA);
+    init_pair(6, COLOR_WHITE, COLOR_WHITE);
+    /* for bookmark strips ended */
 
     initPosVar();
     initScreen();
@@ -1148,6 +1155,7 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
     //int width = pos_SUR_end.col - pos_SUR_stt.col + 1;
     clearGivenNonCalendarArea(2);
     mvprintw(row, col, "ToDos | %d-%02d-%02d", year, month, day);
+    int chkColorPair = 0;
     row += 2;
     char str[BUFSIZ] = {'\0', };
     char *strbuf = str;//malloc(1000 * sizeof(char));
@@ -1156,6 +1164,7 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
     else {
         strbuf = str;
         while (*strbuf != '\0') {
+            col = pos_SUR_stt.col;
             if (row >= pos_SUR_end.row - 1) {
                 mvprintw(pos_SUR_end.row, col, "+%d more...", numofsche - count);
                 break;
@@ -1164,25 +1173,40 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
                 strbuf++;
                 if (*strbuf == '^') {
                     strbuf++;
-                    mvprintw(row, col, "%.2s:", strbuf);
-                    strbuf += 2;
-                    printw("%.2s", strbuf);
-                    strbuf += 2;
+                    if (strncmp(strbuf, "9999", 4) == 0) {
+                        attron(A_BOLD);
+                        mvprintw(row, col, "All Day Long"); /* 볼드체와 색을 동시에 지정하면, 아스키코드가 이상하게 shift 됩니다. 혹시 왜 그런지 아시나요? */
+                        attroff(A_BOLD);
+                        strbuf += 4;
+                    }
+                    else {
+                        mvprintw(row, col, "%.2s:", strbuf);
+                        strbuf += 2;
+                        printw("%.2s", strbuf);
+                        strbuf += 2;
+                    }
                     row++;
                 }
             }
             else if (*strbuf == '*') {
                 strbuf++;
-                attron(COLOR_PAIR(1));
+                (chkColorPair = (int)(*(strbuf++) - 48));
             }
             else if (*strbuf == ']') {
                 strbuf++;
                 if (*strbuf == '^') {
                     strbuf++;
-                    mvprintw(row, col, "-> %.25s", strbuf);
+                    mvprintw(row, col++, " ");
+                    /* for bookmark strip */
+                    printColorStrip(chkColorPair);
+                    /* for bookmark strip */
+                    col += 2;
+                    if (chkColorPair) attron(A_BOLD); /* for ones bookmarked */
+                    mvprintw(row, col, " %.25s", strbuf); /* two blocks of strips */
+                    if (chkColorPair) attroff(A_BOLD); /* for ones bookmarked */
+                    chkColorPair = 0;
                     row += 2;
                     strbuf += 25;
-                    attroff(COLOR_PAIR(1));
                     count++;
                 }
             }
@@ -1200,6 +1224,7 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
     int year = targetDate / 100000000;
     int month = targetDate % 100000000 / 1000000;
     int day = targetDate % 1000000 / 10000;
+    int chkColorPair = 0;
     //int width = pos_SUR_end.col - pos_SUR_stt.col + 1;
     char str[BUFSIZ] = {'\0', };
     char* strbuf = str;
@@ -1227,26 +1252,43 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
     //printf("%d", *page);
     strbuf = str;
     while (*strbuf != '\0') { /* 이게 있어야 뭔가 알 수 없는 프리징이 생기지 않는 것 같습니다. */
+        col = pos_SUR_stt.col;
         if (*strbuf == '[') {
             strbuf++;
             if (*strbuf == '^') {
                 strbuf++;
-                mvprintw(row, col, "%.2s:", strbuf);
-                strbuf += 2;
-                printw("%.2s", strbuf);
-                strbuf += 2;
+                if (strncmp(strbuf, "9999", 4) == 0) {
+                    attron(A_BOLD);
+                    mvprintw(row, col, "All Day Long"); /* 볼드체와 색을 동시에 지정하면, 아스키코드가 이상하게 shift 됩니다. 혹시 왜 그런지 아시나요? */
+                    attroff(A_BOLD);
+                    strbuf += 4;
+                }
+                else {
+                    mvprintw(row, col, "%.2s:", strbuf);
+                    strbuf += 2;
+                    printw("%.2s", strbuf);
+                    strbuf += 2;
+                }
                 row++;
             }
         }
         else if (*strbuf == '*') {
             strbuf++;
-            attron(COLOR_PAIR(1));
+            (chkColorPair = (int)(*(strbuf++) - 48));
         }
         else if (*strbuf == ']') {
             strbuf++;
             if (*strbuf == '^') {
                 strbuf++;
-                mvprintw(row, col, "-> %.25s", strbuf);
+                mvprintw(row, col++, " ");
+                /* for bookmark strip */
+                printColorStrip(chkColorPair);
+                /* for bookmark strip */
+                col += 2;
+                if (chkColorPair) attron(A_BOLD); /* for ones bookmarked */
+                mvprintw(row, ++col, " %.25s", strbuf); /* two blocks of strips */
+                if (chkColorPair) attroff(A_BOLD); /* for ones bookmarked */
+                chkColorPair = 0;
                 row += 2;
                 strbuf += 25;
                 attroff(COLOR_PAIR(1));
@@ -1254,7 +1296,7 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
             else if (*strbuf == ']') {
                 strbuf++;
                 mvprintw(row, col, "Details...");
-                row++;
+                row += 2;
                 char delimiters[] = "!\"#$%&\'()*+,-./:;<=>?@[\\]^_{|}~ ";
                 char* ptr;
                 int length;
@@ -1362,7 +1404,7 @@ void popup(char* title, char* str1, char* str2, int delay) {
         }
     }
 
-    /* printting boundaries */
+    /* printing boundaries */
     /* since LINES are longer than COLS, /= 4. */
     for (i = lineAxis - size / 4; i <= lineAxis + size / 4; i++) {\
         move(i, colAxis - size); standout(); addch(' '); standend(); 
@@ -1431,6 +1473,20 @@ void popup(char* title, char* str1, char* str2, int delay) {
         free(save[i]);
     }
     free(save);
+
+    return;
+}
+void printColorStrip(int colorNum) {
+    if (colorNum == 0) /* default */ {
+        attron(COLOR_PAIR(6)); /* 6 := off-white */
+        addstr("  ");
+        attroff(COLOR_PAIR(6));
+        return;
+    }
+    colorNum += 2; /* refer to the definition of bookmark color */
+    attron(COLOR_PAIR(colorNum));
+    addstr("  ");
+    attroff(COLOR_PAIR(colorNum));
 
     return;
 }

@@ -1239,6 +1239,9 @@ int save(void) {
 
     /* bin */
     for (int i = 0; i <= saveLink->maxIndex; i++) {
+        if ((saveLink->toDoData)[i]->dateData % 10000 == 9999) { /* if system default(public holiday) */
+            continue; /* don't save: it's loaded from other source. */
+        }
         if ((written = write(fd_bin, ((saveLink->toDoData)[i]), sizeof(toDo))) != sizeof(toDo)) {
             errOcc("write");
         }
@@ -1990,8 +1993,16 @@ int setDdayWhileIterate(unsigned long long src, int pageNum) {
 
     return pushDday((dtmp->toDoArr)[pageNum - 1]);
 }
-void popDday(void) { /* LIFO */
+void popDday(void) { /* FIFO-like just for TWO elements */
+    //toDoPtr temp = (toDoPtr)malloc(sizeof(toDo));
+    
+    /* backup last record for FIFO-like action */
+    //memcpy(temp, (dStack->toDoStack)[dStack->stackTop], sizeof(toDo));
+    /* then, pop everything */
+    //freeDdayStack();
     freeDdayStack();
+    /* then, push again */
+    
 
     return;
 }
