@@ -16,7 +16,8 @@ int main(void) {
 
     vector<string> title = {"Morning Jog", "Team Meeting", "Lunch with Mentor", "Code Review", "Dentist Appointment", "Grocery Shopping", "Book Club", "Gym Session",
         "Study Time", "Call Parents", "Yoga Class", "Client Meeting" ,"Write Report" ,"Cook Dinner", "Read Articles", "Plan Trip", "Guitar Practice", 
-        "Check Emails", "Laundry", "Bedtime"};
+        "Check Emails", "Laundry", "Bedtime", "Team Discussion", "Lunch Appointment", "Gym Workout", "Reading Time", "Shopping", "Movie Night", "Family Gathering", 
+        "Study Session", "Travel Booking", "Coffee Break"};
     vector<string> info = {"Start the day with a 30-minute run in the park.",
         "Discuss project milestones and delegate tasks.",
         "Meet at noon at Cafe Luna to discuss career plans.",
@@ -36,7 +37,17 @@ int main(void) {
         "Learn new chords and practice the song Yesterday.",
         "Reply to urgent messages and organize inbox.",
         "Wash clothes and prepare outfits for the week.",
-        "Wind down by 10 PM and review plans for tomorrow."};
+        "Wind down by 10 PM and review plans for tomorrow."
+        , "Discuss project updates and next steps."
+        , "Meet with a colleague for lunch."
+        , "Hit the gym for a workout session."
+        , "Dive into a new novel."
+        , "Visit the mall for some shopping."
+        , "Watch the latest movie at the theater."
+        , "Enjoy a family dinner."
+        , "Prepare for upcoming exams."
+        , "Reserve summer vacation flights."
+        , "Catch up with a friend at a cafe."};
 
     int size;
     int a, b;
@@ -59,7 +70,7 @@ int main(void) {
     uniform_int_distribution<unsigned long long> dayA(8, 8);
     uniform_int_distribution<unsigned long long> hour(0, 23);
     uniform_int_distribution<unsigned long long> minute(0, 59);
-    uniform_int_distribution<unsigned long long> titleCntx(0, 19);
+    uniform_int_distribution<unsigned long long> titleCntx(0, 29);
     uniform_int_distribution<unsigned long long> infoCntx(0, 6);
     uniform_int_distribution<int> pnum(0, 3);
 
@@ -68,7 +79,8 @@ int main(void) {
             tmp = year(gen) * yearmult + month(gen) * monthmult + day(gen) * daymult + hour(gen) * hourmult + minute(gen);
             //cout << year(gen) * yearmult << endl;
             //cout << "1" << endl;
-            cout << tmp << "\n" << pnum(gen) << "\n" << title[titleCntx(gen)] << "\n" << info[titleCntx(gen)] << endl;
+            int k = titleCntx(gen);
+            cout << tmp << "\n" << pnum(gen) << "\n" << title[k] << "\n" << info[k] << endl;
             //printf("%lu %s %s\n", tmp, title[titleCntx(gen)], info[infoCntx(gen)]);
         }
     }
@@ -77,12 +89,13 @@ int main(void) {
             tmp = yearA(gen) * yearmult + monthA(gen) * monthmult + dayA(gen) * daymult + hour(gen) * hourmult + minute(gen);
             //cout << year(gen) * yearmult << endl;
             //cout << "1" << endl;
-            cout << tmp << "\n" << pnum(gen) << "\n" << title[titleCntx(gen)] << "\n" << info[titleCntx(gen)] << endl;
+            int k = titleCntx(gen);
+            cout << tmp << "\n" << pnum(gen) << "\n" << title[k] << "\n" << info[k] << endl;
             //printf("%lu %s %s\n", tmp, title[titleCntx(gen)], info[infoCntx(gen)]);
         }
     }
 
-    Sleep(100000);
+    Sleep(1000000);
 
     return 0;
 }
