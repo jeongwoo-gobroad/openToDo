@@ -124,7 +124,7 @@ int getTodaySchedule_withDetails(unsigned long long today, char* strbuf, int dir
 void getTodaySchedule_withDetails_iterEnd(void);
 void getBookMarkedInDate(unsigned long long today, int counter, char* str);
 
-void deleteWhileIterate(unsigned long long src, int pageNum);
+int deleteWhileIterate(unsigned long long src, int pageNum);
 int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_day, char* t_title, char* t_details, int t_priority);
 int setReminder(time_t current, time_t delta, int repeatCnter, char* what, int intervals);
 int isReminderSetAlready(char* str);
@@ -245,7 +245,12 @@ int main(int argc, char* argv[]) {
                 }
                 /* delete record */
                 else if (c == 'd' && page != 0) {
-                    deleteWhileIterate(selectDate, page); /* del */
+                    if (deleteWhileIterate(selectDate, page) != 0) /* del */ {
+                        popup("Cannot Delete!", NULL, "System Default Public Holiday", 5);
+                    }
+                    else {
+                        popup("Deletion Successful", "", NULL, 5);
+                    }
                     //getTodaySchedule_withDetails_iterEnd(); /* refresh */
                     print_date_NumOfSchedule(selectDate); /* refresh screen */
                     print_date_ToDoWithdetails(selectDate, 0, &page); /* show */
@@ -1017,6 +1022,8 @@ void get_todo() {
         case 2: /* nsdf */
             popup("Cannot Save", NULL, "No such date format!", 5);
             break;
+        case 3:
+            popup("Cannot Save", NULL, "invaild time", 5);
         default:
             break;
     }

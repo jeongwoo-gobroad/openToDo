@@ -49,7 +49,7 @@ int main(void) {
     if (cmd == 1) exit(0);
 
     fd = open(fn, O_CREAT | O_RDWR | O_TRUNC); i = 0;
-    while (i < idx && (btw = write(fd, &arr[i], sizeof(arr[i])) != 0)) {
+    while (i < idx && (btw = write(fd, arr[i], sizeof(arr[i])) != 0)) {
         i++;
     }
     close(fd);

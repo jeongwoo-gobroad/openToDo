@@ -160,7 +160,7 @@ int insert(yearGrp* db, toDoPtr targetData);
 void printAll(yearGrp db);
 dayPtr search_byDate(unsigned long long target);
 int get_toDo_byForm(toDoPtr target, char** buf);
-void deleteRecord(dayPtr when, int index);
+int deleteRecord(dayPtr when, int index);
 
 void sortGivenDateToDos(dayPtr when, int sortType);
 void quickSort_byPriNum(toDoPtr* arr, int from, int to);
@@ -184,7 +184,7 @@ void allocReminder(void);
 //void setDday(unsigned long long target, int adjust); /* YYYYMMDD, adjust := 1 to D+, adjust := 2 to D- */
 //int getDday(int adjust); /* adjust := 1 to D+, adjust := 2 to D- */
 //int isHoliday(unsigned long long target);
-void getHolidayInfos(int fd); /* time: 9999 fixed */
+void getHolidayInfos(int* fd); /* time: 9999 fixed */
 void saveDday(int* fd);
 void loadDday(int* fd);
 //void getDday(int* slot1, char* title1, int* slot2, char* title2);
@@ -208,7 +208,7 @@ int getTodaySchedule_withDetails(unsigned long long today, char* strbuf, int dir
 void getTodaySchedule_withDetails_iterEnd(void);
 void getBookMarkedInDate(unsigned long long today, int counter, char* str);
 
-void deleteWhileIterate(unsigned long long src, int pageNum);
+int deleteWhileIterate(unsigned long long src, int pageNum);
 int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_day, char* t_title, char* t_details, int t_priority);
 int setReminder(time_t current, time_t delta, int repeatCnter, char* what, int intervals);
 int isReminderSetAlready(char* str);
@@ -668,7 +668,7 @@ int insert(yearGrp* db, toDoPtr targetData) {
        returns 1 if a bookmarked todo already exists
        returns 0 if done correctly
     */
-    int year, month, date; //hour, minute;
+    int year, month, date, hour, minute;
     yearPtr   yy;
     monthPtr  mm;
     dayPtr    dd;
@@ -677,8 +677,8 @@ int insert(yearGrp* db, toDoPtr targetData) {
     year =   (targetData->dateData) / 100000000;
     month =  (targetData->dateData) % 100000000 / 1000000;
     date =   (targetData->dateData) % 1000000 / 10000;
-    //hour =   (targetData->dateData) % 10000 / 100;
-    //minute = (targetData->dateData) % 100;
+    hour =   (targetData->dateData) % 10000 / 100;
+    minute = (targetData->dateData) % 100;
 
     /* Search */
     yy = findYear(year, db);
@@ -700,6 +700,12 @@ int insert(yearGrp* db, toDoPtr targetData) {
         free(targetData); /* since it's already allocated! */
         return 2;
     }
+    /* HHMM Check */
+    if ((hour > 24 || minute > 60) && !(hour == 99 && minute == 99)) { /* holiday default SHOULD be added */
+        free(targetData);
+        return 3; /* invaild time or minute */
+    }
+
     /* then save... */
     dd = findDay(date, mm);
     /* one bookmark per day */
@@ -1196,12 +1202,12 @@ int load(void) {
 
     close(fd_bin);
 
-    fd_bin = open(pub_fileName, O_RDONLY);
+    fd_bin = open(pub_fileName, O_RDWR);
     if (fd_bin == -1) {
         errOcc("load");
     }
 
-    getHolidayInfos(fd_bin);
+    getHolidayInfos(&fd_bin);
 
     close(fd_bin);
 
@@ -1615,9 +1621,16 @@ void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
 }
 
 /* For Deletion Features - 0.0.3 added */
-void deleteRecord(dayPtr when, int index) {
+int deleteRecord(dayPtr when, int index) {
     int i;
     int svidx = -1;
+
+    if (index > when->maxIndex || (index < 0 || when->maxIndex == -1)) {
+        return 1; /* err hndl: no such record exists */
+    }
+    if ((when->toDoArr)[index]->dateData % 10000 == 9999) {
+        return 2; /* err hndl: cannot erase public holiday! */
+    }
 
     /* prepare for the back structure adjustment */
     for (i = 0; i <= saveLink->maxIndex; i++) {
@@ -1628,10 +1641,6 @@ void deleteRecord(dayPtr when, int index) {
     }
 
     /* free in the tree structure */
-    if (index > when->maxIndex || (index < 0 || when->maxIndex == -1)) {
-        return; /* err hndl */
-    }
-
     if ((when->toDoArr)[index]->priority != 0) { /* to support multi colored bookmarks */
         when->isBookMarkExists = 0; /* erase bookmark when target has the key */
     }
@@ -1653,9 +1662,9 @@ void deleteRecord(dayPtr when, int index) {
 
     --(when->maxIndex);
 
-    return;
+    return 0;
 }
-void deleteWhileIterate(unsigned long long src, int pageNum) {
+int deleteWhileIterate(unsigned long long src, int pageNum) {
     /* src = YYYYMMDD */
     yearPtr ytmp; monthPtr mtmp; dayPtr dtmp;
 
@@ -1666,22 +1675,19 @@ void deleteWhileIterate(unsigned long long src, int pageNum) {
     dtmp = findDay(src % 100, mtmp);
 
     if (dtmp->toDoArr == NULL || pageNum < 1 || pageNum > dtmp->maxIndex + 1) { /* just to be safe */
-        return; /* nothing to del */
+        return 1; /* nothing to del */
     }
 
     sortGivenDateToDos(dtmp, 2); /* being ready for index-based iteration */
 
     /* don't delete public holiday */
-    if ((dtmp->toDoArr)[pageNum - 1]->dateData % 10000 == 9999) return;
+    if ((dtmp->toDoArr)[pageNum - 1]->dateData % 10000 == 9999) return 2;
 
     if ((dtmp->toDoArr)[pageNum - 1]->priority != 0) { /* if bookmarked... */
         dtmp->isBookMarkExists = 0;
     }
 
-    deleteRecord(dtmp, pageNum - 1);
-    
-
-    return;
+    return deleteRecord(dtmp, pageNum - 1);
 }
 int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_day, char* t_title, char* t_details, int t_priority) {
     /* being able to edit bookmark, date, time, title, details */
@@ -1714,10 +1720,11 @@ int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_d
     }
 
     /* actual editing start */
-    if (t_day != 1234)              (dtmp->toDoArr)[pageNum - 1]->dateData = t_day;
-    if (t_title[0] != '\0')         strcpy((dtmp->toDoArr)[pageNum - 1]->title, t_title);
-    if (t_details[0] != '\0')       strcpy((dtmp->toDoArr)[pageNum - 1]->details, t_details);
-    if (t_priority != -1)           (dtmp->toDoArr)[pageNum - 1]->priority = t_priority;
+    /*                                                    Don't allow users to edit system default holiday */
+    if (t_day != 1234 || (dtmp->toDoArr)[pageNum - 1]->dateData == 9999)              (dtmp->toDoArr)[pageNum - 1]->dateData = t_day;
+    if (t_title[0] != '\0')                                                           strcpy((dtmp->toDoArr)[pageNum - 1]->title, t_title);
+    if (t_details[0] != '\0')                                                         strcpy((dtmp->toDoArr)[pageNum - 1]->details, t_details);
+    if (t_priority != -1)                                                             (dtmp->toDoArr)[pageNum - 1]->priority = t_priority;
     /* actual editing ended */
     if ((dtmp->toDoArr)[pageNum - 1]->priority == 1) {
         dtmp->isBookMarkExists = 1; /* if it has passed the test at the first */
@@ -2109,22 +2116,24 @@ int isHoliday(unsigned long long target) { /* YYYYMMDD */
 
     return dtmp->isHoliday;
 }
-void getHolidayInfos(int fd) { /* let fp := "public.dsv", dsv stands for default save */
+void getHolidayInfos(int* fd) { /* let fp := "public.dsv", dsv stands for default save */
     int bytesRead = 0;
     toDoPtr buf;
 
-    if (!fd) {
+    if (!(*fd)) {
         errOcc("getHolidayInfos");
     }
 
     buf = (toDoPtr)malloc(sizeof(toDo));
-    while ((bytesRead = read(fd, buf, sizeof(toDo))) != 0) {
+    while ((bytesRead = read(*fd, buf, sizeof(toDo))) != 0) {
         if (bytesRead == -1) {
             errOcc("getHolidayInfos");
         }
         insert(&key, buf);
         buf = (toDoPtr)malloc(sizeof(toDo));
     } free(buf); /* last dummy one */
+
+    //puts("why this isnt working");
 
     return;
 }
