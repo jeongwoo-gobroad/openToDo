@@ -30,7 +30,7 @@ int main(void){
     }
  
     serveraddr.sin_family = AF_INET;
-    serveraddr.sin_addr.s_addr = inet_addr("192.168.0.111");
+    serveraddr.sin_addr.s_addr = inet_addr("175.201.149.127");
     serveraddr.sin_port = htons(7227);
  
     client_len = sizeof(serveraddr);
