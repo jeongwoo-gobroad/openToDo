@@ -4,6 +4,8 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 typedef struct toDo {
     unsigned long long hashNum;
@@ -15,12 +17,54 @@ typedef struct toDo {
 } toDo;
 typedef toDo* toDoPtr;
 
+static toDo arr[366];
+static int lastIndex = 0;
+
+void readFromFile(void) {
+    const char* fn = "targetText.txt";
+    FILE* fp; int idx = 0;
+
+    fp = fopen(fn, "r");
+
+    if (fp == NULL) {
+        perror("rFF");
+        exit(1);
+    }
+
+    while (!feof(fp)) {
+        fscanf(fp, "%llu\n", &(arr[idx].dateData));
+        arr[idx].dateData *= 10000; arr[idx].dateData += 9999;
+        fscanf(fp, " %[^\n]s\n", (arr[idx].title));
+        fscanf(fp, " %[^\n]s\n", (arr[idx].details));
+        idx++;
+    }
+
+    lastIndex = idx - 1;
+
+    return;
+}
+
+void writeToFile(void) {
+    const char* fn = "public.dsv";
+    int fd; int idx = 0; int btw;
+
+    fd = open(fn, O_CREAT | O_RDWR | O_TRUNC);
+    while (idx <= lastIndex && (btw = write(fd, &arr[idx], sizeof(arr[idx])) != 0)) {
+        idx++;
+    }
+    close(fd);
+}
+
 int main(void) {
+
+    readFromFile();
+
+    writeToFile();
+    /*
     int cmd; int fd; const char* fn = "public.dsv";
     int idx = 0; int i; int btw;
-
-    toDo arr[366];
-
+    */
+    /*
     while (1) {
         printf("0: quit with save 1: force quit 2: input mode 3: listing mode\n");
         printf("input: ");
@@ -53,6 +97,6 @@ int main(void) {
         i++;
     }
     close(fd);
-
+    */
     return 0;
 }

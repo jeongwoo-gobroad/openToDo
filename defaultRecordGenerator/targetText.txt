@@ -1,0 +1,60 @@
+20240101
+New Year
+New Year
+20240209
+Lunar New Year
+Lunar New Year Holiday
+20240210
+Lunar New Year
+Lunar New Year
+20240211
+Lunar New Year
+Lunar New Year Holiday
+20240212
+Lunar New Year
+Lunar New Year
+20240301
+Independence Mvmt day
+Independence Mvmt day
+20240410
+General Election
+General Election
+20240505
+Children's day
+Children's day
+20240506
+Children's day
+Children's day Holiday
+20240515
+Buddha's Birthday
+Buddha's Birthday
+20240606
+Memorial Day
+Memorial Day
+20240815
+Independence Day
+Independence Day
+20240914
+Chuseok
+Korean Thanksgiving day
+20240915
+Chuseok
+Korean Thanksgiving day
+20240916
+Chuseok
+Korean Thanksgiving day
+20240917
+Chuseok
+Korean Thanksgiving day
+20240918
+Chuseok
+Korean Thanksgiving day
+20241003
+National Day
+National Foundation Day
+20241009
+Hangul Day
+Hangul Day
+20241225
+Christmas
+Christmas
