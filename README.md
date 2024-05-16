@@ -100,7 +100,7 @@ an openToDo project: (aka Plan-it Project)
           (UX) 일정 개수 출력 함수의 string refresh 관련 알고리즘 개선
    
 
-    0.0.8: [current]
+    0.0.8:
    
           (Core) 북마크의 스티커 색을 지정할 수 있게 됨, 따라서 일자에 따른 북마크의 색을 get 할 수 있는 API 및 내부 로직 추가.
    
@@ -125,3 +125,30 @@ an openToDo project: (aka Plan-it Project)
           (기타) randomRecordGenerator의 샘플 개수를 30개로 늘리고, 타이틀 및 텍스트를 로렘 입숨에서 그럴듯 한 텍스트로 바꾸었음
 
           (기타) .dsv 파일을 생성 가능한 defaultRecordGenerator 제공.
+
+          (Server) 초대코드 및 마크업 스트링 기반의 공유 시스템 구현, proof-of-concept 단계.
+
+
+    0.0.9: [current]
+
+          (Server) 초대코드 및 마크업 스트링 기반의 공유 시스템 구현, proof-of-concept 단계.
+
+          (Client) 초대코드 및 마크업 스트링 기반의 공유 시스템 구현, proof-of-concept 단계.
+
+          (Core) 동적 할당 해제 알고리즘 일부 개선
+
+          (Core) default 레코드 생성 프로그램 개선, 편의성 제고
+
+          (Core) 추상화를 거치지 않고 UX에서 활용되는 함수들의 오류 수정, 각주 추가
+
+          (UX) 색상별 북마크 스티커의 구현 및 달력/우측 화면에의 표시
+
+          (UX) 요일별 일자 표시 색 적용
+
+          (UX) 공휴일 적색으로 표시, 공휴일 관련 DB 함수 완전 적용 완료
+
+          (UX) Reminder의 UX-Level 구현
+
+          (UX) getCommandScreen() 범용 함수 구현
+
+          (UX) UX 음영 및 색 조합 관련 개선으로 가독성 향상
