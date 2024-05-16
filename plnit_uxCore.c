@@ -1544,7 +1544,7 @@ void popup(char* title, char* str1, char* str2, int delay) {
 
     return;
 }
-void printColorStrip(int colorNum) {
+void printColorStrip(int colorNum) { 
     attrset(A_NORMAL);
     if (colorNum == 0) /* default */ {
         attron(COLOR_PAIR(9)); /* 9 := off-white */
@@ -1557,6 +1557,10 @@ void printColorStrip(int colorNum) {
         attron(COLOR_PAIR(8)); /* 8 := off-red */
         addstr("  ");
         attroff(COLOR_PAIR(8));
+        return;
+    }
+    if (colorNum == -1) { /* if -1: erase */
+        addstr("  "); /* -1 := erase */
         return;
     }
     colorNum += 4; /* refer to the definition of bookmark color */
@@ -1582,6 +1586,9 @@ void print_date_BookMark(unsigned long long targetDate) {
             move(pos_SC_date[0][i].row, pos_SC_date[0][i].col + 4 * nNum - 2);
             chkColorPair = isBookMarked(targetDate / 1000000 * 100 + date);
             if (chkColorPair) printColorStrip(chkColorPair);
+            else {
+                printColorStrip(-1);
+            }
             date++;
         }
         else {
@@ -1597,6 +1604,9 @@ void print_date_BookMark(unsigned long long targetDate) {
                 move(pos_SC_date[i][j].row, pos_SC_date[i][j].col + 4 * nNum - 2);
                 chkColorPair = isBookMarked(targetDate / 1000000 * 100 + date);
                 if (chkColorPair) printColorStrip(chkColorPair);
+                else {
+                    printColorStrip(-1);
+                }
             }
         }
     }
