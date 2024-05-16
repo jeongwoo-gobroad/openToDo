@@ -15,8 +15,10 @@
 #define SUR 2
 #define SLL 3
 #define SLR 4
-#define ON 1
+#define ON  1
 #define OFF 0
+#define SET 0
+#define DEL 1
 
 /*
  * SUL: Screen Upper Left, SUR: Screen Upper Right
@@ -56,6 +58,16 @@ typedef struct pos {
     int row, col;
 } pos;
 
+typedef struct reminder {
+    int isSet;
+    int repeatCounter;
+    time_t start;
+    time_t end;
+    time_t intervals;
+    char info[31];
+} reminder;
+typedef reminder* reminderPtr; /* for extern feature */
+
 static pos pos_SUL_stt, pos_SUL_end;
 static pos pos_SUR_stt, pos_SUR_end;
 static pos pos_SC_stt,  pos_SC_end;
@@ -94,12 +106,15 @@ void print_UpcomingBookMark();
 void edit_plan(unsigned long long targetDate, int* page);
 void printColorStrip(int colorNum);
 void print_date_BookMark(unsigned long long targetDate);
+void printReminderControl(int how);
 /*-----Display control--------------------------------------------------------------*/
 void clearGivenCalendarArea(/*index of pos_sc_date*/int row, int col);
 void clearGivenRowCols(int fromRow, int fromCol, int toRow, int toCol);
 void clearGivenNonCalendarArea(/*pre-defined Macros*/int area);
 void save_UXPart(void);
 void load_UXPart(void);
+void reminder_extends_popup(int signum);
+char getCommandScreen(char* context, char availToken[]);
 /*-----Signal handling--------------------------------------------------------------*/
 void setInputModeSigHandler(int status); /* Global Variable */
 void inputMode_sigHndl(int signum);         int inputModeForceQuit;
@@ -125,6 +140,9 @@ int getTodaySchedule_withDetails(unsigned long long today, char* strbuf, int dir
 void getTodaySchedule_withDetails_iterEnd(void);
 void getBookMarkedInDate(unsigned long long today, int counter, char* str);
 
+
+
+extern reminderPtr rmdr; 
 int deleteWhileIterate(unsigned long long src, int pageNum);
 int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_day, char* t_title, char* t_details, int t_priority);
 int setReminder(time_t current, time_t delta, int repeatCnter, char* what, int intervals);
@@ -214,6 +232,14 @@ int main(int argc, char* argv[]) {
                 }
                 else if (c == 'x') {
                     load_UXPart();
+                    break;
+                }
+                else if (c == 'q') {
+                    printReminderControl(SET);
+                    break;
+                }
+                else if (c == 'w') {
+                    printReminderControl(DEL);
                     break;
                 }
                 else continue;
@@ -478,13 +504,44 @@ pos_SC_date;
     for (i = 1; i < 7; i++) {
         for (j = pos_SC_stt.row; j <= pos_SC_end.row; j++) {
             move(j, pos_SC_date[0][i].col - 1);
+            //attron(A_DIM | COLOR_PAIR(9));
+            //addch('|'); // '|'
+            //attroff(A_DIM | COLOR_PAIR(9));
+            //attron(A_DIM);
+            //standout();
+            //addch(' ');
+            //standend();
+            //attroff(A_DIM);
+            attron(A_DIM);
             addch('|');
+            attroff(A_DIM);
         }
     }
     for (i = 0; i < 6; i++) {
         for (j = pos_SUL_stt.col; j <= pos_SUL_end.col; j++) {
             move(pos_SC_date[i][0].row - 1, j);
+            //attron(A_DIM | COLOR_PAIR(9));
+            //addch('-'); // '-'
+            /*
+            if (j % (4 * nNum + 1) != 0) {
+                attron(A_DIM);
+                standout();
+                addch(' ');
+                standend();
+                attroff(A_DIM);
+            }
+            else {
+                attron(A_DIM);
+                standout();
+                addch(' ');
+                standend();
+                attroff(A_DIM);
+            }
+            */
+            attron(A_DIM);
             addch('-');
+            attroff(A_DIM);
+            //attroff(A_DIM | COLOR_PAIR(9));
         }
     }
     attron(A_BOLD);
@@ -787,7 +844,9 @@ void print_commandLine(int mode) {
     char* command;
     switch(mode) {
     case 0: 
-        sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'i', "upwards", 'j', "left", 'k', "downwards", 'l', "right", 's', "select", 'z', "save", 'x', "load");
+        /*                  i      j      k      l      s      z      x      q      w      e*/
+        sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s",
+         'i', "upwards", 'j', "left", 'k', "downwards", 'l', "right", 's', "select", 'z', "save", 'x', "load", 'q', "set rmdr", 'w', "del rmdr", 'e', "set D-day");
         break;
     case 1:
         sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'I', "insert", 'd', "delete", 'm', "modify", '+', "D+", '-', "D-", 'b', "BookMark", 'e', "exit");
@@ -1480,7 +1539,10 @@ void popup(char* title, char* str1, char* str2, int delay) {
         for (j = colAxis - size + 1; j <= colAxis + size - 1; j++) {
             if (i == lineAxis - size / 4 || i == lineAxis + size / 4) {
                 move(i, j);
+                //attron(COLOR_PAIR(3));
                 standout(); addch(' '); standend();
+                //addch(' ');
+                //attroff(COLOR_PAIR(3));
             }
             else {
                 move(i, j);
@@ -1610,5 +1672,169 @@ void print_date_BookMark(unsigned long long targetDate) {
             }
         }
     }
+    return;
+}
+
+char getCommandScreen(char* context, char availToken[]) {
+    /*
+    ---------------------------------------
+    * @           SUL          @|@   SUR      
+    * --------------------------|   
+    * @                         |             
+    *                           |              
+    *             SC            |   
+    *                           |         @
+    *                           |----------  
+    *                          @|@         
+    * --------------------------|   
+    * @           SLL           |    SLR      
+    *                          @|         @   
+    * -------------------------------------   
+    */
+    char input;
+
+    clearGivenNonCalendarArea(SLL);
+
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, context);
+    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "input[");
+    addstr(availToken);
+    addstr("]: ");
+
+    refresh();
+    nocbreak(); // icanonon
+    echo();
+
+    while (1) {
+        input = getch();
+
+        if (strchr(availToken, input)) {
+            break;
+        }
+
+        clearGivenNonCalendarArea(SLL);
+
+        mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, context);
+        mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "input[");
+        addstr(availToken);
+        addstr("]: ");
+
+        refresh();
+    }
+
+    return input;
+}
+
+void printReminderControl(int how) {
+    char buf[BUFSIZ];
+    char context[BUFSIZ];
+    /* reminder variables */
+    char info[31]; time_t delta; int repeat, interval;
+    /* ------------------ */
+    char temp; char temparr[10];
+
+    memset(buf, 0x00, BUFSIZ);
+    memset(context, 0x00, BUFSIZ);
+
+    clearGivenNonCalendarArea(SLL);
+
+    refresh();
+    nocbreak(); // icanonon
+    echo();
+
+    if (how == SET) {
+        if (isReminderSetAlready(buf)) {
+            strcpy(context, "Reminder ");
+            strcat(context, buf);
+            strcat(context, " is already set. Want to override?");
+            refresh();
+            if ((temp = getCommandScreen(context, "yYnN")) == 'n' || temp == 'N') {
+                return; /* don't want to override */
+            }
+        }
+
+        clearGivenNonCalendarArea(SLL);
+        standout();
+        mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type reminder title below:");
+        move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
+        standend();
+        refresh();
+        getstr(info);
+
+        clearGivenNonCalendarArea(SLL);
+        standout();
+        mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Please enter the time(seconds) to set the reminder:");
+        move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
+        standend();
+        refresh();
+        getstr(temparr);
+        delta = atol(temparr);
+
+        clearGivenNonCalendarArea(SLL);
+        standout();
+        mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Please enter the number of times to repeat:");
+        move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
+        standend();
+        refresh();
+        getstr(temparr);
+        repeat = atoi(temparr);
+
+        clearGivenNonCalendarArea(SLL);
+        standout();
+        mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Please enter the interval for the reminder:");
+        move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
+        standend();
+        refresh();
+        getstr(temparr);
+        interval = atoi(temparr);
+
+        setReminder(time(NULL), delta, repeat, info, interval);
+    }
+    else if (how == DEL) {
+        if (isReminderSetAlready(buf)) {
+            refresh();
+            if ((temp = getCommandScreen("Would you like to delete the existing reminder?", "yYnN")) == 'n' || temp == 'N') {
+                return; /* don't want to delete */
+            }
+            else {
+                turnOffReminder();
+                standout();
+                mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Reminder deleted.");
+                mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "Press ENTER to continue");
+                standend();
+                refresh();
+                getch();
+            }
+        }
+        else {
+            standout();
+            mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "No reminder has set yet.");
+            mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "Press ENTER to continue");
+            standend();
+            refresh();
+            getch();
+        }
+    }
+
+    cbreak();
+    noecho();
+
+    return;
+}
+
+void reminder_extends_popup(int signum) {
+    char str[127];
+
+    memset(str, 0x00, 127);
+
+    if (rmdr->repeatCounter == 0) {
+        popup("Reminder Expired!", NULL, "", 5);
+        turnOffReminder();
+
+        return;
+    }
+    sprintf(str, "Timer %d Seconds Left", (int)(rmdr->repeatCounter) * (int)(rmdr->intervals));
+    popup("Reminder Alert", rmdr->info, str, 5);
+    (rmdr->repeatCounter)--;
+
     return;
 }

@@ -213,6 +213,7 @@ int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_d
 int setReminder(time_t current, time_t delta, int repeatCnter, char* what, int intervals);
 int isReminderSetAlready(char* str);
 void turnOffReminder(void);
+void reminder_extends_popup(int signum); /* <--- UX Layer interactions */
 
 void printUsage(void);
 void __launchOptions(int argc, char* argv[]);
@@ -916,9 +917,13 @@ void sortGivenDateToDos(dayPtr when, int sortType) {
     */
     toDoPtr temp = NULL;
 
+    /* err hndl */
     if (!when) {
-        puts("No datas to sort");
+        //puts("No datas to sort");
         return;
+    }
+    if (when->maxIndex == -1) {
+        return; /* no records to sort */
     }
 
     /* kind of radix(bucket) */
@@ -1328,6 +1333,7 @@ int save_hr(FILE* fp) {
                         fprintf(fp, "           [ %d Record(s) in this day. ]\n", ((db->target->months)[i]->dates)[j]->maxIndex + 1);
                         temp = ((db->target->months)[i]->dates)[j];
                         /* Quick Sort */
+                        
                         sortGivenDateToDos(temp, 2);
                         for (k = 0; k <= temp->maxIndex; k++) {
                             lnk = (temp->toDoArr)[k];
@@ -1337,7 +1343,7 @@ int save_hr(FILE* fp) {
                                 lnk->title, lnk->details);
                             }
                             else {
-                                fprintf(fp, "             > \t\t\t%02llu:%02llu -> Title: %12s, Details: %s\n", time / 100, time % 100,
+                                fprintf(fp, "             > \t\t\t\t%02llu:%02llu -> Title: %12s, Details: %s\n", time / 100, time % 100,
                                 lnk->title, lnk->details);
                             }
                         }
@@ -1666,13 +1672,15 @@ int deleteRecord(dayPtr when, int index) {
 }
 int deleteWhileIterate(unsigned long long src, int pageNum) {
     /* src = YYYYMMDD */
-    yearPtr ytmp; monthPtr mtmp; dayPtr dtmp;
+    /*yearPtr ytmp; monthPtr mtmp; */dayPtr dtmp;
 
-    src /= 10000;
+    //src /= 10000;
+    /* this function is not encapsulated at the UX Layer. So we use raw 'src' value with no adjustment. */
+    dtmp = search_byDate(src); // YYYYMMDD
 
-    ytmp = findYear(src / 10000, &key);
-    mtmp = findMonth(src % 10000 / 100, ytmp);
-    dtmp = findDay(src % 100, mtmp);
+    //ytmp = findYear(src / 10000, &key);
+    //mtmp = findMonth(src % 10000 / 100, ytmp);
+    //dtmp = findDay(src % 100, mtmp);
 
     if (dtmp->toDoArr == NULL || pageNum < 1 || pageNum > dtmp->maxIndex + 1) { /* just to be safe */
         return 1; /* nothing to del */
@@ -1697,7 +1705,7 @@ int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_d
     /* if t_priority := -1     user doesn't want to edit this section of the record */
     /* src = YYYYMMDD */
 
-    src /= 10000;
+    //src /= 10000;
 
     yearPtr ytmp; monthPtr mtmp; dayPtr dtmp;
 
@@ -1771,7 +1779,7 @@ void setReminderHandler(int status, unsigned long init, unsigned long repeat) {
     static struct itimerval org;
 
     if (status == 1) {
-        inmode.sa_handler = reminderHandler;
+        inmode.sa_handler = reminder_extends_popup;
         inmode.sa_flags &= ~SA_RESETHAND;
         inmode.sa_flags &= ~SA_SIGINFO;
 
