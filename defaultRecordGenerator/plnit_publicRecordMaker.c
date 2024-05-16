@@ -32,8 +32,12 @@ void readFromFile(void) {
     }
 
     while (!feof(fp)) {
+        memset(arr[idx].title, 0x00, 26);
+        memset(arr[idx].details, 0x00, 61);
         fscanf(fp, "%llu\n", &(arr[idx].dateData));
         arr[idx].dateData *= 10000; arr[idx].dateData += 9999;
+        arr[idx].priority = 0;
+        arr[idx].hashNum = 0;
         fscanf(fp, " %[^\n]s\n", (arr[idx].title));
         fscanf(fp, " %[^\n]s\n", (arr[idx].details));
         idx++;

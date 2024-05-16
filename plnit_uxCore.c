@@ -93,6 +93,7 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
 void print_UpcomingBookMark();
 void edit_plan(unsigned long long targetDate, int* page);
 void printColorStrip(int colorNum);
+void print_date_BookMark(unsigned long long targetDate);
 /*-----Display control--------------------------------------------------------------*/
 void clearGivenCalendarArea(/*index of pos_sc_date*/int row, int col);
 void clearGivenRowCols(int fromRow, int fromCol, int toRow, int toCol);
@@ -132,6 +133,13 @@ void turnOffReminder(void);
 
 int __dbDebug(void);
 void __launchOptions(int argc, char* argv[]);
+/* 0511 added */
+int isBookMarked(unsigned long long targetDate); /* YYYYMMDD */
+/* 0511 added: D-day settings, holiday */
+void getDday(int* slot1, char* title1, int* slot2, char* title2);
+void popDday(void);
+int setDdayWhileIterate(unsigned long long src, int pageNum);
+int isHoliday(unsigned long long target);
 
 /*-------------------------------------------------------*/
 
@@ -163,11 +171,14 @@ int main(int argc, char* argv[]) {
     start_color();
     init_pair(1, COLOR_RED, COLOR_BLACK);
     init_pair(2, COLOR_RED, COLOR_WHITE);
+    init_pair(3, COLOR_BLUE, COLOR_BLACK);
+    init_pair(4, COLOR_BLUE, COLOR_WHITE);
     /* for bookmark strips */
-    init_pair(3, COLOR_GREEN, COLOR_GREEN);
-    init_pair(4, COLOR_CYAN, COLOR_CYAN);
-    init_pair(5, COLOR_MAGENTA, COLOR_MAGENTA);
-    init_pair(6, COLOR_WHITE, COLOR_WHITE);
+    init_pair(5, COLOR_GREEN, COLOR_GREEN);
+    init_pair(6, COLOR_CYAN, COLOR_CYAN);
+    init_pair(7, COLOR_MAGENTA, COLOR_MAGENTA);
+    init_pair(8, COLOR_RED, COLOR_RED);
+    init_pair(9, COLOR_WHITE, COLOR_WHITE);
     /* for bookmark strips ended */
 
     initPosVar();
@@ -218,8 +229,7 @@ int main(int argc, char* argv[]) {
                     get_todo();
                     print_date_NumOfSchedule(selectDate); /* refresh screen */
                     print_date_ToDoWithdetails(selectDate, 0, &page); /* to refresh */
-                    //mode++;
-                    //break;
+                    print_date_BookMark(selectDate); /* to refresh */
                 }
                 /* exit details mode */
                 else if (c == 'e') { /* details exit */
@@ -240,7 +250,8 @@ int main(int argc, char* argv[]) {
                 else if (c == 'm' && page != 0) {
                     edit_plan(selectDate, &page);
                     print_date_NumOfSchedule(selectDate); /* refresh screen */
-                    print_date_ToDoWithdetails(selectDate, 0, &page);
+                    print_date_ToDoWithdetails(selectDate, 0, &page); /* to refresh */
+                    print_date_BookMark(selectDate); /* to refresh */
                     /* don't break */
                 }
                 /* delete record */
@@ -251,9 +262,9 @@ int main(int argc, char* argv[]) {
                     else {
                         popup("Deletion Successful", "", NULL, 5);
                     }
-                    //getTodaySchedule_withDetails_iterEnd(); /* refresh */
-                    print_date_NumOfSchedule(selectDate); /* refresh screen */
-                    print_date_ToDoWithdetails(selectDate, 0, &page); /* show */
+                    print_date_NumOfSchedule(selectDate); /* to refresh */
+                    print_date_ToDoWithdetails(selectDate, 0, &page); /* to refresh */
+                    print_date_BookMark(selectDate); /* to refresh */
                     /* delete related functions */
                     /* don't break */
                     /* maybe some pageIterator refresh needed here */
@@ -496,6 +507,7 @@ pos_SC_date;
     
     print_date(selectDate);
     print_date_NumOfSchedule(selectDate);
+    print_date_BookMark(selectDate);
     print_commandLine(0);
     print_date_ToDoSummarized(selectDate);
     print_UpcomingBookMark();
@@ -651,11 +663,19 @@ void print_date(unsigned long long targetDate) {
                 attroff(A_DIM);
                 attron(A_BOLD);
             }
-            mvprintw(pos_SC_date[0][i].row, pos_SC_date[0][i].col, "%-2d", date);
-            if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
-                attroff(A_BOLD);
-                attron(A_DIM);
+            if (i == 6) {
+                attroff(A_DIM);
+                attron(A_BOLD);
+                attron(COLOR_PAIR(3));
             }
+            if (isHoliday(targetDate / 1000000 * 100 + date) || i == 0) {
+                attroff(A_DIM);
+                attron(A_BOLD);
+                attron(COLOR_PAIR(1));
+            }
+            mvprintw(pos_SC_date[0][i].row, pos_SC_date[0][i].col, "%-2d", date);
+            attrset(A_NORMAL);
+            attron(A_DIM);
             date++;
         }
         else {
@@ -668,19 +688,25 @@ void print_date(unsigned long long targetDate) {
         for (int j = 0; j < 7; j++, date++) {
             if (date > days) {
                 clearGivenCalendarArea(i, j);
-                //move(pos_SC_date[i][j].row, pos_SC_date[i][j].col);
-                //addstr("  ");
             }
             else {
                 if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
                     attroff(A_DIM);
                     attron(A_BOLD);
                 }
-                mvprintw(pos_SC_date[i][j].row, pos_SC_date[i][j].col, "%-2d", date);
-                if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
-                    attroff(A_BOLD);
-                    attron(A_DIM);
+                if (j == 6) {
+                    attroff(A_DIM);
+                    attron(A_BOLD);
+                    attron(COLOR_PAIR(3));
                 }
+                if (isHoliday(targetDate / 1000000 * 100 + date) || j == 0) {
+                    attroff(A_DIM);
+                    attron(A_BOLD);
+                    attron(COLOR_PAIR(1));
+                }
+                mvprintw(pos_SC_date[i][j].row, pos_SC_date[i][j].col, "%-2d", date);
+                attrset(A_NORMAL);
+                attron(A_DIM);
             }
         }
     }
@@ -788,22 +814,46 @@ void print_commandLine(int mode) {
 }
 
 void select_highlightOn() {
+    attron(A_DIM);
     standout();
+    if (selectDate == todayDate) {
+        attroff(A_DIM);
+        attron(A_BOLD);
+    }
+    if (selectDate_col == 6) {
+        standend();
+        attroff(A_DIM);
+        attron(A_BOLD);
+        attron(COLOR_PAIR(4));
+    }
+    if (isHoliday(selectDate / 10000) || selectDate_col == 0) {
+        standend();
+        attroff(A_DIM);
+        attron(A_BOLD);
+        attron(COLOR_PAIR(2));
+    }
     mvprintw(pos_SC_date[selectDate_row][selectDate_col].row, pos_SC_date[selectDate_row][selectDate_col].col, "%-2d", selectDate / 10000 % 100);
-    standend();
+    attrset(A_NORMAL);
 }
 
 void prev_select_highlightOff() {
-    //if (selectDate == todayDate) return;
+    attron(A_DIM);
     if (selectDate == todayDate) {
-        attron(COLOR_PAIR(1) | A_UNDERLINE);
-        mvprintw(pos_SC_date[selectDate_row][selectDate_col].row, pos_SC_date[selectDate_row][selectDate_col].col, "%-2d", selectDate / 10000 % 100);
-        attroff(COLOR_PAIR(1) | A_UNDERLINE);
-        return;
+        attroff(A_DIM);
+        attron(A_BOLD);
     }
-    attron(COLOR_PAIR(1));
+    if (selectDate_col == 6) {
+        attroff(A_DIM);
+        attron(A_BOLD);
+        attron(COLOR_PAIR(3));
+    }
+    if (isHoliday(selectDate / 10000) || selectDate_col == 0) {
+        attroff(A_DIM);
+        attron(A_BOLD);
+        attron(COLOR_PAIR(1));
+    }
     mvprintw(pos_SC_date[selectDate_row][selectDate_col].row, pos_SC_date[selectDate_row][selectDate_col].col, "%-2d", selectDate / 10000 % 100);
-    attroff(COLOR_PAIR(1));
+    attrset(A_NORMAL);
 }
 
 void select_date(char c) {
@@ -832,6 +882,7 @@ void select_date(char c) {
             print_Year_Month(selectDate / 1000000);
             print_date(selectDate);
             print_date_NumOfSchedule(selectDate);
+            print_date_BookMark(selectDate);
         }
         break;
     case 'k':
@@ -852,6 +903,7 @@ void select_date(char c) {
             print_Year_Month(selectDate / 1000000);
             print_date(selectDate);
             print_date_NumOfSchedule(selectDate);
+            print_date_BookMark(selectDate);
         }
         break;
     case 'j': 
@@ -870,6 +922,7 @@ void select_date(char c) {
                 print_Year_Month(selectDate / 1000000);
                 print_date(selectDate);
                 print_date_NumOfSchedule(selectDate);
+                print_date_BookMark(selectDate);
             }
         }
         else {
@@ -890,6 +943,7 @@ void select_date(char c) {
                 print_Year_Month(selectDate / 1000000);
                 print_date(selectDate);
                 print_date_NumOfSchedule(selectDate);
+                print_date_BookMark(selectDate);
             }
         }
         break;
@@ -909,6 +963,7 @@ void select_date(char c) {
                 print_Year_Month(selectDate / 1000000);
                 print_date(selectDate);
                 print_date_NumOfSchedule(selectDate);
+                print_date_BookMark(selectDate);
             }
         }
         else {
@@ -929,7 +984,7 @@ void select_date(char c) {
                 print_Year_Month(selectDate / 1000000);
                 print_date(selectDate);
                 print_date_NumOfSchedule(selectDate);
-
+                print_date_BookMark(selectDate);
             }
         }
         break;
@@ -1159,15 +1214,15 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
     int month = targetDate % 100000000 / 1000000;
     int day = targetDate % 1000000 / 10000;
     int row = pos_SUR_stt.row, col = pos_SUR_stt.col;
-    //int width = pos_SUR_end.col - pos_SUR_stt.col + 1;
-    clearGivenNonCalendarArea(2);
+    clearGivenNonCalendarArea(SUR);
     mvprintw(row, col, "ToDos | %d-%02d-%02d", year, month, day);
     int chkColorPair = 0;
+    int isHolidayEvent = 0;
     row += 2;
     char str[BUFSIZ] = {'\0', };
     char *strbuf = str;//malloc(1000 * sizeof(char));
     int numofsche = getNumOfSchedule(targetDate / 10000), count = 0;
-    if (getTodaySchedule_Summarized((targetDate / 10000), str) == -1)return;
+    if (getTodaySchedule_Summarized((targetDate / 10000), str) == -1) return;
     else {
         strbuf = str;
         while (*strbuf != '\0') {
@@ -1182,8 +1237,10 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
                     strbuf++;
                     if (strncmp(strbuf, "9999", 4) == 0) {
                         attron(A_BOLD);
+                        attron(COLOR_PAIR(1));
                         mvprintw(row, col, "All Day Long"); /* 볼드체와 색을 동시에 지정하면, 아스키코드가 이상하게 shift 됩니다. 혹시 왜 그런지 아시나요? */
-                        attroff(A_BOLD);
+                        attrset(A_NORMAL);
+                        isHolidayEvent = 1;
                         strbuf += 4;
                     }
                     else {
@@ -1197,7 +1254,8 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
             }
             else if (*strbuf == '*') {
                 strbuf++;
-                (chkColorPair = (int)(*(strbuf++) - 48));
+                chkColorPair = (int)(*(strbuf++) - 48);
+                if (isHolidayEvent) chkColorPair = 9;
             }
             else if (*strbuf == ']') {
                 strbuf++;
@@ -1205,6 +1263,7 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
                     strbuf++;
                     mvprintw(row, col++, " ");
                     /* for bookmark strip */
+                    if (isHolidayEvent) chkColorPair = 9;
                     printColorStrip(chkColorPair);
                     /* for bookmark strip */
                     col += 2;
@@ -1212,6 +1271,7 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
                     mvprintw(row, col, " %.25s", strbuf); /* two blocks of strips */
                     if (chkColorPair) attroff(A_BOLD); /* for ones bookmarked */
                     chkColorPair = 0;
+                    isHolidayEvent = 0;
                     row += 2;
                     strbuf += 25;
                     count++;
@@ -1232,7 +1292,7 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
     int month = targetDate % 100000000 / 1000000;
     int day = targetDate % 1000000 / 10000;
     int chkColorPair = 0;
-    //int width = pos_SUR_end.col - pos_SUR_stt.col + 1;
+    int isHolidayEvent = 0;
     char str[BUFSIZ] = {'\0', };
     char* strbuf = str;
     int numofsche = getNumOfSchedule(targetDate / 10000);
@@ -1240,18 +1300,14 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
     move(LINES - 1, COLS - 1);
 
     int row = pos_SUR_stt.row, col = pos_SUR_stt.col;
-    clearGivenNonCalendarArea(SUR); // 여기서 날짜를 출력하기 전에 영역 초기화를 해줍니다
+    clearGivenNonCalendarArea(SUR); 
     mvprintw(pos_SUR_stt.row, pos_SUR_stt.col, "ToDos | %d-%02d-%02d", year, month, day);
     row += 2;
-
-    /* 영역 초기화는 먼저 오는 것이 좋을 듯 합니다. 마지막에 조회 한 것을 수정하고자 하면 그 대상이 계속 떠 있는 것이 더 직관적일 것 같습니다. */
-    //clearGivenNonCalendarArea(SUR); 이미 날짜 출력하기 전에 영역초기화를 해주어서 여기서 또 안해도 될것같습니다. 날짜 출력하기 전에 한 것은 날짜를 출력해서 선택된 날짜를 직관적으로 알 수 있게 하기 위함이었습니다.
 
     *page = getTodaySchedule_withDetails(targetDate / 10000, str, status) + 1;
 
     /* no data 처리 */
     if (*page == 0) { /* warn: when it's 0, there's no record */
-        //clearGivenNonCalendarArea(2); 여기서도 위에서 이미 영역 초기화를 해주어서 또 안해주어도 될것같습니다
         mvprintw((pos_SUR_stt.row + pos_SUR_end.row) / 2, (pos_SUR_stt.col + pos_SUR_end.col) / 2 - 8, "#No details data#");
         return;
     }
@@ -1266,8 +1322,10 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
                 strbuf++;
                 if (strncmp(strbuf, "9999", 4) == 0) {
                     attron(A_BOLD);
+                    attron(COLOR_PAIR(1));
                     mvprintw(row, col, "All Day Long"); /* 볼드체와 색을 동시에 지정하면, 아스키코드가 이상하게 shift 됩니다. 혹시 왜 그런지 아시나요? */
-                    attroff(A_BOLD);
+                    attrset(A_NORMAL);
+                    isHolidayEvent = 1;
                     strbuf += 4;
                 }
                 else {
@@ -1281,19 +1339,22 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
         }
         else if (*strbuf == '*') {
             strbuf++;
-            (chkColorPair = (int)(*(strbuf++) - 48));
+            chkColorPair = (int)(*(strbuf++) - 48);
+            if (isHolidayEvent) chkColorPair = 9;
+            isHolidayEvent = 0;
         }
         else if (*strbuf == ']') {
             strbuf++;
             if (*strbuf == '^') {
                 strbuf++;
-                mvprintw(row, col++, " ");
+                mvprintw(row, col++, " "); /* ok */ 
                 /* for bookmark strip */
+                if (isHolidayEvent) chkColorPair = 9;
                 printColorStrip(chkColorPair);
                 /* for bookmark strip */
                 col += 2;
                 if (chkColorPair) attron(A_BOLD); /* for ones bookmarked */
-                mvprintw(row, ++col, " %.25s", strbuf); /* two blocks of strips */
+                mvprintw(row, col, " %.25s", strbuf); /* two blocks of strips */
                 if (chkColorPair) attroff(A_BOLD); /* for ones bookmarked */
                 chkColorPair = 0;
                 row += 2;
@@ -1484,16 +1545,60 @@ void popup(char* title, char* str1, char* str2, int delay) {
     return;
 }
 void printColorStrip(int colorNum) {
+    attrset(A_NORMAL);
     if (colorNum == 0) /* default */ {
-        attron(COLOR_PAIR(6)); /* 6 := off-white */
+        attron(COLOR_PAIR(9)); /* 9 := off-white */
         addstr("  ");
-        attroff(COLOR_PAIR(6));
+        attrset(A_NORMAL);
+        //attroff(COLOR_PAIR(9));
         return;
     }
-    colorNum += 2; /* refer to the definition of bookmark color */
+    if (colorNum == 9) /* holiday */ {
+        attron(COLOR_PAIR(8)); /* 8 := off-red */
+        addstr("  ");
+        attroff(COLOR_PAIR(8));
+        return;
+    }
+    colorNum += 4; /* refer to the definition of bookmark color */
     attron(COLOR_PAIR(colorNum));
     addstr("  ");
     attroff(COLOR_PAIR(colorNum));
 
+    return;
+}
+
+void print_date_BookMark(unsigned long long targetDate) {
+    int stt_col = stt_day_1(targetDate);
+
+    int year = targetDate / 100000000;
+    int month = targetDate % 100000000 / 1000000;
+    int date = 1;
+
+    int days = daysInMonth(year * 100 + month);
+    int chkColorPair = 0;
+
+    for (int i = 0; i < 7; i++) {
+        if (i >= stt_col) {
+            move(pos_SC_date[0][i].row, pos_SC_date[0][i].col + 4 * nNum - 2);
+            chkColorPair = isBookMarked(targetDate / 1000000 * 100 + date);
+            if (chkColorPair) printColorStrip(chkColorPair);
+            date++;
+        }
+        else {
+            clearGivenCalendarArea(0, i);
+        }
+    }
+    for (int i = 1; i < 6; i++) {
+        for (int j = 0; j < 7; j++, date++) {
+            if (date > days) {
+                clearGivenCalendarArea(i, j);
+            }
+            else {
+                move(pos_SC_date[i][j].row, pos_SC_date[i][j].col + 4 * nNum - 2);
+                chkColorPair = isBookMarked(targetDate / 1000000 * 100 + date);
+                if (chkColorPair) printColorStrip(chkColorPair);
+            }
+        }
+    }
     return;
 }
