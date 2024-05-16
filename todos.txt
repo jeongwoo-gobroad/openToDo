@@ -1,7 +1,8 @@
 Reminder has not set yet.
 
-#0: 20231027, Plan Trip
-#1: 20250124, Guitar Practice
+#0: 20250124, Guitar Practice
+#1: 20231027, Plan Trip
+Records of the Year 0:
 Records of the Year 2023:
     -> Records of the Month 01:
         --> Records of the Day 01:
@@ -109,24 +110,6 @@ Records of the Year 2023:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]03:09 -> Title: Guitar Practice, Details: Learn new chords and practice the song Yesterday.
-        --> Records of the Day 29:
-           [ 3 Record(s) in this day. ]
-             > 			07:02 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
-             > 			07:02 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
-             > 			07:02 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
-        --> Records of the Day 30:
-           [ 6 Record(s) in this day. ]
-             > 			03:06 -> Title: Lunch with Mentor, Details: Meet at noon at Cafe Luna to discuss career plans.
-             > 			03:06 -> Title: Lunch with Mentor, Details: Meet at noon at Cafe Luna to discuss career plans.
-             > 			03:06 -> Title: Lunch with Mentor, Details: Meet at noon at Cafe Luna to discuss career plans.
-             > [BookMarked]14:05 -> Title: Travel Booking, Details: Reserve summer vacation flights.
-             > 			20:14 -> Title: Study Session, Details: Prepare for upcoming exams.
-             > 			20:14 -> Title: Study Session, Details: Prepare for upcoming exams.
-        --> Records of the Day 31:
-           [ 3 Record(s) in this day. ]
-             > 			07:44 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
-             > 			07:44 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
-             > 			07:44 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
     -> Records of the Month 02:
         --> Records of the Day 02:
            [ 1 Record(s) in this day. ]
@@ -334,18 +317,6 @@ Records of the Year 2023:
              > 			12:56 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
              > 			12:56 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
              > 			12:56 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
-        --> Records of the Day 29:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]21:15 -> Title: Dentist Appointment, Details: Teeth cleaning session at 3 PM with Dr. Smith.
-        --> Records of the Day 30:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]14:58 -> Title: Travel Booking, Details: Reserve summer vacation flights.
-        --> Records of the Day 31:
-           [ 4 Record(s) in this day. ]
-             > 			10:24 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
-             > 			10:24 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
-             > 			10:24 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
-             > [BookMarked]23:56 -> Title: Family Gathering, Details: Enjoy a family dinner.
     -> Records of the Month 04:
         --> Records of the Day 01:
            [ 4 Record(s) in this day. ]
@@ -485,13 +456,6 @@ Records of the Year 2023:
              > 			06:06 -> Title: Dentist Appointment, Details: Teeth cleaning session at 3 PM with Dr. Smith.
              > 			06:06 -> Title: Dentist Appointment, Details: Teeth cleaning session at 3 PM with Dr. Smith.
              > [BookMarked]23:16 -> Title: Call Parents, Details: Catch up with family at 8 PM for half an hour.
-        --> Records of the Day 29:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]16:37 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
-        --> Records of the Day 30:
-           [ 2 Record(s) in this day. ]
-             > 			04:28 -> Title: Read Articles, Details: Stay updated with the latest tech news.
-             > 			04:28 -> Title: Read Articles, Details: Stay updated with the latest tech news.
     -> Records of the Month 05:
         --> Records of the Day 02:
            [ 1 Record(s) in this day. ]
@@ -592,18 +556,6 @@ Records of the Year 2023:
              > 			21:46 -> Title:    Plan Trip, Details: Research and book accommodations for summer vacation.
              > 			21:46 -> Title:    Plan Trip, Details: Research and book accommodations for summer vacation.
              > 			21:46 -> Title:    Plan Trip, Details: Research and book accommodations for summer vacation.
-        --> Records of the Day 29:
-           [ 4 Record(s) in this day. ]
-             > [BookMarked]03:04 -> Title:   Yoga Class, Details: Relaxing mind and body with instructor Lee.
-             > 			07:20 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
-             > 			07:20 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
-             > 			07:20 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
-        --> Records of the Day 30:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]18:00 -> Title: Family Gathering, Details: Enjoy a family dinner.
-        --> Records of the Day 31:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]09:25 -> Title: Write Report, Details: Summarize findings from the recent survey.
     -> Records of the Month 06:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
@@ -821,20 +773,6 @@ Records of the Year 2023:
              > 			21:54 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
              > 			21:54 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
              > 			21:54 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
-        --> Records of the Day 29:
-           [ 6 Record(s) in this day. ]
-             > 			03:20 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
-             > 			03:20 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
-             > [BookMarked]06:49 -> Title: Team Meeting, Details: Discuss project milestones and delegate tasks.
-             > 			22:14 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
-             > 			22:14 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
-             > 			22:14 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
-        --> Records of the Day 30:
-           [ 4 Record(s) in this day. ]
-             > [BookMarked]09:32 -> Title: Guitar Practice, Details: Learn new chords and practice the song Yesterday.
-             > 			20:28 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
-             > 			20:28 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
-             > 			20:28 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
     -> Records of the Month 08:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
@@ -948,20 +886,6 @@ Records of the Year 2023:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]15:00 -> Title: Call Parents, Details: Catch up with family at 8 PM for half an hour.
-        --> Records of the Day 29:
-           [ 6 Record(s) in this day. ]
-             > 			04:30 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
-             > 			04:30 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
-             > [BookMarked]14:28 -> Title:   Study Time, Details: Focus on algorithms and data structures.
-             > 			17:06 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
-             > 			17:06 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
-             > 			17:06 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
-        --> Records of the Day 30:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]04:35 -> Title: Team Discussion, Details: Discuss project updates and next steps.
-        --> Records of the Day 31:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]11:35 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
     -> Records of the Month 09:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
@@ -1051,15 +975,6 @@ Records of the Year 2023:
              > 			11:30 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
              > 			11:30 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
              > [BookMarked]18:27 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
-        --> Records of the Day 29:
-           [ 4 Record(s) in this day. ]
-             > 			00:31 -> Title:   Yoga Class, Details: Relaxing mind and body with instructor Lee.
-             > 			00:31 -> Title:   Yoga Class, Details: Relaxing mind and body with instructor Lee.
-             > 			00:31 -> Title:   Yoga Class, Details: Relaxing mind and body with instructor Lee.
-             > [BookMarked]04:27 -> Title: Lunch with Mentor, Details: Meet at noon at Cafe Luna to discuss career plans.
-        --> Records of the Day 30:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]15:32 -> Title:   Yoga Class, Details: Relaxing mind and body with instructor Lee.
     -> Records of the Month 10:
         --> Records of the Day 01:
            [ 4 Record(s) in this day. ]
@@ -1157,12 +1072,6 @@ Records of the Year 2023:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]07:09 -> Title:    Plan Trip, Details: Research and book accommodations for summer vacation.
-        --> Records of the Day 30:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]07:05 -> Title: Family Gathering, Details: Enjoy a family dinner.
-        --> Records of the Day 31:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]00:29 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
     -> Records of the Month 11:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
@@ -1248,12 +1157,6 @@ Records of the Year 2023:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]03:57 -> Title:  Cook Dinner, Details: Try a new recipe for pasta with homemade sauce.
-        --> Records of the Day 29:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]04:44 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
-        --> Records of the Day 30:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]14:21 -> Title: Team Meeting, Details: Discuss project milestones and delegate tasks.
     -> Records of the Month 12:
         --> Records of the Day 01:
            [ 3 Record(s) in this day. ]
@@ -1361,23 +1264,11 @@ Records of the Year 2023:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]16:47 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
-        --> Records of the Day 29:
-           [ 3 Record(s) in this day. ]
-             > 			06:17 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
-             > 			06:17 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
-             > 			06:17 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
-        --> Records of the Day 30:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]07:54 -> Title:      Laundry, Details: Wash clothes and prepare outfits for the week.
-        --> Records of the Day 31:
-           [ 3 Record(s) in this day. ]
-             > 			09:43 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
-             > 			09:43 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
-             > 			09:43 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
 Records of the Year 2024:
     -> Records of the Month 01:
         --> Records of the Day 01:
-           [ 1 Record(s) in this day. ]
+           [ 2 Record(s) in this day. ]
+             > 			99:99 -> Title:    New Year, Details: New Year
              > [BookMarked]10:44 -> Title: Dentist Appointment, Details: Teeth cleaning session at 3 PM with Dr. Smith.
         --> Records of the Day 02:
            [ 6 Record(s) in this day. ]
@@ -1485,15 +1376,6 @@ Records of the Year 2024:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]21:58 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
-        --> Records of the Day 29:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]01:17 -> Title: Travel Booking, Details: Reserve summer vacation flights.
-        --> Records of the Day 30:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]02:22 -> Title: Travel Booking, Details: Reserve summer vacation flights.
-        --> Records of the Day 31:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]19:33 -> Title: Team Meeting, Details: Discuss project milestones and delegate tasks.
     -> Records of the Month 02:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
@@ -1529,13 +1411,19 @@ Records of the Year 2024:
              > 			12:24 -> Title: Coffee Break, Details: Catch up with a friend at a cafe.
              > 			12:24 -> Title: Coffee Break, Details: Catch up with a friend at a cafe.
         --> Records of the Day 09:
-           [ 1 Record(s) in this day. ]
+           [ 2 Record(s) in this day. ]
+             > 			99:99 -> Title: Lunar New Year, Details: Lunar New Year Holiday
              > [BookMarked]01:50 -> Title: Check Emails, Details: Reply to urgent messages and organize inbox.
-        --> Records of the Day 11:
+        --> Records of the Day 10:
            [ 1 Record(s) in this day. ]
+             > 			99:99 -> Title: Lunar New Year, Details: Lunar New Year
+        --> Records of the Day 11:
+           [ 2 Record(s) in this day. ]
+             > 			99:99 -> Title: Lunar New Year, Details: Lunar New Year Holiday
              > [BookMarked]21:03 -> Title:      Laundry, Details: Wash clothes and prepare outfits for the week.
         --> Records of the Day 12:
-           [ 1 Record(s) in this day. ]
+           [ 2 Record(s) in this day. ]
+             > 			99:99 -> Title: Lunar New Year, Details: Lunar New Year
              > [BookMarked]22:19 -> Title: Dentist Appointment, Details: Teeth cleaning session at 3 PM with Dr. Smith.
         --> Records of the Day 13:
            [ 1 Record(s) in this day. ]
@@ -1580,15 +1468,10 @@ Records of the Year 2024:
              > 			19:13 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
              > 			19:13 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
              > 			19:13 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
-        --> Records of the Day 29:
-           [ 4 Record(s) in this day. ]
-             > 			09:05 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
-             > 			09:05 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
-             > 			09:05 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
-             > [BookMarked]09:59 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
     -> Records of the Month 03:
         --> Records of the Day 01:
-           [ 4 Record(s) in this day. ]
+           [ 5 Record(s) in this day. ]
+             > 			99:99 -> Title: Independence Mvmt day, Details: Independence Mvmt day
              > [BookMarked]00:15 -> Title:  Gym Workout, Details: Hit the gym for a workout session.
              > 			19:59 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
              > 			19:59 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
@@ -1684,28 +1567,6 @@ Records of the Year 2024:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]18:28 -> Title:   Study Time, Details: Focus on algorithms and data structures.
-        --> Records of the Day 29:
-           [ 10 Record(s) in this day. ]
-             > 			02:46 -> Title: Check Emails, Details: Reply to urgent messages and organize inbox.
-             > 			02:46 -> Title: Check Emails, Details: Reply to urgent messages and organize inbox.
-             > 			02:46 -> Title: Check Emails, Details: Reply to urgent messages and organize inbox.
-             > 			03:46 -> Title: Call Parents, Details: Catch up with family at 8 PM for half an hour.
-             > 			03:46 -> Title: Call Parents, Details: Catch up with family at 8 PM for half an hour.
-             > 			03:46 -> Title: Call Parents, Details: Catch up with family at 8 PM for half an hour.
-             > 			10:08 -> Title: Team Discussion, Details: Discuss project updates and next steps.
-             > 			10:08 -> Title: Team Discussion, Details: Discuss project updates and next steps.
-             > 			10:08 -> Title: Team Discussion, Details: Discuss project updates and next steps.
-             > [BookMarked]11:22 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
-        --> Records of the Day 30:
-           [ 3 Record(s) in this day. ]
-             > 			19:56 -> Title: Team Discussion, Details: Discuss project updates and next steps.
-             > 			19:56 -> Title: Team Discussion, Details: Discuss project updates and next steps.
-             > 			19:56 -> Title: Team Discussion, Details: Discuss project updates and next steps.
-        --> Records of the Day 31:
-           [ 3 Record(s) in this day. ]
-             > 			05:47 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
-             > 			05:47 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
-             > 			05:47 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
     -> Records of the Month 04:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
@@ -1745,6 +1606,9 @@ Records of the Year 2024:
         --> Records of the Day 08:
            [ 1 Record(s) in this day. ]
              > [BookMarked]08:27 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
+        --> Records of the Day 10:
+           [ 1 Record(s) in this day. ]
+             > 			99:99 -> Title: General Election, Details: General Election
         --> Records of the Day 11:
            [ 1 Record(s) in this day. ]
              > [BookMarked]03:38 -> Title:      Laundry, Details: Wash clothes and prepare outfits for the week.
@@ -1791,9 +1655,6 @@ Records of the Year 2024:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]15:02 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
-        --> Records of the Day 30:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]03:18 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
     -> Records of the Month 05:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
@@ -1808,10 +1669,12 @@ Records of the Year 2024:
            [ 1 Record(s) in this day. ]
              > [BookMarked]22:27 -> Title: Guitar Practice, Details: Learn new chords and practice the song Yesterday.
         --> Records of the Day 05:
-           [ 1 Record(s) in this day. ]
+           [ 2 Record(s) in this day. ]
+             > 			99:99 -> Title: Children's day, Details: Children's day
              > [BookMarked]22:49 -> Title: Call Parents, Details: Catch up with family at 8 PM for half an hour.
         --> Records of the Day 06:
-           [ 3 Record(s) in this day. ]
+           [ 4 Record(s) in this day. ]
+             > 			99:99 -> Title: Children's day, Details: Children's day Holiday
              > 			21:22 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
              > 			21:22 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
              > [BookMarked]22:08 -> Title:     Shopping, Details: Visit the mall for some shopping.
@@ -1862,7 +1725,8 @@ Records of the Year 2024:
            [ 1 Record(s) in this day. ]
              > [BookMarked]19:08 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
         --> Records of the Day 15:
-           [ 4 Record(s) in this day. ]
+           [ 5 Record(s) in this day. ]
+             > 			99:99 -> Title: Buddha's Birthday, Details: Buddha's Birthday
              > 			15:17 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
              > 			15:17 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
              > 			15:17 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
@@ -1925,18 +1789,6 @@ Records of the Year 2024:
              > 			03:48 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
              > 			03:48 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
              > 			03:48 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
-        --> Records of the Day 29:
-           [ 4 Record(s) in this day. ]
-             > [BookMarked]06:42 -> Title: Call Parents, Details: Catch up with family at 8 PM for half an hour.
-             > 			07:01 -> Title: Lunch with Mentor, Details: Meet at noon at Cafe Luna to discuss career plans.
-             > 			07:01 -> Title: Lunch with Mentor, Details: Meet at noon at Cafe Luna to discuss career plans.
-             > 			07:01 -> Title: Lunch with Mentor, Details: Meet at noon at Cafe Luna to discuss career plans.
-        --> Records of the Day 31:
-           [ 4 Record(s) in this day. ]
-             > [BookMarked]00:58 -> Title:     Shopping, Details: Visit the mall for some shopping.
-             > 			09:09 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
-             > 			09:09 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
-             > 			09:09 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
     -> Records of the Month 06:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
@@ -1953,7 +1805,8 @@ Records of the Year 2024:
              > 			08:47 -> Title: Team Discussion, Details: Discuss project updates and next steps.
              > 			08:47 -> Title: Team Discussion, Details: Discuss project updates and next steps.
         --> Records of the Day 06:
-           [ 1 Record(s) in this day. ]
+           [ 2 Record(s) in this day. ]
+             > 			99:99 -> Title: Memorial Day, Details: Memorial Day
              > [BookMarked]07:39 -> Title: Call Parents, Details: Catch up with family at 8 PM for half an hour.
         --> Records of the Day 07:
            [ 1 Record(s) in this day. ]
@@ -2029,12 +1882,6 @@ Records of the Year 2024:
              > 			18:11 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
              > 			18:11 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
              > [BookMarked]21:16 -> Title:  Cook Dinner, Details: Try a new recipe for pasta with homemade sauce.
-        --> Records of the Day 29:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]16:46 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
-        --> Records of the Day 30:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]16:51 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
     -> Records of the Month 07:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
@@ -2177,20 +2024,6 @@ Records of the Year 2024:
              > 			06:52 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
              > 			06:52 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
              > [BookMarked]09:32 -> Title: Family Gathering, Details: Enjoy a family dinner.
-        --> Records of the Day 29:
-           [ 3 Record(s) in this day. ]
-             > 			16:09 -> Title: Team Discussion, Details: Discuss project updates and next steps.
-             > 			16:09 -> Title: Team Discussion, Details: Discuss project updates and next steps.
-             > 			16:09 -> Title: Team Discussion, Details: Discuss project updates and next steps.
-        --> Records of the Day 30:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]06:14 -> Title: Guitar Practice, Details: Learn new chords and practice the song Yesterday.
-        --> Records of the Day 31:
-           [ 4 Record(s) in this day. ]
-             > [BookMarked]01:02 -> Title: Reading Time, Details: Dive into a new novel.
-             > 			12:19 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
-             > 			12:19 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
-             > 			12:19 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
     -> Records of the Month 08:
         --> Records of the Day 01:
            [ 2 Record(s) in this day. ]
@@ -2241,7 +2074,8 @@ Records of the Year 2024:
            [ 1 Record(s) in this day. ]
              > [BookMarked]00:57 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
         --> Records of the Day 15:
-           [ 1 Record(s) in this day. ]
+           [ 2 Record(s) in this day. ]
+             > 			99:99 -> Title: Independence Day, Details: Independence Day
              > [BookMarked]16:57 -> Title:  Gym Workout, Details: Hit the gym for a workout session.
         --> Records of the Day 16:
            [ 1 Record(s) in this day. ]
@@ -2300,18 +2134,6 @@ Records of the Year 2024:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]03:26 -> Title: Guitar Practice, Details: Learn new chords and practice the song Yesterday.
-        --> Records of the Day 29:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]21:51 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
-        --> Records of the Day 30:
-           [ 4 Record(s) in this day. ]
-             > [BookMarked]06:20 -> Title:      Laundry, Details: Wash clothes and prepare outfits for the week.
-             > 			08:33 -> Title:    Plan Trip, Details: Research and book accommodations for summer vacation.
-             > 			08:33 -> Title:    Plan Trip, Details: Research and book accommodations for summer vacation.
-             > 			08:33 -> Title:    Plan Trip, Details: Research and book accommodations for summer vacation.
-        --> Records of the Day 31:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]04:16 -> Title: Dentist Appointment, Details: Teeth cleaning session at 3 PM with Dr. Smith.
     -> Records of the Month 09:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
@@ -2364,23 +2186,28 @@ Records of the Year 2024:
              > 			19:29 -> Title: Guitar Practice, Details: Learn new chords and practice the song Yesterday.
              > 			19:29 -> Title: Guitar Practice, Details: Learn new chords and practice the song Yesterday.
         --> Records of the Day 14:
-           [ 1 Record(s) in this day. ]
+           [ 2 Record(s) in this day. ]
+             > 			99:99 -> Title:     Chuseok, Details: Korean Thanksgiving day
              > [BookMarked]20:37 -> Title: Travel Booking, Details: Reserve summer vacation flights.
         --> Records of the Day 15:
-           [ 3 Record(s) in this day. ]
+           [ 4 Record(s) in this day. ]
+             > 			99:99 -> Title:     Chuseok, Details: Korean Thanksgiving day
              > 			22:03 -> Title: Team Meeting, Details: Discuss project milestones and delegate tasks.
              > 			22:03 -> Title: Team Meeting, Details: Discuss project milestones and delegate tasks.
              > 			22:03 -> Title: Team Meeting, Details: Discuss project milestones and delegate tasks.
         --> Records of the Day 16:
-           [ 3 Record(s) in this day. ]
+           [ 4 Record(s) in this day. ]
+             > 			99:99 -> Title:     Chuseok, Details: Korean Thanksgiving day
              > 			13:40 -> Title: Coffee Break, Details: Catch up with a friend at a cafe.
              > 			13:40 -> Title: Coffee Break, Details: Catch up with a friend at a cafe.
              > 			13:40 -> Title: Coffee Break, Details: Catch up with a friend at a cafe.
         --> Records of the Day 17:
-           [ 1 Record(s) in this day. ]
+           [ 2 Record(s) in this day. ]
+             > 			99:99 -> Title:     Chuseok, Details: Korean Thanksgiving day
              > [BookMarked]16:30 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
         --> Records of the Day 18:
-           [ 1 Record(s) in this day. ]
+           [ 2 Record(s) in this day. ]
+             > 			99:99 -> Title:     Chuseok, Details: Korean Thanksgiving day
              > [BookMarked]09:36 -> Title: Travel Booking, Details: Reserve summer vacation flights.
         --> Records of the Day 19:
            [ 4 Record(s) in this day. ]
@@ -2417,20 +2244,6 @@ Records of the Year 2024:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]13:02 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
-        --> Records of the Day 29:
-           [ 4 Record(s) in this day. ]
-             > 			02:41 -> Title:     Shopping, Details: Visit the mall for some shopping.
-             > 			02:41 -> Title:     Shopping, Details: Visit the mall for some shopping.
-             > 			02:41 -> Title:     Shopping, Details: Visit the mall for some shopping.
-             > [BookMarked]17:31 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
-        --> Records of the Day 30:
-           [ 6 Record(s) in this day. ]
-             > 			01:44 -> Title: Travel Booking, Details: Reserve summer vacation flights.
-             > 			01:44 -> Title: Travel Booking, Details: Reserve summer vacation flights.
-             > 			01:44 -> Title: Travel Booking, Details: Reserve summer vacation flights.
-             > 			08:38 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
-             > 			08:38 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
-             > 			08:38 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
     -> Records of the Month 10:
         --> Records of the Day 01:
            [ 10 Record(s) in this day. ]
@@ -2448,7 +2261,8 @@ Records of the Year 2024:
            [ 1 Record(s) in this day. ]
              > [BookMarked]16:38 -> Title: Reading Time, Details: Dive into a new novel.
         --> Records of the Day 03:
-           [ 1 Record(s) in this day. ]
+           [ 2 Record(s) in this day. ]
+             > 			99:99 -> Title: National Day, Details: National Foundation Day
              > [BookMarked]14:32 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
         --> Records of the Day 05:
            [ 1 Record(s) in this day. ]
@@ -2468,7 +2282,8 @@ Records of the Year 2024:
              > 			03:57 -> Title: Travel Booking, Details: Reserve summer vacation flights.
              > [BookMarked]23:31 -> Title: Lunch with Mentor, Details: Meet at noon at Cafe Luna to discuss career plans.
         --> Records of the Day 09:
-           [ 1 Record(s) in this day. ]
+           [ 2 Record(s) in this day. ]
+             > 			99:99 -> Title:  Hangul Day, Details: Hangul Day
              > [BookMarked]08:46 -> Title:   Study Time, Details: Focus on algorithms and data structures.
         --> Records of the Day 10:
            [ 1 Record(s) in this day. ]
@@ -2549,21 +2364,6 @@ Records of the Year 2024:
              > 			03:54 -> Title: Check Emails, Details: Reply to urgent messages and organize inbox.
              > 			03:54 -> Title: Check Emails, Details: Reply to urgent messages and organize inbox.
              > [BookMarked]06:09 -> Title: Coffee Break, Details: Catch up with a friend at a cafe.
-        --> Records of the Day 29:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]17:40 -> Title:  Gym Workout, Details: Hit the gym for a workout session.
-        --> Records of the Day 30:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]02:57 -> Title: Team Discussion, Details: Discuss project updates and next steps.
-        --> Records of the Day 31:
-           [ 7 Record(s) in this day. ]
-             > [BookMarked]07:18 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
-             > 			15:00 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
-             > 			15:00 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
-             > 			15:00 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
-             > 			21:04 -> Title:      Laundry, Details: Wash clothes and prepare outfits for the week.
-             > 			21:04 -> Title:      Laundry, Details: Wash clothes and prepare outfits for the week.
-             > 			21:04 -> Title:      Laundry, Details: Wash clothes and prepare outfits for the week.
     -> Records of the Month 11:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
@@ -2644,15 +2444,6 @@ Records of the Year 2024:
              > 			20:37 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
              > 			20:37 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
              > 			20:37 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
-        --> Records of the Day 29:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]12:10 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
-        --> Records of the Day 30:
-           [ 4 Record(s) in this day. ]
-             > [BookMarked]03:53 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
-             > 			17:59 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
-             > 			17:59 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
-             > 			17:59 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
     -> Records of the Month 12:
         --> Records of the Day 01:
            [ 4 Record(s) in this day. ]
@@ -2735,7 +2526,8 @@ Records of the Year 2024:
            [ 1 Record(s) in this day. ]
              > [BookMarked]17:13 -> Title: Guitar Practice, Details: Learn new chords and practice the song Yesterday.
         --> Records of the Day 25:
-           [ 1 Record(s) in this day. ]
+           [ 2 Record(s) in this day. ]
+             > 			99:99 -> Title:   Christmas, Details: Christmas
              > [BookMarked]21:05 -> Title: Write Report, Details: Summarize findings from the recent survey.
         --> Records of the Day 26:
            [ 1 Record(s) in this day. ]
@@ -2748,21 +2540,6 @@ Records of the Year 2024:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]09:24 -> Title: Reading Time, Details: Dive into a new novel.
-        --> Records of the Day 29:
-           [ 4 Record(s) in this day. ]
-             > [BookMarked]09:00 -> Title:    Plan Trip, Details: Research and book accommodations for summer vacation.
-             > 			21:37 -> Title: Family Gathering, Details: Enjoy a family dinner.
-             > 			21:37 -> Title: Family Gathering, Details: Enjoy a family dinner.
-             > 			21:37 -> Title: Family Gathering, Details: Enjoy a family dinner.
-        --> Records of the Day 30:
-           [ 7 Record(s) in this day. ]
-             > 			03:01 -> Title:   Yoga Class, Details: Relaxing mind and body with instructor Lee.
-             > 			03:01 -> Title:   Yoga Class, Details: Relaxing mind and body with instructor Lee.
-             > 			03:01 -> Title:   Yoga Class, Details: Relaxing mind and body with instructor Lee.
-             > 			16:03 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
-             > 			16:03 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
-             > 			16:03 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
-             > [BookMarked]21:01 -> Title: Check Emails, Details: Reply to urgent messages and organize inbox.
 Records of the Year 2025:
     -> Records of the Month 01:
         --> Records of the Day 01:
@@ -2860,16 +2637,6 @@ Records of the Year 2025:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]18:27 -> Title:   Yoga Class, Details: Relaxing mind and body with instructor Lee.
-        --> Records of the Day 29:
-           [ 3 Record(s) in this day. ]
-             > 			02:26 -> Title:     Shopping, Details: Visit the mall for some shopping.
-             > 			02:26 -> Title:     Shopping, Details: Visit the mall for some shopping.
-             > 			02:26 -> Title:     Shopping, Details: Visit the mall for some shopping.
-        --> Records of the Day 30:
-           [ 3 Record(s) in this day. ]
-             > 			06:01 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
-             > 			06:01 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
-             > [BookMarked]13:23 -> Title: Coffee Break, Details: Catch up with a friend at a cafe.
     -> Records of the Month 02:
         --> Records of the Day 01:
            [ 4 Record(s) in this day. ]
@@ -3096,18 +2863,6 @@ Records of the Year 2025:
              > 			12:43 -> Title: Dentist Appointment, Details: Teeth cleaning session at 3 PM with Dr. Smith.
              > 			12:43 -> Title: Dentist Appointment, Details: Teeth cleaning session at 3 PM with Dr. Smith.
              > [BookMarked]13:43 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
-        --> Records of the Day 29:
-           [ 4 Record(s) in this day. ]
-             > 			07:13 -> Title: Lunch with Mentor, Details: Meet at noon at Cafe Luna to discuss career plans.
-             > 			07:13 -> Title: Lunch with Mentor, Details: Meet at noon at Cafe Luna to discuss career plans.
-             > 			07:13 -> Title: Lunch with Mentor, Details: Meet at noon at Cafe Luna to discuss career plans.
-             > [BookMarked]16:53 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
-        --> Records of the Day 30:
-           [ 4 Record(s) in this day. ]
-             > [BookMarked]02:15 -> Title:    Plan Trip, Details: Research and book accommodations for summer vacation.
-             > 			18:21 -> Title: Team Discussion, Details: Discuss project updates and next steps.
-             > 			18:21 -> Title: Team Discussion, Details: Discuss project updates and next steps.
-             > 			18:21 -> Title: Team Discussion, Details: Discuss project updates and next steps.
     -> Records of the Month 04:
         --> Records of the Day 03:
            [ 3 Record(s) in this day. ]
@@ -3194,9 +2949,6 @@ Records of the Year 2025:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]21:26 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
-        --> Records of the Day 29:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]16:18 -> Title:   Study Time, Details: Focus on algorithms and data structures.
     -> Records of the Month 05:
         --> Records of the Day 02:
            [ 3 Record(s) in this day. ]
@@ -3276,28 +3028,6 @@ Records of the Year 2025:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]02:28 -> Title:  Gym Workout, Details: Hit the gym for a workout session.
-        --> Records of the Day 29:
-           [ 4 Record(s) in this day. ]
-             > 			02:02 -> Title: Team Meeting, Details: Discuss project milestones and delegate tasks.
-             > 			02:02 -> Title: Team Meeting, Details: Discuss project milestones and delegate tasks.
-             > 			02:02 -> Title: Team Meeting, Details: Discuss project milestones and delegate tasks.
-             > [BookMarked]14:53 -> Title: Write Report, Details: Summarize findings from the recent survey.
-        --> Records of the Day 30:
-           [ 3 Record(s) in this day. ]
-             > 			17:04 -> Title: Guitar Practice, Details: Learn new chords and practice the song Yesterday.
-             > 			17:04 -> Title: Guitar Practice, Details: Learn new chords and practice the song Yesterday.
-             > [BookMarked]22:49 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
-        --> Records of the Day 31:
-           [ 9 Record(s) in this day. ]
-             > 			04:30 -> Title:  Cook Dinner, Details: Try a new recipe for pasta with homemade sauce.
-             > 			04:30 -> Title:  Cook Dinner, Details: Try a new recipe for pasta with homemade sauce.
-             > 			04:30 -> Title:  Cook Dinner, Details: Try a new recipe for pasta with homemade sauce.
-             > 			07:06 -> Title: Write Report, Details: Summarize findings from the recent survey.
-             > 			07:06 -> Title: Write Report, Details: Summarize findings from the recent survey.
-             > 			07:06 -> Title: Write Report, Details: Summarize findings from the recent survey.
-             > 			17:43 -> Title: Team Discussion, Details: Discuss project updates and next steps.
-             > 			17:43 -> Title: Team Discussion, Details: Discuss project updates and next steps.
-             > 			17:43 -> Title: Team Discussion, Details: Discuss project updates and next steps.
     -> Records of the Month 06:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
@@ -3404,12 +3134,6 @@ Records of the Year 2025:
              > 			07:18 -> Title:   Yoga Class, Details: Relaxing mind and body with instructor Lee.
              > 			07:18 -> Title:   Yoga Class, Details: Relaxing mind and body with instructor Lee.
              > [BookMarked]08:56 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
-        --> Records of the Day 29:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]17:04 -> Title: Family Gathering, Details: Enjoy a family dinner.
-        --> Records of the Day 30:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]14:31 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
     -> Records of the Month 07:
         --> Records of the Day 01:
            [ 4 Record(s) in this day. ]
@@ -3534,12 +3258,6 @@ Records of the Year 2025:
              > 			19:09 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
              > 			19:09 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
              > 			19:09 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
-        --> Records of the Day 29:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]02:56 -> Title: Guitar Practice, Details: Learn new chords and practice the song Yesterday.
-        --> Records of the Day 31:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]00:16 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
     -> Records of the Month 08:
         --> Records of the Day 01:
            [ 4 Record(s) in this day. ]
@@ -3644,20 +3362,6 @@ Records of the Year 2025:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]21:40 -> Title: Dentist Appointment, Details: Teeth cleaning session at 3 PM with Dr. Smith.
-        --> Records of the Day 29:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]17:05 -> Title:      Laundry, Details: Wash clothes and prepare outfits for the week.
-        --> Records of the Day 30:
-           [ 4 Record(s) in this day. ]
-             > [BookMarked]14:07 -> Title: Dentist Appointment, Details: Teeth cleaning session at 3 PM with Dr. Smith.
-             > 			15:15 -> Title: Lunch with Mentor, Details: Meet at noon at Cafe Luna to discuss career plans.
-             > 			15:15 -> Title: Lunch with Mentor, Details: Meet at noon at Cafe Luna to discuss career plans.
-             > 			15:15 -> Title: Lunch with Mentor, Details: Meet at noon at Cafe Luna to discuss career plans.
-        --> Records of the Day 31:
-           [ 3 Record(s) in this day. ]
-             > 			05:29 -> Title: Read Articles, Details: Stay updated with the latest tech news.
-             > 			05:29 -> Title: Read Articles, Details: Stay updated with the latest tech news.
-             > [BookMarked]19:50 -> Title: Team Discussion, Details: Discuss project updates and next steps.
     -> Records of the Month 09:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
@@ -3764,10 +3468,6 @@ Records of the Year 2025:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]08:49 -> Title: Read Articles, Details: Stay updated with the latest tech news.
-        --> Records of the Day 29:
-           [ 2 Record(s) in this day. ]
-             > 			11:12 -> Title: Coffee Break, Details: Catch up with a friend at a cafe.
-             > 			11:12 -> Title: Coffee Break, Details: Catch up with a friend at a cafe.
     -> Records of the Month 10:
         --> Records of the Day 02:
            [ 4 Record(s) in this day. ]
@@ -3869,17 +3569,6 @@ Records of the Year 2025:
              > 			17:20 -> Title:  Gym Session, Details: Leg day workout followed by 20 mins of cardio.
              > 			17:20 -> Title:  Gym Session, Details: Leg day workout followed by 20 mins of cardio.
              > 			17:20 -> Title:  Gym Session, Details: Leg day workout followed by 20 mins of cardio.
-        --> Records of the Day 29:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]04:49 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
-        --> Records of the Day 30:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]19:47 -> Title:  Cook Dinner, Details: Try a new recipe for pasta with homemade sauce.
-        --> Records of the Day 31:
-           [ 3 Record(s) in this day. ]
-             > 			10:24 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
-             > 			10:24 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
-             > 			10:24 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
     -> Records of the Month 11:
         --> Records of the Day 02:
            [ 1 Record(s) in this day. ]
@@ -3968,18 +3657,6 @@ Records of the Year 2025:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]03:45 -> Title: Coffee Break, Details: Catch up with a friend at a cafe.
-        --> Records of the Day 29:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]15:04 -> Title:  Gym Workout, Details: Hit the gym for a workout session.
-        --> Records of the Day 30:
-           [ 7 Record(s) in this day. ]
-             > 			08:05 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
-             > 			08:05 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
-             > 			08:05 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
-             > [BookMarked]10:19 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
-             > 			23:06 -> Title:  Gym Workout, Details: Hit the gym for a workout session.
-             > 			23:06 -> Title:  Gym Workout, Details: Hit the gym for a workout session.
-             > 			23:06 -> Title:  Gym Workout, Details: Hit the gym for a workout session.
     -> Records of the Month 12:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
@@ -4081,9 +3758,3 @@ Records of the Year 2025:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]19:02 -> Title:    Plan Trip, Details: Research and book accommodations for summer vacation.
-        --> Records of the Day 30:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]07:06 -> Title:  Cook Dinner, Details: Try a new recipe for pasta with homemade sauce.
-        --> Records of the Day 31:
-           [ 1 Record(s) in this day. ]
-             > [BookMarked]14:07 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
