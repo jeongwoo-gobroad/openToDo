@@ -102,7 +102,7 @@ void select_highlightOn();
 void prev_select_highlightOff();
 void print_date_ToDoSummarized(unsigned long long targetDate);
 void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* page); 
-void print_UpcomingBookMark();
+void print_UpcomingBookMark(unsigned long long today);
 void edit_plan(unsigned long long targetDate, int* page);
 void printColorStrip(int colorNum);
 void print_date_BookMark(unsigned long long targetDate);
@@ -315,6 +315,7 @@ int main(int argc, char* argv[]) {
             print_date_NumOfSchedule(selectDate); /* to refresh */
         }
         
+        print_UpcomingBookMark(selectDate); /* to refresh */
         print_commandLine(mode);
         refresh();
     }
@@ -398,7 +399,7 @@ void edit_plan(unsigned long long targetDate, int* page){
         default:
             break;
     }
-    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Press ENTER to comtinue");
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Press ENTER to continue");
     getch();
     
     cbreak();  // 다시 non-canonical 모드로 전환
@@ -567,7 +568,7 @@ pos_SC_date;
     print_date_BookMark(selectDate);
     print_commandLine(0);
     print_date_ToDoSummarized(selectDate);
-    print_UpcomingBookMark();
+    print_UpcomingBookMark(todayDate);
     return;
 }
 
@@ -1484,10 +1485,58 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
     return;
 }
 
-void print_UpcomingBookMark() {
+void print_UpcomingBookMark(unsigned long long today) {
+    char str[BUFSIZ] = {'\0', };
+    char *strbuf = str;
+    int chkColorPair = 0;
     for (int i = pos_SLR_stt.col; i <= pos_SLR_end.col; i++)
         mvprintw(pos_SLR_stt.row - 1, i, "-");
     mvprintw(pos_SLR_stt.row, pos_SLR_stt.col, "Upcoming Book Marks..");
+    int row = pos_SLR_stt.row+2;
+    int col = pos_SLR_stt.col;
+    int count = (pos_SLR_end.row - (row-1))/2;
+    getBookMarkedInDate(today / 10000, count, str);
+
+    strbuf = str;
+    while (*strbuf != '\0') {
+        col = pos_SLR_stt.col;
+        if (*strbuf == '[') {
+            strbuf++;
+            if (*strbuf == '^') {
+                strbuf++;
+                mvprintw(row, col, "%.2s:", strbuf);
+                strbuf += 2;
+                printw("%.2s", strbuf);
+                strbuf += 2;
+                row++;
+            }
+        }
+        else if (*strbuf == '*') {
+            strbuf++;
+            chkColorPair = (int)(*(strbuf++) - 48);
+        }
+        else if (*strbuf == ']') {
+            strbuf++;
+            if (*strbuf == '^') {
+                strbuf++;
+                mvprintw(row, col++, " ");                   
+                printColorStrip(chkColorPair);
+                col += 2;
+                if (chkColorPair) attron(A_BOLD); 
+                mvprintw(row, col, " %.25s", strbuf);
+                if (chkColorPair) attroff(A_BOLD); 
+                chkColorPair = 0;
+                row += 2;
+                strbuf += 25;
+            }
+        }
+
+        if (strbuf > &str[BUFSIZ]) {
+            perror("overflow");
+        }
+
+        //strbuf++;
+    } 
 }
 
 void popup(char* title, char* str1, char* str2, int delay) {
