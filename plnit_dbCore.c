@@ -1623,6 +1623,8 @@ void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
 
     strcpy(str, retstr);
 
+    free(retstr);
+
     return;
 }
 
