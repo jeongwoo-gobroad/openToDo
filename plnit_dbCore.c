@@ -193,6 +193,8 @@ void initDday(void);
 int isBothDdayTheSame(toDoPtr s, toDo o);
 void delDdayStack(int whatto);
 void setDdayStack(toDoPtr target, int addto);
+/* 0518 added for safe exit */
+void clearAll(void);
 
 /*--UX Layer interactive API Methods---------------------*/
 
@@ -456,6 +458,7 @@ int __dbDebug(void) {
                 initDday();
                 break;
             case 0:
+                clearAll();
                 r = 0;
                 break;
             default:
@@ -2208,6 +2211,21 @@ void getHolidayInfos(int* fd) { /* let fp := "public.dsv", dsv stands for defaul
     } free(buf); /* last dummy one */
 
     //puts("why this isnt working");
+
+    return;
+}
+void clearAll(void) {
+    freeAllMem();
+    initSaveMem();
+
+    free(leapYear);
+    free(twenty_Eight);
+    free(twenty_Nine);
+    free(thirty);
+    free(thirty_one);
+
+    free(rmdr);
+    free(dStack);
 
     return;
 }
