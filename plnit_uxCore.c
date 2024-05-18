@@ -104,7 +104,7 @@ void print_date_ToDoSummarized(unsigned long long targetDate);
 void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* page); 
 void print_UpcomingBookMark(unsigned long long today);
 void edit_plan(unsigned long long targetDate, int* page);
-void printColorStrip(int colorNum);
+void printColorStrip(char *c, int colorNum);
 void print_date_BookMark(unsigned long long targetDate);
 void printReminderControl(int how);
 /*-----Display control--------------------------------------------------------------*/
@@ -192,11 +192,11 @@ int main(int argc, char* argv[]) {
     init_pair(3, COLOR_BLUE, COLOR_BLACK);
     init_pair(4, COLOR_BLUE, COLOR_WHITE);
     /* for bookmark strips */
-    init_pair(5, COLOR_GREEN, COLOR_GREEN);
-    init_pair(6, COLOR_CYAN, COLOR_CYAN);
-    init_pair(7, COLOR_MAGENTA, COLOR_MAGENTA);
-    init_pair(8, COLOR_RED, COLOR_RED);
-    init_pair(9, COLOR_WHITE, COLOR_WHITE);
+    init_pair(5, COLOR_BLACK, COLOR_GREEN);
+    init_pair(6, COLOR_BLACK, COLOR_CYAN);
+    init_pair(7, COLOR_BLACK, COLOR_MAGENTA);
+    init_pair(8, COLOR_BLACK, COLOR_RED);
+    init_pair(9, COLOR_BLACK, COLOR_WHITE);
     /* for bookmark strips ended */
 
     initPosVar();
@@ -1324,7 +1324,7 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
                     mvprintw(row, col++, " ");
                     /* for bookmark strip */
                     if (isHolidayEvent) chkColorPair = 9;
-                    printColorStrip(chkColorPair);
+                    printColorStrip("  ", chkColorPair);
                     /* for bookmark strip */
                     col += 2;
                     if (chkColorPair) attron(A_BOLD); /* for ones bookmarked */
@@ -1410,7 +1410,7 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
                 mvprintw(row, col++, " "); /* ok */ 
                 /* for bookmark strip */
                 if (isHolidayEvent) chkColorPair = 9;
-                printColorStrip(chkColorPair);
+                printColorStrip("  ", chkColorPair);
                 /* for bookmark strip */
                 col += 2;
                 if (chkColorPair) attron(A_BOLD); /* for ones bookmarked */
@@ -1486,15 +1486,15 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
 }
 
 void print_UpcomingBookMark(unsigned long long today) {
-    char str[BUFSIZ] = {'\0', };
-    char *strbuf = str;
+    char str[BUFSIZ] = { '\0', };
+    char* strbuf = str;
     int chkColorPair = 0;
     for (int i = pos_SLR_stt.col; i <= pos_SLR_end.col; i++)
         mvprintw(pos_SLR_stt.row - 1, i, "-");
-    mvprintw(pos_SLR_stt.row, pos_SLR_stt.col, "Upcoming Book Marks..");
-    int row = pos_SLR_stt.row+2;
+    mvprintw(pos_SLR_stt.row, pos_SLR_end.col - 20, "Upcoming Book-Marks..");
+    int row = pos_SLR_stt.row + 1;
     int col = pos_SLR_stt.col;
-    int count = (pos_SLR_end.row - (row-1))/2;
+    int count = (pos_SLR_end.row - (row)) / 2 - 1;
     getBookMarkedInDate(today / 10000, count, str);
 
     strbuf = str;
@@ -1519,12 +1519,12 @@ void print_UpcomingBookMark(unsigned long long today) {
             strbuf++;
             if (*strbuf == '^') {
                 strbuf++;
-                mvprintw(row, col++, " ");                   
-                printColorStrip(chkColorPair);
+                mvprintw(row, col++, " ");
+                printColorStrip("  ", chkColorPair);
                 col += 2;
-                if (chkColorPair) attron(A_BOLD); 
+                if (chkColorPair) attron(A_BOLD);
                 mvprintw(row, col, " %.25s", strbuf);
-                if (chkColorPair) attroff(A_BOLD); 
+                if (chkColorPair) attroff(A_BOLD);
                 chkColorPair = 0;
                 row += 2;
                 strbuf += 25;
@@ -1536,7 +1536,7 @@ void print_UpcomingBookMark(unsigned long long today) {
         }
 
         //strbuf++;
-    } 
+    }
 }
 
 void popup(char* title, char* str1, char* str2, int delay) {
@@ -1655,28 +1655,28 @@ void popup(char* title, char* str1, char* str2, int delay) {
 
     return;
 }
-void printColorStrip(int colorNum) { 
+void printColorStrip(char *c, int colorNum) { 
     attrset(A_NORMAL);
     if (colorNum == 0) /* default */ {
         attron(COLOR_PAIR(9)); /* 9 := off-white */
-        addstr("  ");
+        addstr(c);
         attrset(A_NORMAL);
         //attroff(COLOR_PAIR(9));
         return;
     }
     if (colorNum == 9) /* holiday */ {
         attron(COLOR_PAIR(8)); /* 8 := off-red */
-        addstr("  ");
+        addstr(c);
         attroff(COLOR_PAIR(8));
         return;
     }
     if (colorNum == -1) { /* if -1: erase */
-        addstr("  "); /* -1 := erase */
+        addstr(c); /* -1 := erase */
         return;
     }
     colorNum += 4; /* refer to the definition of bookmark color */
     attron(COLOR_PAIR(colorNum));
-    addstr("  ");
+    addstr(c);
     attroff(COLOR_PAIR(colorNum));
 
     return;
@@ -1696,9 +1696,9 @@ void print_date_BookMark(unsigned long long targetDate) {
         if (i >= stt_col) {
             move(pos_SC_date[0][i].row, pos_SC_date[0][i].col + 4 * nNum - 2);
             chkColorPair = isBookMarked(targetDate / 1000000 * 100 + date);
-            if (chkColorPair) printColorStrip(chkColorPair);
+            if (chkColorPair) printColorStrip("  ", chkColorPair);
             else {
-                printColorStrip(-1);
+                printColorStrip("  ", - 1);
             }
             date++;
         }
@@ -1714,9 +1714,9 @@ void print_date_BookMark(unsigned long long targetDate) {
             else {
                 move(pos_SC_date[i][j].row, pos_SC_date[i][j].col + 4 * nNum - 2);
                 chkColorPair = isBookMarked(targetDate / 1000000 * 100 + date);
-                if (chkColorPair) printColorStrip(chkColorPair);
+                if (chkColorPair) printColorStrip("  ", chkColorPair);
                 else {
-                    printColorStrip(-1);
+                    printColorStrip("  ", - 1);
                 }
             }
         }
