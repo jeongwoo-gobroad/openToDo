@@ -1,5 +1,5 @@
 #!/bin/sh
-if gcc -Wall plnit_dbCore.c plnit_uxCore.c -o pln -lcurses -g
+if gcc -Wall plnit_dbCore.c plnit_uxCore.c plnit_clientCore.c -o pln -lcurses -g
 then
     echo Build Complete, Launch it with ./pln, also you can debug it with gdb.
 else

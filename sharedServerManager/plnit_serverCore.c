@@ -14,7 +14,7 @@
 #include <signal.h>
 
 #define PORT    7227
-#define MAXLINE 196
+#define MAXLINE 1024
 
 #define PUT 120
 #define GET 140
@@ -24,6 +24,7 @@ typedef unsigned long long ull;
 
 typedef struct personalToDo {
     char accessKey[9];
+    char userName[16];
 
     ull dateData;
     int priority;
@@ -40,7 +41,7 @@ typedef struct sharedDB {
 /* Global variables */
 sharedDB ssvc;
 const char keyPool[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 
-/*---size: 22-------*/  'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'j', 'l', };
+/*---size: 22-------*/  'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', };
 const char* bin_save = "accesspairs.ssv";
 static int storefp = 0;
 /*------------------*/
@@ -50,7 +51,7 @@ void       initServerDB(void);
 void       closeServerDB(void);
 char*      genAccessKey(void);
 int        isKeyColide(char* key);
-perToDoPtr allocData(char* accKey, ull d_data, int p_data, char* t_data, char* dt_data);
+perToDoPtr allocData(char* accKey, char* user, ull d_data, int p_data, char* t_data, char* dt_data);
 int        insert(char* targetString);
 perToDoPtr getData(char* key);
 void       writeToFile(void);
@@ -59,7 +60,7 @@ int        readFromFile(void);
 
 /* client management functions */
 int   checkMode(char* str);
-int   markupStringToData(ull* d_data, int* p_data, char* t_data, char* dt_data, char* targetString);
+int   markupStringToData(char* user, ull* d_data, int* p_data, char* t_data, char* dt_data, char* targetString);
 char* dataToMarkUpString(perToDoPtr target);
 /*-----------------------------*/
 
@@ -74,12 +75,13 @@ int main(void){
     struct sockaddr_in host_addr, client_addr;
     socklen_t size;
     int recv_length;
+    //int btw;
 
     char buffer[MAXLINE];
     perToDoPtr rtn;
     char* temp;
 
-    socket_fd = socket(PF_INET,SOCK_STREAM,0);
+    socket_fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     host_addr.sin_family = AF_INET;
     host_addr.sin_port = htons(PORT);
@@ -93,9 +95,11 @@ int main(void){
     initServerDB();
     setSigHandler();
 
+    puts("-------------openToDo(pln_it) Server Program v 1.0-------------");
+
     while (1){
         size = sizeof(struct sockaddr_in);
-        accepted_fd=accept(socket_fd, (struct sockaddr *)&client_addr, &size);
+        accepted_fd = accept(socket_fd, (struct sockaddr *)&client_addr, &size);
 
         printf("Client Info : IP %s, Port %d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
@@ -103,20 +107,23 @@ int main(void){
         recv_length = 1;
         //printf("Received: [%s]\n", buffer);
         while (recv_length > 0) {
-            recv_length = recv(accepted_fd, &buffer, MAXLINE, 0);
+            recv_length = read(accepted_fd, buffer, MAXLINE);
             printf("Received: [%s]\n", buffer);
             if (checkMode(buffer) == PUT) {
                 puts("insert mode...");
                 memset(buffer, 0x00, MAXLINE);
-                recv(accepted_fd, &buffer, MAXLINE, 0);
+                read(accepted_fd, buffer, MAXLINE);
+                printf("buffer: %s\n", buffer);
                 insert(buffer);
                 write(accepted_fd, (ssvc.arr)[ssvc.maxindex]->accessKey, 9);
+                printf("@%s, %llu, %s -> %s with p of %d\n", (ssvc.arr)[ssvc.maxindex]->userName, (ssvc.arr)[ssvc.maxindex]->dateData, 
+                    (ssvc.arr)[ssvc.maxindex]->title, (ssvc.arr)[ssvc.maxindex]->details, (ssvc.arr)[ssvc.maxindex]->priority);
                 memset(buffer, 0x00, MAXLINE);
                 writeToFile();
             }
             else if (checkMode(buffer) == GET) {
                 memset(buffer, 0x00, MAXLINE);
-                recv(accepted_fd, &buffer, MAXLINE, 0);
+                read(accepted_fd, buffer, MAXLINE);
                 if ((rtn = getData(buffer)) == NULL) {
                     write(accepted_fd, "NOSUCHDATA", 11);
                 }
@@ -145,6 +152,9 @@ int main(void){
 
         close(accepted_fd);
     }
+
+    free(ssvc.arr);
+
     return 0;
 }
 
@@ -216,7 +226,7 @@ int        isKeyColide(char* key) {
 
     return 0;
 }
-perToDoPtr allocData(char* accKey, ull d_data, int p_data, char* t_data, char* dt_data) {
+perToDoPtr allocData(char* accKey, char* user, ull d_data, int p_data, char* t_data, char* dt_data) {
     perToDoPtr temp = (perToDoPtr)malloc(sizeof(personalToDo));
 
     if (temp == NULL) errOcc("allocData");
@@ -224,6 +234,7 @@ perToDoPtr allocData(char* accKey, ull d_data, int p_data, char* t_data, char* d
     strcpy(temp->accessKey, accKey);
     strcpy(temp->title, t_data);
     strcpy(temp->details, dt_data);
+    strcpy(temp->userName, user);
 
     temp->dateData = d_data;
     temp->priority = p_data;
@@ -231,7 +242,7 @@ perToDoPtr allocData(char* accKey, ull d_data, int p_data, char* t_data, char* d
     return temp;
 }
 int        insert(char* targetString) {
-    ull tmpd; int tmpp; char tmpt[26]; char tmpdt[61];
+    ull tmpd; int tmpp; char tmpt[26]; char tmpdt[61]; char name[16];
 
     if (ssvc.arr == NULL) {
         ssvc.arr = (perToDoPtr*)malloc(sizeof(perToDoPtr));
@@ -243,8 +254,8 @@ int        insert(char* targetString) {
         ssvc.arr = (perToDoPtr*)realloc(ssvc.arr, sizeof(perToDoPtr) * (ssvc.maxindex + 1));
         if (ssvc.arr == NULL) errOcc("insert");
     }
-    markupStringToData(&tmpd, &tmpp, tmpt, tmpdt, targetString);
-    (ssvc.arr)[ssvc.maxindex] = allocData(genAccessKey(), tmpd, tmpp, tmpt, tmpdt);
+    markupStringToData(name, &tmpd, &tmpp, tmpt, tmpdt, targetString);
+    (ssvc.arr)[ssvc.maxindex] = allocData(genAccessKey(), name, tmpd, tmpp, tmpt, tmpdt);
 
     return 0;
 }
@@ -315,7 +326,7 @@ int   checkMode(char* str) {
 
     return 0;
 }
-int   markupStringToData(ull* d_data, int* p_data, char* t_data, char* dt_data, char* targetString) {
+int   markupStringToData(char* user, ull* d_data, int* p_data, char* t_data, char* dt_data, char* targetString) {
     /* date: [*, prior: [[, title: ]*, details: ]] */
     int i; char* indexing;
     char tempDate[13] = {'\0', };
@@ -325,7 +336,12 @@ int   markupStringToData(ull* d_data, int* p_data, char* t_data, char* dt_data, 
     
     while (*indexing) {
         //printf("%c\n", *indexing);
-        if (*indexing == '[') {
+        if (*indexing == '@') {
+            indexing++;
+            strncpy(user, indexing, 15);
+            indexing += 14;
+        }
+        else if (*indexing == '[') {
             indexing++;
             if (*indexing == '*') {
                 indexing++;
@@ -371,7 +387,7 @@ char* dataToMarkUpString(perToDoPtr target) {
 
     if (temp == NULL) errOcc("dTMUS");
 
-    sprintf(temp, "[*%llu[[%d]*%-25s]]%s", target->dateData, target->priority, target->title, target->details);
+    sprintf(temp, "@%-15s[*%llu[[%d]*%-25s]]%s", target->userName, target->dateData, target->priority, target->title, target->details);
 
     return temp;
 }
@@ -387,6 +403,10 @@ void safeExit(int signum) {
     puts("Terminating plnit-Serverside program...");
 
     close(storefp);
+    for (int i = 0; i <= ssvc.maxindex; i++) {
+        free(ssvc.arr[i]);
+    }
+    free(ssvc.arr);
 
     exit(0);
 }

@@ -8,6 +8,10 @@
 #include <sys/stat.h>
 
 typedef struct toDo {
+    char userName[16];
+    int isShared; /* 1: shared 2: being shared */
+    char code[9]; /* if it's being shared */
+
     unsigned long long hashNum;
     unsigned long long dateData;
     int priority;
@@ -40,6 +44,9 @@ void readFromFile(void) {
         arr[idx].hashNum = 0;
         fscanf(fp, " %[^\n]s\n", (arr[idx].title));
         fscanf(fp, " %[^\n]s\n", (arr[idx].details));
+        arr[idx].isShared = 0;
+        strcpy(arr[idx].code, "--------");
+        strcpy(arr[idx].userName, "_default");
         idx++;
     }
 

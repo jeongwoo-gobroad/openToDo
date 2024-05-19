@@ -1,6 +1,6 @@
 Reminder has not set yet.
 
-#0: 20231210, Yoga Class
+#0: 0, 
 #1: 0, 
 Records of the Year 2023:
     -> Records of the Month 01:
