@@ -2403,7 +2403,7 @@ int getFromServer_Highlevel(char* shareCode) {
     }
     else {
         if (temp->priority != 0) {
-            deBookMarkInDate(temp->dateData % 10000);
+            deBookMarkInDate(temp->dateData / 10000);
         }
         insert(&key, temp);
     }

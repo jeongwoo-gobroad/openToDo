@@ -210,18 +210,18 @@ int cli_getToDoDataFromServer(toDoPtr target, const char* code) {
     if (rtn) return 2; /* cannot connect */
 
     /* sending get request to the server */
-    if (write(conn->server_sockfd, "receive", 8) <= 0){
+    if (write(conn->server_sockfd, "receive", 8) < 0){
         return 2;
     }
 
     /* sending code */
-    if (write(conn->server_sockfd, code, strlen(code)) <= 0){
+    if (write(conn->server_sockfd, code, strlen(code)) < 0){
         return 2;
     }
 
     /* getting code */
     memset(buf, 0x00, MAXLINE);
-    if (read(conn->server_sockfd, buf, MAXLINE) <= 0){
+    if (read(conn->server_sockfd, buf, MAXLINE) < 0){
         return 2;
     }
 
