@@ -39,6 +39,10 @@ typedef struct reminder {
 typedef reminder* reminderPtr;
 
 typedef struct toDo {
+    char userName[16];
+    int isShared; /* 1: shared 2: being shared */
+    char code[9]; /* if it's being shared */
+
     unsigned long long hashNum;
     unsigned long long dateData;
     int priority;
@@ -58,6 +62,7 @@ typedef dDay* dDayPtr;
 
 typedef struct day {
     int isBookMarkExists;
+    int sharedToDoExists;
     int maxIndex;
     int isHoliday;
     toDoPtr* toDoArr;
@@ -104,11 +109,13 @@ static yearGrp key = NULL; // this should be global var. to abstract the process
 static savePtr saveLink  = NULL;
 int ifAlreadyLoaded = 0;
 static int pageIterator = 0; // for GUI interaction; See Codes Below -> void getTodaySchedule_withDetails
+static char userName[16] = {'\0', };
 /**/
 const char* bin_fileName = "todos.sv";
 const char*  hr_fileName = "todos.txt"; /* hr stands for human readable */
 const char* pub_fileName = "public.dsv"; /* dsv := default save file for public holidays */
 const char*   dbDebug = "-d";
+const char*   clDebug = "-cl";
 const char* cli_input = "-in";
 /**/ /* for leap year and month limit check */
 monthPtr leapYear = NULL;
@@ -195,6 +202,19 @@ void delDdayStack(int whatto);
 void setDdayStack(toDoPtr target, int addto);
 /* 0518 added for safe exit */
 void clearAll(void);
+/* 0519 added for network features */
+void setUserName(char* myName);
+int getFromServer(toDoPtr target, char* shareCode);
+int getFromServer_Highlevel(char* shareCode);
+int pushToServer(toDoPtr o, char* shareCode);
+int shareWhileIterate(unsigned long long src, int pageNum, char* shareCode);
+int isSharedToDoExisting(unsigned long long targetDate);
+void deBookMarkInDate(unsigned long long src);
+
+/*--server-client interaction related APIs---------------*/
+int __clDebug(void);
+int cli_pushToDoDataToServer(toDoPtr target, char* code);
+int cli_getToDoDataFromServer(toDoPtr target, const char* code);
 
 /*--UX Layer interactive API Methods---------------------*/
 
@@ -243,9 +263,12 @@ int __dbDebug(void) {
     int temp;
     char testStr[BUFSIZ];
     int dday1, dday2; char dday1_str[30]; char dday2_str[30];
+    char tmpname[16] = {'\0', };
+    char shareCode[9] = {'\0', };
 
     allocReminder();
     initDday();
+    setUserName("Gildong_Hong");
 
     /* dummy datas just for leap year / month limit check */
     leapYear     = (monthPtr)malloc(sizeof(month));
@@ -257,8 +280,8 @@ int __dbDebug(void) {
     while (r) {
         puts("Plan_it DB Core Debugger Menu");
         puts("Basic operation: ");
-        puts("(1) to insert\n(2) to print all");
-        puts("(3) to save\n(4) to load\n(0) to quit");
+        puts("(0) to set username\n(1) to insert\n(2) to print all");
+        puts("(3) to save\n(4) to load\n(-1) to quit");
         puts("  API Test menu: ");
         puts("  (5) to search by YYYYMMDD\n  (6) to get today's infos for given sort type");
         puts("  (7) to print summarized info of the given date in a markup form");
@@ -275,10 +298,18 @@ int __dbDebug(void) {
         puts("  (18) to set a D-day with YYYYMMDD and page number");
         puts("  (19) to show the D-day list");
         puts("  (20) debug only feature: to clear out D-day lists");
+        puts("  (21) to share records with YYYYMMDD and iterator 'page' number");
+        puts("  (22) to receive shared records by invitation code");
+        puts("  (23) to get does the given date includes shared todos");
         printf("Type: ");
         //getchar();
         scanf("%d", &input);
         switch (input) {
+            case 0:
+                printf("Type username: ");
+                scanf("%s", tmpname); getchar();
+                setUserName(tmpname);
+                break;
             case 1:
                 printf("Type number of records: \n");
                 scanf("%d", &input);
@@ -457,7 +488,29 @@ int __dbDebug(void) {
             case 20:
                 initDday();
                 break;
-            case 0:
+            case 21:
+                printf("Type scan target YYYYMMDD: \n");
+                scanf("%llu", &date); //getchar();
+                printf("Type Page Number [Alert: not an index]: \n");
+                scanf("%d", &input);
+                input_2 = shareWhileIterate(date, input, shareCode);
+                printf("result: %d\n", input_2);
+                if (input_2 == 0) {
+                    printf("code: %s\n", shareCode);
+                }
+                break;
+            case 22:
+                printf("Type invitation code: \n");
+                scanf("%s", shareCode);
+                input_2 = getFromServer_Highlevel(shareCode);
+                printf("result: %d\n", input_2);
+                break;
+            case 23:
+                printf("Type scan target YYYYMMDD: \n");
+                scanf("%llu", &date); //getchar();
+                printf("result: %d\n", isSharedToDoExisting(date));
+                break;
+            case -1:
                 clearAll();
                 r = 0;
                 break;
@@ -484,8 +537,11 @@ toDoPtr create_Node(unsigned long long date, int priority_num, const char* title
     newOne->hashNum = 0;
     newOne->dateData = date;
     newOne->priority = priority_num;
+    newOne->isShared = 0;
     strcpy(newOne->title, title);
     strcpy(newOne->details, info);
+    strcpy(newOne->userName, userName);
+    strcpy(newOne->code, "---------");
 
     return newOne;
 }
@@ -536,6 +592,7 @@ dayPtr create_day(void) {
     newOne->toDoArr = NULL;
     newOne->isBookMarkExists = 0;
     newOne->isHoliday = 0;
+    newOne->sharedToDoExists = 0;
 
     return newOne;
 }
@@ -740,6 +797,10 @@ int insert(yearGrp* db, toDoPtr targetData) {
 
     if (targetData->dateData % 10000 == 9999) {
         dd->isHoliday = 1; /* set holiday */
+    }
+
+    if (targetData->isShared == 1) {
+        dd->sharedToDoExists = 1; /* shared content inside */
     }
 
     //puts("inserted");
@@ -978,7 +1039,18 @@ void printToday(dayPtr when) {
     }
 
     for (i = 0; i <= when->maxIndex; i++) { /* safe approach */
-        printf("            %llu: [%d] %s || %s\n", (when->toDoArr)[i]->dateData, (when->toDoArr)[i]->priority, (when->toDoArr)[i]->title, (when->toDoArr)[i]->details);
+        if ((when->toDoArr)[i]->isShared == 1) {
+            printf("            Shared by %s::\n            %llu: [%d] %s || %s\n", (when->toDoArr)[i]->userName,
+                (when->toDoArr)[i]->dateData, (when->toDoArr)[i]->priority, (when->toDoArr)[i]->title, (when->toDoArr)[i]->details);
+        }
+        else if ((when->toDoArr)[i]->isShared == 2) {
+            printf("            ShareCode %s::\n            %llu: [%d] %s || %s\n", (when->toDoArr)[i]->code,
+                (when->toDoArr)[i]->dateData, (when->toDoArr)[i]->priority, (when->toDoArr)[i]->title, (when->toDoArr)[i]->details);  
+        }
+        else {
+            printf("            %llu: [%d] %s || %s\n", 
+                (when->toDoArr)[i]->dateData, (when->toDoArr)[i]->priority, (when->toDoArr)[i]->title, (when->toDoArr)[i]->details);
+        }
     }
 
     return;
@@ -1082,7 +1154,10 @@ int getTodaySchedule_Summarized(unsigned long long today, char* strbuf) {
     else {
         sortGivenDateToDos(dd, 2);
         for (i = 0; i <= dd->maxIndex; i++) {
-            if ((dd->toDoArr)[i]->priority) /* if bookmarked */ {
+            if ((dd->toDoArr)[i]->isShared) {
+                sprintf(temp, "[^%04llu*%d@%-15s]^%-25s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->priority, (dd->toDoArr)[i]->userName, (dd->toDoArr)[i]->title);
+            }
+            else if ((dd->toDoArr)[i]->priority) /* if bookmarked */ {
                 /*            Time->BookMarked->Title*/
                 sprintf(temp, "[^%04llu*%d]^%-25s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->priority, (dd->toDoArr)[i]->title);
             }
@@ -1135,7 +1210,10 @@ int getTodaySchedule_withDetails(unsigned long long today, char* strbuf, int dir
 
         sortGivenDateToDos(dd, 2);
 
-        if ((dd->toDoArr)[i]->priority) { /* if bookmarked */
+        if ((dd->toDoArr)[i]->isShared) {
+            sprintf(temp, "[^%04llu*%d@%-15s]^%-25s]]%s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->priority, (dd->toDoArr)[i]->userName, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
+        }
+        else if ((dd->toDoArr)[i]->priority) { /* if bookmarked */
             /*         Time->BookMarked->Title(NL)->Details*/
             sprintf(temp, "[^%04llu*%d]^%-25s]]%s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->priority, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
         }
@@ -1567,6 +1645,7 @@ void printUsage(void) {
     puts("Plan_it: ./pln [options] [argument 1...]");
     puts("      [options]:  NONE: Launch Plan_it in Normal Mode.");
     puts("      [options]:    -d: Launch Plan_it in Core Part Debugging Mode.");
+    puts("      [options]:   -cl: Launch Plan_it in Client Part Debugging Mode.");
     puts("      [options]:   -in: using CLI interface, you can insert data with arguments");
     puts("      -----------------------------------------------------------------------");
     puts("      [arguments]: [YYYYMMDD][HHMM][Priority_Num][Title][Details]");
@@ -1578,6 +1657,9 @@ void __launchOptions(int argc, char* argv[]){
     if (argc == 2) {
         if (strcmp(argv[1], dbDebug) == 0) {
             __dbDebug();
+        }
+        if (strcmp(argv[1], clDebug) == 0) {
+            __clDebug();
         }
         else {
             fprintf(stderr, "Plan_it: Unsupported command - '%s'\n", argv[1]);
@@ -2227,5 +2309,103 @@ void clearAll(void) {
     free(rmdr);
     free(dStack);
 
+    /* all heap blocks were freed -- no leaks are possible! */
+
     return;
+}
+/* 0519 added for network features */
+void setUserName(char* myName) {
+    strcpy(userName, myName);
+
+    return;
+}
+int isSharedToDoExisting(unsigned long long targetDate) {
+    /* YYYYMMDD */
+    yearPtr ytmp; monthPtr mtmp; dayPtr dtmp;
+
+    ytmp = findYear(targetDate / 10000, &key);
+    mtmp = findMonth(targetDate % 10000 / 100, ytmp);
+    dtmp = findDay(targetDate % 100, mtmp);
+
+    if (!dtmp) return 0; /* no record at first */
+
+    return dtmp->sharedToDoExists; /* 1: shared, 2: being shared */
+}
+int shareWhileIterate(unsigned long long src, int pageNum, char* shareCode) {
+    /* src = YYYYMMDD, (dtmp->toDoArr)[pageNum - 1] */
+    int rtnval;
+    yearPtr ytmp; monthPtr mtmp; dayPtr dtmp; toDoPtr temp;
+
+    ytmp = findYear(src / 10000, &key);
+    mtmp = findMonth(src % 10000 / 100, ytmp);
+    dtmp = findDay(src % 100, mtmp);
+
+    if (dtmp->toDoArr == NULL || pageNum < 1 || pageNum > dtmp->maxIndex + 1) { /* just to be safe */
+        return 3; /* no such data- */
+    }
+
+    sortGivenDateToDos(dtmp, 2); /* being ready for index-based iteration */
+
+    temp = (dtmp->toDoArr)[pageNum - 1];
+
+    rtnval = pushToServer(temp, shareCode);
+
+    if (rtnval == 0) { /* only if success */
+        temp->isShared = 2;
+        dtmp->sharedToDoExists = 1;
+        strcpy(temp->code, shareCode);
+    }
+
+    return rtnval; /* 2: cannot connect/server connection error, 0: success*/
+}
+int pushToServer(toDoPtr o, char* shareCode) {
+    return cli_pushToDoDataToServer(o, shareCode);
+}
+void deBookMarkInDate(unsigned long long src) {
+    int i;
+    yearPtr ytmp; monthPtr mtmp; dayPtr dtmp;
+
+    ytmp = findYear(src / 10000, &key);
+    mtmp = findMonth(src % 10000 / 100, ytmp);
+    dtmp = findDay(src % 100, mtmp);
+
+    if (dtmp == NULL) {
+        return;
+    }
+
+    for (i = 0; i <= dtmp->maxIndex; i++) {
+        if ((dtmp->toDoArr)[i]->priority != 0) {
+            (dtmp->toDoArr)[i]->priority = 0;
+            break;
+        }
+    }
+    dtmp->isBookMarkExists = 0;
+
+    return;
+}
+int getFromServer_Highlevel(char* shareCode) {
+    int rtn;
+    toDoPtr temp = (toDoPtr)malloc(sizeof(toDo));
+
+    if (temp == NULL) errOcc("gFS_Hl err");
+
+    if ((rtn = getFromServer(temp, shareCode)) == 1) {
+        free(temp);
+        return 1; /* no such data */
+    }
+    else if (rtn == 2) {
+        free(temp);
+        return 2; /* cannot connect to the server */
+    }
+    else {
+        if (temp->priority != 0) {
+            deBookMarkInDate(temp->dateData % 10000);
+        }
+        insert(&key, temp);
+    }
+
+    return 0;
+}
+int getFromServer(toDoPtr target, char* shareCode) {
+    return cli_getToDoDataFromServer(target, shareCode);
 }

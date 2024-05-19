@@ -14,6 +14,9 @@
 typedef unsigned long long ull;
 
 typedef struct toDo {
+    char userName[16];
+    int isShared;
+
     unsigned long long hashNum;
     unsigned long long dateData;
     int priority;
@@ -34,56 +37,25 @@ typedef struct connection {
 typedef connection* connPtr;
 
 static connPtr conn;
+static const char* default_ip = "175.201.149.127";
 
 /* client level function declared here */
 int cli_init(void);
+void cli_close(void);
 int cli_serverConnect(char* ipaddr);
-int cli_pushToDoDataToServer(toDoPtr target, char* code, char* usrname);
-int cli_getToDoDataFromServer(toDoPtr target, const char* code, char* usrname);
+int cli_pushToDoDataToServer(toDoPtr target, char* code);
+int cli_getToDoDataFromServer(toDoPtr target, const char* code);
 void cli_serverClose(void);
 void errOcc(char* str);
 /* ----------------------------------- */
 
-int main(void){
-    struct sockaddr_in serveraddr;
-    int server_sockfd;
-    int client_len;
+int main(void) {
     char buf[MAXLINE];
     /*char command[12];*/ int input;
-    ull dt; int pr; char tt[26]; char dtl[61];
-
-    
+    ull dt; int pr; char tt[26]; char dtl[61]; char un[16];
  
-    if ((server_sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
-        errOcc("socket");
-        return 1;
-    }
- 
-    serveraddr.sin_family = AF_INET;
-    serveraddr.sin_addr.s_addr = inet_addr("192.168.0.111");
-    serveraddr.sin_port = htons(7227);
- 
-    client_len = sizeof(serveraddr);
- 
-    if (connect(server_sockfd, (struct sockaddr *)&serveraddr, client_len) == -1){
-        errOcc("connect");
-        return 1;
-    }
-
-    /*int   checkMode(char* str) {
-    if (strcmp(str, "input")) {
-        return PUT;
-    }
-    else if (strcmp(str, "receive")) {
-        return GET;
-    }
-    else if (strcmp(str, "delete")) {
-        return DEL;
-    }
-    ull dt; int pr; char tt[26]; char dt[61];
-    return 0;
-}
-    */
+    cli_init();
+    cli_serverConnect(NULL);
 
     while (1) {
         memset(buf, 0x00, MAXLINE);
@@ -91,9 +63,11 @@ int main(void){
         scanf("%d", &input);
 
         if (input == 1) {
-            if (write(server_sockfd, "input", 6) <= 0){
+            if (write(conn->server_sockfd, "input", 6) <= 0){
                 errOcc("write");
             }
+            printf("input username: ");
+            scanf("%s", un);
             printf("input YYYYMMDDHHMM: ");
             scanf("%llu", &dt);
             printf("input PNUM: ");
@@ -104,15 +78,15 @@ int main(void){
             scanf(" %[^\n]s\n", dtl);
 
             memset(buf, 0x00, MAXLINE);
-            sprintf(buf, "[*%llu[[%d]*%-25s]]%s", dt, pr, tt, dtl);
+            sprintf(buf, "@%-15s[*%llu[[%d]*%-25s]]%s", un, dt, pr, tt, dtl);
 
-            if (write(server_sockfd, buf, MAXLINE) <= 0){
+            if (write(conn->server_sockfd, buf, MAXLINE) <= 0){
                 errOcc("write");
                 return 1;
             }
 
             memset(buf, 0x00, MAXLINE);
-            if (read(server_sockfd, buf, MAXLINE) <= 0){
+            if (read(conn->server_sockfd, buf, MAXLINE) <= 0){
                 errOcc("read");
                 return 1;
             }
@@ -120,28 +94,30 @@ int main(void){
             printf("Code: %s\n", buf);
         }
         else if (input == 2) {
-            if (write(server_sockfd, "receive", 8) <= 0){
+            if (write(conn->server_sockfd, "receive", 8) <= 0){
                 errOcc("write");
             }
             printf("input code: ");
             scanf("%s", buf);
 
-            if (write(server_sockfd, buf, MAXLINE) <= 0){
+            if (write(conn->server_sockfd, buf, MAXLINE) <= 0){
                 errOcc("write");
                 return 1;
             }
 
              memset(buf, 0x00, MAXLINE);
-            if (read(server_sockfd, buf, MAXLINE) <= 0){
+            if (read(conn->server_sockfd, buf, MAXLINE) <= 0){
                 errOcc("read");
                 return 1;
             }
 
             printf("String: %s\n", buf);
         }
- 
-    close(server_sockfd);
-    printf("read : %s", buf);
+    
+    }
+    
+    cli_close();
+
     return 0;
 }
 
@@ -160,9 +136,18 @@ int cli_init(void) {
 
     return 0;
 }
+void cli_close(void) {
+    close(conn->server_sockfd);
+    free(conn);
+
+    return;
+}
 int cli_serverConnect(char* ipaddr) {
-    if (conn->ipaddr == NULL) {
-        strcpy(conn->ipaddr, "175.201.149.127"); /* default server ip address if not given */
+    if (ipaddr == NULL) {
+        strcpy(conn->ipaddr, default_ip); /* default server ip address if not given */
+    }
+    else {
+        strcpy(conn->ipaddr, ipaddr);
     }
 
     if ((conn->server_sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
@@ -174,7 +159,7 @@ int cli_serverConnect(char* ipaddr) {
     conn->serveraddr.sin_addr.s_addr = inet_addr(conn->ipaddr);
     conn->serveraddr.sin_port = htons(7227); /* Port: 7227 fixed */
  
-    conn->client_len = sizeof(serveraddr);
+    conn->client_len = sizeof(conn->serveraddr);
  
     if (connect(conn->server_sockfd, (struct sockaddr *)&(conn->serveraddr), conn->client_len) == -1){
         //errOcc("connect");
@@ -185,73 +170,120 @@ int cli_serverConnect(char* ipaddr) {
 
     return 0; /* succeeded */
 }
-int cli_pushToDoDataToServer(toDoPtr target, char* code, char* usrname) {
-    /*
-    typedef struct toDo {
-        unsigned long long hashNum;
-        unsigned long long dateData;
-        int priority;
-        char title[26];
-        // SOCKET FEATURE {method}();
-        char details[61];
-    } toDo;
-    */
+int cli_pushToDoDataToServer(toDoPtr target, char* code) {
+    int rtn;
     char buf[MAXLINE] = {'\0', };
 
-    if (write(conn->server_sockfd, "input", 6) <= 0){ /* sending 'input' request to the server */
-        //errOcc("write");
-        return 1;
+    cli_init();
+    rtn = cli_serverConnect(NULL);
+    if (rtn) return 2; /* cannot connect */
+
+    /* sending 'input' request to the server */
+    if (write(conn->server_sockfd, "input", 6) <= 0){
+        return 2;
     }
 
     /* tokenizing */
-    sprintf(buf, "[*%llu[[%d]*%-25s]]%s", target->dateData, target->priority, target->title, target->details);
+    sprintf(buf, "@%-15s[*%llu[[%d]*%-25s]]%s", target->userName, target->dateData, target->priority, target->title, target->details);
 
     /* send to the server */
     if (write(conn->server_sockfd, buf, MAXLINE) <= 0){
-        //errOcc("write");
-        return 1;
+        return 2;
     }
 
     /* receiving sharing code */
     memset(buf, 0x00, MAXLINE);
     if (read(conn->server_sockfd, buf, MAXLINE) <= 0){
-        //errOcc("read");
-        return 1;
+        return 2;
     }
 
     strcpy(code, buf);
 
+    cli_close();
+
     return 0;
 }
-int cli_getToDoDataFromServer(toDoPtr target, const char* code, char* usrname) {
+int cli_getToDoDataFromServer(toDoPtr target, const char* code) {
+    char* ptr; int rtn;
     char buf[MAXLINE] = {'\0', };
+    char tempDate[13] = {'\0', };
+    int i = 0;
+
+    cli_init();
+    rtn = cli_serverConnect(NULL);
+    if (rtn) return 2; /* cannot connect */
 
     /* sending get request to the server */
     if (write(conn->server_sockfd, "receive", 8) <= 0){
-        errOcc("write");
-        return 1;
+        return 2;
     }
 
     /* sending code */
     if (write(conn->server_sockfd, code, strlen(code)) <= 0){
-        errOcc("write");
-        return 1;
+        return 2;
     }
 
     /* getting code */
     memset(buf, 0x00, MAXLINE);
     if (read(conn->server_sockfd, buf, MAXLINE) <= 0){
-        errOcc("read");
-        return 1;
+        return 2;
     }
 
     /* anything received? */
     if (strcmp(buf, "NOSUCHDATA") == 0) {
-        return 2; /* no such data */
+        return 1; /* no such data */
     }
 
+    ptr = buf;
     /* then split markup string */
+    while (*ptr) {
+        if (*ptr == '@') {
+            ptr++;
+            strncpy(target->userName, ptr, 15);
+            ptr += 14;
+        }
+        if (*ptr == '[') {
+            ptr++;
+            if (*ptr == '*') {
+                ptr++;
+                // YYYYMMDDHHMM 
+                strncpy(tempDate, ptr, 12);
+                //printf("%s\n", tempDate);
+                target->dateData = atoll(tempDate);
+                ptr += 11;
+            }
+            else if (*ptr == '[') {
+                ptr++;
+                //target->priority = (int)*ptr - 48;
+                target->priority = 0;
+                //indexing++;
+            }
+        }
+        else if (*ptr == ']') {
+            ptr++;
+            if (*ptr == '*') {
+                ptr++;
+                strncpy(target->title, ptr, 25);
+                ptr += 24;
+            }
+            else if (*ptr == ']') {
+                ptr++;
+                break;
+            }
+        }
+        ptr++;
+    }
+    while (*ptr) {
+        (target->details)[i++] = *ptr;
+        ptr++;
+    }
+    (target->details)[i] = '\0';
 
+    target->isShared = 1;
+
+    cli_close();
+
+    return 0;
 }
 void cli_serverClose(void) {
     close(conn->server_sockfd);
