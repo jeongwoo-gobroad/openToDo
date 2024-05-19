@@ -106,25 +106,30 @@ int main(void){
         /* receive */
         recv_length = 1;
         //printf("Received: [%s]\n", buffer);
-        while (recv_length > 0) {
-            recv_length = read(accepted_fd, buffer, MAXLINE);
+        while ((recv_length = read(accepted_fd, buffer, MAXLINE)) > 0) {
             printf("Received: [%s]\n", buffer);
             if (checkMode(buffer) == PUT) {
                 puts("insert mode...");
                 memset(buffer, 0x00, MAXLINE);
+                /* read from client */
                 read(accepted_fd, buffer, MAXLINE);
                 printf("buffer: %s\n", buffer);
+                /* then push it to our DB */
                 insert(buffer);
+                /* send to the client the recently added item's access code */
                 write(accepted_fd, (ssvc.arr)[ssvc.maxindex]->accessKey, 9);
                 printf("@%s, %llu, %s -> %s with p of %d\n", (ssvc.arr)[ssvc.maxindex]->userName, (ssvc.arr)[ssvc.maxindex]->dateData, 
                     (ssvc.arr)[ssvc.maxindex]->title, (ssvc.arr)[ssvc.maxindex]->details, (ssvc.arr)[ssvc.maxindex]->priority);
                 memset(buffer, 0x00, MAXLINE);
+                /* then save it to our local file */
                 writeToFile();
             }
             else if (checkMode(buffer) == GET) {
                 memset(buffer, 0x00, MAXLINE);
+                /* read from client */
                 read(accepted_fd, buffer, MAXLINE);
                 if ((rtn = getData(buffer)) == NULL) {
+                    /* if no such data */
                     write(accepted_fd, "NOSUCHDATA", 11);
                 }
                 else {
@@ -149,11 +154,9 @@ int main(void){
                 //printf("From Client : %s\n", buffer);
                 recv_length = recv(accepted_fd,&buffer, MAXLINE, 0);
         }
-
-        close(accepted_fd);
     }
 
-    free(ssvc.arr);
+    safeExit(0);
 
     return 0;
 }
