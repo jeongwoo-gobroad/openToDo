@@ -210,6 +210,7 @@ int pushToServer(toDoPtr o, char* shareCode);
 int shareWhileIterate(unsigned long long src, int pageNum, char* shareCode);
 int isSharedToDoExisting(unsigned long long targetDate);
 void deBookMarkInDate(unsigned long long src);
+/*-------------------------------------------------------*/
 
 /*--server-client interaction related APIs---------------*/
 int __clDebug(void);
@@ -1155,7 +1156,7 @@ int getTodaySchedule_Summarized(unsigned long long today, char* strbuf) {
         sortGivenDateToDos(dd, 2);
         for (i = 0; i <= dd->maxIndex; i++) {
             if ((dd->toDoArr)[i]->isShared) {
-                sprintf(temp, "[^%04llu*%d@%-15s]^%-25s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->priority, (dd->toDoArr)[i]->userName, (dd->toDoArr)[i]->title);
+                sprintf(temp, "[^%04llu*%d@]^%-25s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->priority, (dd->toDoArr)[i]->title);
             }
             else if ((dd->toDoArr)[i]->priority) /* if bookmarked */ {
                 /*            Time->BookMarked->Title*/
@@ -1210,8 +1211,11 @@ int getTodaySchedule_withDetails(unsigned long long today, char* strbuf, int dir
 
         sortGivenDateToDos(dd, 2);
 
-        if ((dd->toDoArr)[i]->isShared) {
+        if ((dd->toDoArr)[i]->isShared == 1) { /* shared: 공유 받은 */
             sprintf(temp, "[^%04llu*%d@%-15s]^%-25s]]%s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->priority, (dd->toDoArr)[i]->userName, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
+        }
+        else if ((dd->toDoArr)[i]->isShared == 2) { /* being shared: 공유 해 주는 */
+            sprintf(temp, "[^%04llu*%d@@%-8s]^%-25s]]%s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->priority, (dd->toDoArr)[i]->code, (dd->toDoArr)[i]->title, (dd->toDoArr)[i]->details);
         }
         else if ((dd->toDoArr)[i]->priority) { /* if bookmarked */
             /*         Time->BookMarked->Title(NL)->Details*/
