@@ -107,6 +107,8 @@ void edit_plan(unsigned long long targetDate, int* page);
 void printColorStrip(char *c, int colorNum);
 void print_date_BookMark(unsigned long long targetDate);
 void printReminderControl(int how);
+void print_userName();
+void getSharedTodo();
 /*-----Display control--------------------------------------------------------------*/
 void clearGivenCalendarArea(/*index of pos_sc_date*/int row, int col);
 void clearGivenRowCols(int fromRow, int fromCol, int toRow, int toCol);
@@ -156,9 +158,17 @@ int isBookMarked(unsigned long long targetDate); /* YYYYMMDD */
 /* 0511 added: D-day settings, holiday */
 void getDday(int* slot1, char* title1, int* slot2, char* title2);
 void popDday(void);
-int setDdayWhileIterate(unsigned long long src, int pageNum);
+void setDdayWhileIterate(unsigned long long src, int pageNum, int mode);
 int isHoliday(unsigned long long target);
-
+int isSharedToDoExisting(unsigned long long targetDate);
+void Set_Dday(unsigned long long targetDate, int pageNum, int mode);
+int checkDdayWhileIterate(unsigned long long src, int pageNum, int mode);
+void print_Dday(void);
+void delDdayStack(int whatto);
+int shareWhileIterate(unsigned long long src, int pageNum, char* shareCode);
+int getFromServer_Highlevel(char* shareCode);
+/* 0524 added */
+char* getUserName(void);
 /*-------------------------------------------------------*/
 
 int main(int argc, char* argv[]) {
@@ -211,6 +221,7 @@ int main(int argc, char* argv[]) {
     char c;
     int mode = 0;
     int page = -1;
+    char shareCode[9] = { '\0', };
 
     /* implement of modes */
     while (1) {
@@ -242,7 +253,15 @@ int main(int argc, char* argv[]) {
                     printReminderControl(DEL);
                     break;
                 }
+                else if (c == 'g') {
+                    getSharedTodo();
+                    print_date_ToDoSummarized(selectDate); /* to refresh */
+                    print_date_NumOfSchedule(selectDate); /* refresh screen */
+                    print_date_BookMark(selectDate); /* to refresh */
+                }
                 else continue;
+                print_commandLine(mode);
+                refresh();
             }
         }
         else if (mode == 1) {
@@ -283,10 +302,10 @@ int main(int argc, char* argv[]) {
                 /* delete record */
                 else if (c == 'd' && page != 0) {
                     if (deleteWhileIterate(selectDate, page) != 0) /* del */ {
-                        popup("Cannot Delete!", NULL, "System Default Public Holiday", 5);
+                        popup("Cannot Delete!", NULL, "System Default Public Holiday", 3);
                     }
                     else {
-                        popup("Deletion Successful", "", NULL, 5);
+                        popup("Deletion Successful", "", NULL, 3);
                     }
                     print_date_NumOfSchedule(selectDate); /* to refresh */
                     print_date_ToDoWithdetails(selectDate, 0, &page); /* to refresh */
@@ -295,6 +314,25 @@ int main(int argc, char* argv[]) {
                     /* don't break */
                     /* maybe some pageIterator refresh needed here */
                 }
+                else if (c == '+' && page != 0) {
+                    Set_Dday(selectDate, page, 0);
+                }
+                else if (c == '-' && page != 0) {
+                    Set_Dday(selectDate, page, 1);
+                }
+                else if (c == 'S') {
+                    switch (shareWhileIterate(selectDate / 10000, page, shareCode)) {
+                    case 0:
+                        popup("Sharing Successful", NULL, shareCode, 3); break;
+                    case 2:
+                        popup("Cannot Share!", NULL , "Cannot connect to server", 3); break;
+                    case 3:
+                        popup("Cannot Share!", NULL, "No Data", 3); break;
+                    }
+                    print_date_NumOfSchedule(selectDate); /* to refresh */
+                    print_date_ToDoWithdetails(selectDate, 0, &page); /* to refresh */
+                    print_date_BookMark(selectDate); /* to refresh */
+                }
                 /* error handling */
                 else if (page == 0) {
                     /* just wait till user adds a record or exit */
@@ -302,6 +340,7 @@ int main(int argc, char* argv[]) {
                 else {
                     continue;
                 }
+                print_UpcomingBookMark(todayDate);
                 print_commandLine(mode);
                 refresh();
             }
@@ -315,7 +354,6 @@ int main(int argc, char* argv[]) {
             print_date_NumOfSchedule(selectDate); /* to refresh */
         }
         
-        print_UpcomingBookMark(selectDate); /* to refresh */
         print_commandLine(mode);
         refresh();
     }
@@ -332,7 +370,7 @@ void edit_plan(unsigned long long targetDate, int* page){
     char t[13]; // 문자열을 위한 배열 선언
     char title[31];
     char details[256];
-    char p[2]; int priority; 
+    char b[2]; int bookmark; 
     unsigned long long date_2;
     int input_2; 
     int input_1 = *page;
@@ -342,59 +380,56 @@ void edit_plan(unsigned long long targetDate, int* page){
     clearGivenNonCalendarArea(SLL);
 
     standout();
-    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Date&Time Below (Format: YYYYMMDDHHMM, Date&Time=1234: no edit) :");
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Date&Time (Format:YYYYMMDDHHMM, 1234:no edit)");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
     getstr(t);//날짜, 시간 입력
     //if (strcmp(t, "e") == 0) return;
 
     clearGivenNonCalendarArea(SLL);
-    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, " ");
-    for (int i = 0; i < pos_SUL_end.col - 1; i++)
-        printw(" ");
     standout();
-    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Title Below (Format: String, Title=Blank: no edit) :");
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Title (Blank:no edit)");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
     getstr(title);
 
     clearGivenNonCalendarArea(SLL);
-    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, " ");
-    for (int i = 0; i < pos_SUL_end.col - 1; i++)
-        printw(" ");
     standout();
-    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Details Below (Format: String, Details=Blank: no edit) :");
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Details (Blank:no edit)");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
     getstr(details);
 
 
     clearGivenNonCalendarArea(SLL);
-    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, " ");
-    for (int i = 0; i < pos_SUL_end.col - 1; i++)
-        printw(" ");
     standout();
-    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Priority Number Below: (0/1, Priority Number=-1: no edit) :");
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "BookMark");
+    addstr(" (1:"); printColorStrip("  ", 1); standout();
+    addstr(" 2:"); printColorStrip("  ", 2); standout();
+    addstr(" 3:"); printColorStrip("  ", 3); standout();
+    addstr(" 0:no bookmark, -1:no edit)");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
-    getstr(p);
+    move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
+    standend();
+    getstr(b);
     clearGivenNonCalendarArea(SLL);
      
-    priority = atoi(p);
+    bookmark = atoi(b);
     date_2 = strtoull(t, NULL, 10);
 
-    input_2 = editWhileIterate(targetDate, input_1 , date_2, title, details, priority);
+    input_2 = editWhileIterate(targetDate / 10000, input_1 , date_2, title, details, bookmark);
         
     //mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "result value: %d", input_2);
     switch (input_2) {
         case 1:
-            popup("Cannot edit!", NULL, "Bookmark Collision!", 5);
+            popup("Cannot edit!", NULL, "Bookmark Collision!", 3);
             break;
         case 2:
-            popup("Cannot edit!", NULL, "No such record", 5);
+            popup("Cannot edit!", NULL, "No such record", 3);
             break;
         case 0:
-            popup("Success", NULL, "Edits applied.", 5);
+            popup("Success", NULL, "Edits applied.", 3);
             break;
         default:
             break;
@@ -569,6 +604,8 @@ pos_SC_date;
     print_commandLine(0);
     print_date_ToDoSummarized(selectDate);
     print_UpcomingBookMark(todayDate);
+    print_Dday();
+    print_userName();
     return;
 }
 
@@ -714,26 +751,22 @@ void print_date(unsigned long long targetDate) {
     }
 
     int days = daysInMonth(year * 100 + month);
-    attron(A_DIM);
     for (int i = 0; i < 7; i++) {
         if (i >= stt_col) {
             if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
-                attroff(A_DIM);
-                attron(A_BOLD);
+                standout();
             }
             if (i == 6) {
-                attroff(A_DIM);
                 attron(A_BOLD);
                 attron(COLOR_PAIR(3));
             }
             if (isHoliday(targetDate / 1000000 * 100 + date) || i == 0) {
-                attroff(A_DIM);
                 attron(A_BOLD);
                 attron(COLOR_PAIR(1));
             }
             mvprintw(pos_SC_date[0][i].row, pos_SC_date[0][i].col, "%-2d", date);
+            standend();
             attrset(A_NORMAL);
-            attron(A_DIM);
             date++;
         }
         else {
@@ -749,26 +782,22 @@ void print_date(unsigned long long targetDate) {
             }
             else {
                 if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
-                    attroff(A_DIM);
-                    attron(A_BOLD);
+                    standout();
                 }
                 if (j == 6) {
-                    attroff(A_DIM);
                     attron(A_BOLD);
                     attron(COLOR_PAIR(3));
                 }
                 if (isHoliday(targetDate / 1000000 * 100 + date) || j == 0) {
-                    attroff(A_DIM);
                     attron(A_BOLD);
                     attron(COLOR_PAIR(1));
                 }
                 mvprintw(pos_SC_date[i][j].row, pos_SC_date[i][j].col, "%-2d", date);
+                standend();
                 attrset(A_NORMAL);
-                attron(A_DIM);
             }
         }
     }
-    attroff(A_DIM);
     return;
 }
 
@@ -788,16 +817,10 @@ void print_date_NumOfSchedule(unsigned long long targetDate) {
                 addch(' ');
             }
             if (num) {
+                attron(A_DIM);
                 mvprintw(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col, "%s", "To-Dos:");
                 mvprintw(pos_SC_date[0][i].row + nNum - 1, pos_SC_date[0][i].col + 4 * nNum - 3, "%3d", num);
-            }
-            else {
-                // clearGivenCalendarArea(0, i);
-                /* erasing only the very last row of the cell */
-                //for (int k = pos_SC_date[0][i].col; k < pos_SC_date[0][i].col + 4 * nNum - 4; k++) {
-                //    move(pos_SC_date[0][i].row + nNum - 1, k);
-                //    addch(' ');
-                //}
+                attroff(A_DIM);
             }
             targetDate++;
         
@@ -821,8 +844,10 @@ void print_date_NumOfSchedule(unsigned long long targetDate) {
                 }
                 num = getNumOfSchedule(targetDate);
                 if (num) {
+                    attron(A_DIM);
                     mvprintw(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col, "%s", "To-Dos:");
                     mvprintw(pos_SC_date[i][j].row + nNum - 1, pos_SC_date[i][j].col + 4 * nNum - 3, "%3d", num);
+                    attroff(A_DIM);
                 }
                 else {
                     //clearGivenCalendarArea(i, j);
@@ -845,12 +870,11 @@ void print_commandLine(int mode) {
     char* command;
     switch(mode) {
     case 0: 
-        /*                  i      j      k      l      s      z      x      q      w      e*/
-        sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s",
-         'i', "upwards", 'j', "left", 'k', "downwards", 'l', "right", 's', "select", 'z', "save", 'x', "load", 'q', "set rmdr", 'w', "del rmdr", 'e', "set D-day");
+        /*                  i      j      k      l      s      g      z      x      q      w     */
+        sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'i', "upwards", 'j', "left", 'k', "downwards", 'l', "right", 's', "select", 'g', "get shared", 'z', "save", 'x', "load", 'q', "set rmdr", 'w', "del rmdr");
         break;
     case 1:
-        sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'I', "insert", 'd', "delete", 'm', "modify", '+', "D+", '-', "D-", 'b', "BookMark", 'e', "exit");
+        sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'I', "insert", 'd', "delete", 'm', "modify", '+', "D+", '-', "D-", 'S', "share", 'e', "exit");
         break;
     default:
         break;
@@ -874,9 +898,7 @@ void print_commandLine(int mode) {
 }
 
 void select_highlightOn() {
-    attron(A_DIM);
-    standout();
-    if (selectDate == todayDate) {
+    /*if (selectDate == todayDate) {
         attroff(A_DIM);
         attron(A_BOLD);
     }
@@ -891,14 +913,36 @@ void select_highlightOn() {
         attroff(A_DIM);
         attron(A_BOLD);
         attron(COLOR_PAIR(2));
+    }*/
+    if (selectDate / 10000 % 100 >= 10)
+        mvprintw(pos_SC_date[selectDate_row][selectDate_col].row, pos_SC_date[selectDate_row][selectDate_col].col + 2, "<<");
+    else
+        mvprintw(pos_SC_date[selectDate_row][selectDate_col].row, pos_SC_date[selectDate_row][selectDate_col].col + 1, "<<");
+
+    attron(A_BOLD);
+    for (int i = pos_SC_date[selectDate_row][selectDate_col].col; i < pos_SC_date[selectDate_row][selectDate_col].col + 4 * nNum; i++) {
+        mvprintw(pos_SC_date[selectDate_row][selectDate_col].row - 1, i, "-");
     }
-    mvprintw(pos_SC_date[selectDate_row][selectDate_col].row, pos_SC_date[selectDate_row][selectDate_col].col, "%-2d", selectDate / 10000 % 100);
-    attrset(A_NORMAL);
+    if (selectDate_row != 5) {
+        for (int i = pos_SC_date[selectDate_row][selectDate_col].col; i < pos_SC_date[selectDate_row][selectDate_col].col + 4 * nNum; i++) {
+            mvprintw(pos_SC_date[selectDate_row][selectDate_col].row + nNum, i, "-");
+        }
+    }
+    if (selectDate_col != 0) {
+        for (int i = pos_SC_date[selectDate_row][selectDate_col].row; i < pos_SC_date[selectDate_row][selectDate_col].row + nNum; i++) {
+            mvprintw(i, pos_SC_date[selectDate_row][selectDate_col].col - 1, "|");
+        }
+    }
+    if (selectDate_col != 6) {
+        for (int i = pos_SC_date[selectDate_row][selectDate_col].row; i < pos_SC_date[selectDate_row][selectDate_col].row + nNum; i++) {
+            mvprintw(i, pos_SC_date[selectDate_row][selectDate_col].col + 4 * nNum, "|");
+        }
+    }
+    attroff(A_BOLD);
 }
 
 void prev_select_highlightOff() {
-    attron(A_DIM);
-    if (selectDate == todayDate) {
+    /*if (selectDate == todayDate) {
         attroff(A_DIM);
         attron(A_BOLD);
     }
@@ -911,9 +955,32 @@ void prev_select_highlightOff() {
         attroff(A_DIM);
         attron(A_BOLD);
         attron(COLOR_PAIR(1));
+    }*/
+    if (selectDate / 10000 % 100 >= 10)
+        mvprintw(pos_SC_date[selectDate_row][selectDate_col].row, pos_SC_date[selectDate_row][selectDate_col].col + 2, "  ");
+    else
+        mvprintw(pos_SC_date[selectDate_row][selectDate_col].row, pos_SC_date[selectDate_row][selectDate_col].col + 1, "  ");
+    
+    attron(A_DIM);
+    for (int i = pos_SC_date[selectDate_row][selectDate_col].col; i < pos_SC_date[selectDate_row][selectDate_col].col + 4 * nNum; i++) {
+        mvprintw(pos_SC_date[selectDate_row][selectDate_col].row - 1, i, "-");
     }
-    mvprintw(pos_SC_date[selectDate_row][selectDate_col].row, pos_SC_date[selectDate_row][selectDate_col].col, "%-2d", selectDate / 10000 % 100);
-    attrset(A_NORMAL);
+    if (selectDate_row != 5) {
+        for (int i = pos_SC_date[selectDate_row][selectDate_col].col; i < pos_SC_date[selectDate_row][selectDate_col].col + 4 * nNum; i++) {
+            mvprintw(pos_SC_date[selectDate_row][selectDate_col].row + nNum, i, "-");
+        }
+    }
+    if (selectDate_col != 0) {
+        for (int i = pos_SC_date[selectDate_row][selectDate_col].row; i < pos_SC_date[selectDate_row][selectDate_col].row + nNum; i++) {
+            mvprintw(i, pos_SC_date[selectDate_row][selectDate_col].col - 1, "|");
+        }
+    }
+    if (selectDate_col != 6) {
+        for (int i = pos_SC_date[selectDate_row][selectDate_col].row; i < pos_SC_date[selectDate_row][selectDate_col].row + nNum; i++) {
+            mvprintw(i, pos_SC_date[selectDate_row][selectDate_col].col + 4 * nNum, "|");
+        }
+    }
+    attroff(A_DIM);
 }
 
 void select_date(char c) {
@@ -1057,7 +1124,7 @@ void get_todo() {
     char t[5]; // 문자열을 위한 배열 선언
     char title[31];
     char details[256];
-    char p[2]; int priority; int time;
+    char b[2]; int bookmark; int time;
 
     nocbreak();  // canonical 모드로 전환
     echo();  // 입력한 키를 화면에 보이도록 설정
@@ -1074,51 +1141,49 @@ void get_todo() {
     clearGivenNonCalendarArea(SLL);
 
     standout();
-    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the Time Below: (Format: HHMM)");
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the Time (Format: HHMM)");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
     
     getstr(t);//시각 입력
     if (inputModeForceQuit) return;
     //if (strcmp(t, "e") == 0) return;
+    clearGivenNonCalendarArea(SLL);
 
-    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, " ");
-    for (int i = 0; i < pos_SUL_end.col - 1; i++)
-        printw(" ");
     standout();
-    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the Title Below: (Format: String)");
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the Title");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
     
     getstr(title);
     if (inputModeForceQuit) return;
-
-    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, " ");
-    for (int i = 0; i < pos_SUL_end.col - 1; i++)
-        printw(" ");
+    clearGivenNonCalendarArea(SLL);
+    
     standout();
-    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the Details Below: (Format: String)");
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the Details");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
     
     getstr(details);
     if (inputModeForceQuit) return;
+    clearGivenNonCalendarArea(SLL);
 
-    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, " ");
-    for (int i = 0; i < pos_SUL_end.col - 1; i++)
-        printw(" ");
     standout();
-    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the Priority Number Below: (0 ~ 9)");
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "BookMark");
+    addstr(" (1:"); printColorStrip("  ", 1); standout();
+    addstr(" 2:"); printColorStrip("  ", 2); standout();
+    addstr(" 3:"); printColorStrip("  ", 3); standout();
+    addstr(" 0:pass)");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
     
-    getstr(p);
+    getstr(b);
     if (inputModeForceQuit) return;
 
     cbreak();  // 다시 non-canonical 모드로 전환
     noecho();
 
-    priority = atoi(p);
+    bookmark = atoi(b);
     time = atoi(t);
     if (selectDate == 0) {
         errOcc("get_todo() Error");
@@ -1127,18 +1192,18 @@ void get_todo() {
     selectDate += (unsigned long long)time;
 
     /* 에러 메시지에 따른 return value assigning */
-    switch (setSchedule(selectDate, title, details, priority)) {
+    switch (setSchedule(selectDate, title, details, bookmark)) {
         case 0: /* safe */
-            popup("Success", NULL, "Saved.", 5);
+            popup("Success", NULL, "Saved.", 3);
             break;
         case 1: /* bc */
-            popup("Cannot Save", NULL, "Bookmark Collision!", 5);
+            popup("Cannot Save", NULL, "Bookmark Collision!", 3);
             break;
         case 2: /* nsdf */
-            popup("Cannot Save", NULL, "No such date format!", 5);
+            popup("Cannot Save", NULL, "No such date format!", 3);
             break;
         case 3:
-            popup("Cannot Save", NULL, "invaild time", 5);
+            popup("Cannot Save", NULL, "invaild time", 3);
         default:
             break;
     }
@@ -1278,6 +1343,7 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
     mvprintw(row, col, "ToDos | %d-%02d-%02d", year, month, day);
     int chkColorPair = 0;
     int isHolidayEvent = 0;
+    int isShared = 0;
     row += 2;
     char str[BUFSIZ] = {'\0', };
     char *strbuf = str;//malloc(1000 * sizeof(char));
@@ -1317,6 +1383,10 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
                 chkColorPair = (int)(*(strbuf++) - 48);
                 if (isHolidayEvent) chkColorPair = 9;
             }
+            else if (*strbuf == '@') {
+                strbuf++;
+                isShared = 1;
+            }
             else if (*strbuf == ']') {
                 strbuf++;
                 if (*strbuf == '^') {
@@ -1324,7 +1394,8 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
                     mvprintw(row, col++, " ");
                     /* for bookmark strip */
                     if (isHolidayEvent) chkColorPair = 9;
-                    printColorStrip("  ", chkColorPair);
+                    if (isShared) printColorStrip("@ ", chkColorPair);
+                    else printColorStrip("  ", chkColorPair);
                     /* for bookmark strip */
                     col += 2;
                     if (chkColorPair) attron(A_BOLD); /* for ones bookmarked */
@@ -1332,6 +1403,7 @@ void print_date_ToDoSummarized(unsigned long long targetDate) {
                     if (chkColorPair) attroff(A_BOLD); /* for ones bookmarked */
                     chkColorPair = 0;
                     isHolidayEvent = 0;
+                    isShared = 0;
                     row += 2;
                     strbuf += 25;
                     count++;
@@ -1353,7 +1425,10 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
     int day = targetDate % 1000000 / 10000;
     int chkColorPair = 0;
     int isHolidayEvent = 0;
-    char str[BUFSIZ] = {'\0', };
+    int isShared = 0;
+    char whoShared[16] = { '\0', };
+    char shareCode[9] = { '\0', };
+    char str[BUFSIZ] = { '\0', };
     char* strbuf = str;
     int numofsche = getNumOfSchedule(targetDate / 10000);
 
@@ -1403,6 +1478,20 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
             if (isHolidayEvent) chkColorPair = 9;
             isHolidayEvent = 0;
         }
+        else if (*strbuf == '@') { /*공유일정*/
+            strbuf++;
+            isShared = 1;
+            if (*strbuf == '@') { /*공유한 일정*/
+                strbuf++;
+                isShared = 2;
+                sprintf(shareCode, "%.8s", strbuf);
+                strbuf += 8;
+            }
+            else { /*공유 받은 일정*/
+                sprintf(whoShared, "%.15s", strbuf);
+                strbuf += 15;
+            }
+        }
         else if (*strbuf == ']') {
             strbuf++;
             if (*strbuf == '^') {
@@ -1410,16 +1499,31 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
                 mvprintw(row, col++, " "); /* ok */ 
                 /* for bookmark strip */
                 if (isHolidayEvent) chkColorPair = 9;
-                printColorStrip("  ", chkColorPair);
+                if (isShared) printColorStrip("@ ", chkColorPair);
+                else printColorStrip("  ", chkColorPair);
                 /* for bookmark strip */
                 col += 2;
                 if (chkColorPair) attron(A_BOLD); /* for ones bookmarked */
                 mvprintw(row, col, " %.25s", strbuf); /* two blocks of strips */
                 if (chkColorPair) attroff(A_BOLD); /* for ones bookmarked */
                 chkColorPair = 0;
-                row += 2;
+
+                col -= 2;
+                attron(A_DIM);
+                if (isShared == 1) { /*공유한 사람 이름 출력*/
+                    row++;
+                    mvprintw(row, col, "Shared by: %.15s", whoShared);
+                    row += 2;
+                }
+                else if (isShared == 2) { /*공유코드 출력*/
+                    row++;
+                    mvprintw(row, col, "My Code: %.8s", shareCode);
+                    row += 2;
+                }
+                else row += 2;
+                attroff(A_DIM);
+
                 strbuf += 25;
-                attroff(COLOR_PAIR(1));
             }
             else if (*strbuf == ']') {
                 strbuf++;
@@ -1495,7 +1599,10 @@ void print_UpcomingBookMark(unsigned long long today) {
     int row = pos_SLR_stt.row + 1;
     int col = pos_SLR_stt.col;
     int count = (pos_SLR_end.row - (row)) / 2 - 1;
-    getBookMarkedInDate(today / 10000, count, str);
+    getBookMarkedInDate(today, count, str);
+    int isShared = 0;
+
+    clearGivenNonCalendarArea(SLR);
 
     strbuf = str;
     while (*strbuf != '\0') {
@@ -1504,7 +1611,13 @@ void print_UpcomingBookMark(unsigned long long today) {
             strbuf++;
             if (*strbuf == '^') {
                 strbuf++;
-                mvprintw(row, col, "%.2s:", strbuf);
+                mvprintw(row, col, "%.4s-", strbuf);
+                strbuf += 4;
+                printw("%.2s-", strbuf);
+                strbuf += 2;
+                printw("%.2s | ", strbuf);
+                strbuf += 2;
+                printw("%.2s:", strbuf);
                 strbuf += 2;
                 printw("%.2s", strbuf);
                 strbuf += 2;
@@ -1515,12 +1628,21 @@ void print_UpcomingBookMark(unsigned long long today) {
             strbuf++;
             chkColorPair = (int)(*(strbuf++) - 48);
         }
+        else if (*strbuf == '@') {
+            isShared = 1;
+            strbuf++;
+        }
         else if (*strbuf == ']') {
             strbuf++;
             if (*strbuf == '^') {
                 strbuf++;
                 mvprintw(row, col++, " ");
-                printColorStrip("  ", chkColorPair);
+                if (isShared) {
+                    printColorStrip("  ", chkColorPair);
+                }
+                else {
+                    printColorStrip("  ", chkColorPair);
+                }
                 col += 2;
                 if (chkColorPair) attron(A_BOLD);
                 mvprintw(row, col, " %.25s", strbuf);
@@ -1660,8 +1782,7 @@ void printColorStrip(char *c, int colorNum) {
     if (colorNum == 0) /* default */ {
         attron(COLOR_PAIR(9)); /* 9 := off-white */
         addstr(c);
-        attrset(A_NORMAL);
-        //attroff(COLOR_PAIR(9));
+        attroff(COLOR_PAIR(9));
         return;
     }
     if (colorNum == 9) /* holiday */ {
@@ -1691,12 +1812,22 @@ void print_date_BookMark(unsigned long long targetDate) {
 
     int days = daysInMonth(year * 100 + month);
     int chkColorPair = 0;
+    int isShared = 0;
 
     for (int i = 0; i < 7; i++) {
         if (i >= stt_col) {
             move(pos_SC_date[0][i].row, pos_SC_date[0][i].col + 4 * nNum - 2);
             chkColorPair = isBookMarked(targetDate / 1000000 * 100 + date);
-            if (chkColorPair) printColorStrip("  ", chkColorPair);
+            isShared = isSharedToDoExisting(targetDate / 1000000 * 100 + date);
+            if (chkColorPair || isShared) {
+                if (chkColorPair) { /*북마크가 있는 경우*/
+                    if (isShared) printColorStrip("@ ", chkColorPair);
+                    else printColorStrip("  ", chkColorPair);
+                }
+                else { /*북마크가 없고 공유일정이 있는 경우*/
+                    printColorStrip("@ ", chkColorPair);
+                }
+            }
             else {
                 printColorStrip("  ", - 1);
             }
@@ -1716,7 +1847,7 @@ void print_date_BookMark(unsigned long long targetDate) {
                 chkColorPair = isBookMarked(targetDate / 1000000 * 100 + date);
                 if (chkColorPair) printColorStrip("  ", chkColorPair);
                 else {
-                    printColorStrip("  ", - 1);
+                    printColorStrip("  ", -1);
                 }
             }
         }
@@ -1770,6 +1901,9 @@ char getCommandScreen(char* context, char availToken[]) {
         refresh();
     }
 
+    cbreak();
+    noecho();
+    
     return input;
 }
 
@@ -1876,14 +2010,103 @@ void reminder_extends_popup(int signum) {
     memset(str, 0x00, 127);
 
     if (rmdr->repeatCounter == 0) {
-        popup("Reminder Expired!", NULL, "", 5);
+        popup("Reminder Expired!", NULL, "", 3);
         turnOffReminder();
 
         return;
     }
     sprintf(str, "Timer %d Seconds Left", (int)(rmdr->repeatCounter) * (int)(rmdr->intervals));
-    popup("Reminder Alert", rmdr->info, str, 5);
+    popup("Reminder Alert", rmdr->info, str, 3);
     (rmdr->repeatCounter)--;
 
     return;
+}
+
+void print_Dday() {
+    int dday1, dday2; char dday1_str[30]; char dday2_str[30];
+    clearGivenRowCols(pos_SUL_stt.row, pos_SUL_stt.col + 9, pos_SUL_end.row, pos_SUL_end.col);
+    getDday(&dday1, dday1_str, &dday2, dday2_str);
+    if (dday1_str[0] != '\0') {
+        mvprintw(pos_SUL_stt.row, pos_SUL_stt.col+14, "D%+d: %s", dday1, dday1_str);
+    }
+    if (dday2_str[0] != '\0') {
+        mvprintw(pos_SUL_stt.row, pos_SUL_end.col-38, "D%+d: %s", dday2, dday2_str);
+    }
+}
+
+void Set_Dday(unsigned long long targetDate, int pageNum, int mode) {
+    int caseN=0;
+    char yorn;
+    char context[BUFSIZ] = {'\0', };
+    caseN = checkDdayWhileIterate(targetDate/10000, pageNum, mode);
+    if (caseN == 1) {
+        strcat(context, "Same content alert : Do you want to delete it? Y/N");
+        if ((yorn = getCommandScreen(context, "yYnN")) == 'Y' || yorn == 'y') {
+            delDdayStack(mode);
+        }
+    }
+    else if (caseN == 2) {
+        strcat(context, "Override alert : Do you want to override it? Y/N");
+        if ((yorn = getCommandScreen(context, "yYnN")) == 'Y' || yorn == 'y') {
+            setDdayWhileIterate(targetDate/10000, pageNum, mode);
+        }
+    }
+    else{
+        setDdayWhileIterate(targetDate/10000, pageNum, mode);
+    }
+    
+    print_Dday();
+
+    return;
+}
+
+void print_userName() {
+    char *name = getUserName();
+    char str[26] = { '\0', };
+    sprintf(str, "username: %.15s", name);
+    attron(A_DIM);
+    mvprintw(pos_SLR_end.row + 2, pos_SLR_end.col + 1 - 24, "%25s", str);
+    attroff(A_DIM);
+}
+
+void getSharedTodo() {
+    char shareCode[9] = { '\0', };
+    nocbreak();  // canonical 모드로 전환
+    echo();  // 입력한 키를 화면에 보이도록 설정
+    clearGivenNonCalendarArea(SLL);
+    setInputModeSigHandler(ON);
+
+    standout();
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "^C to quit get shared mode");
+    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "press enter to continue");
+    getch(); /* wait for user input */
+
+    standend();
+    if (inputModeForceQuit) return;
+    clearGivenNonCalendarArea(SLL);
+
+    standout();
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the shareCode");
+    move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
+    standend();
+
+    getstr(shareCode);//시각 입력
+    if (inputModeForceQuit) return;
+    //if (strcmp(t, "e") == 0) return;
+    clearGivenNonCalendarArea(SLL);
+
+    cbreak();  // 다시 non-canonical 모드로 전환
+    noecho();
+
+    switch (getFromServer_Highlevel(shareCode)) {
+    case 0:
+        popup("Sharing Successful", NULL, shareCode, 3); break;
+    case 1:
+        popup("Cannot Get Shared Data!", NULL, "No Data", 3); break;
+    case 2:
+        popup("Cannot Get Shared Data!", NULL, "Cannot connect to server", 3); break;
+    }
+
+    move(LINES - 1, COLS - 1);
+    setInputModeSigHandler(OFF);
 }

@@ -138,6 +138,7 @@ int julian_day(struct tm *date) {
 
     return date->tm_mday + ((153*m + 2) / 5) + 365*y + y/4 - y/100 + y/400 - 32045;
 }
+/* julian_day related references:  */
 /* https://stackoverflow.com/questions/13932909/difference-between-two-dates-in-c */
 /* https://stackoverflow.com/questions/1442116/how-to-get-the-date-and-time-values-in-a-c-program */
 /**/
@@ -246,7 +247,8 @@ void getDday(int* slot1, char* title1, int* slot2, char* title2);
 void setDdayWhileIterate(unsigned long long src, int pageNum, int mode);
 int checkDdayWhileIterate(unsigned long long src, int pageNum, int mode);
 int isHoliday(unsigned long long target);
-
+/* 0524 added */
+char* getUserName(void);
 /*-------------------------------------------------------*/
 
 /*--Debug-only features----------------------------------*/
@@ -1155,7 +1157,7 @@ int getTodaySchedule_Summarized(unsigned long long today, char* strbuf) {
     else {
         sortGivenDateToDos(dd, 2);
         for (i = 0; i <= dd->maxIndex; i++) {
-            if ((dd->toDoArr)[i]->isShared) {
+            if ((dd->toDoArr)[i]->isShared) { /* if the pointed todo is shared one */
                 sprintf(temp, "[^%04llu*%d@]^%-25s", (dd->toDoArr)[i]->dateData % 10000, (dd->toDoArr)[i]->priority, (dd->toDoArr)[i]->title);
             }
             else if ((dd->toDoArr)[i]->priority) /* if bookmarked */ {
@@ -1243,7 +1245,8 @@ void getTodaySchedule_withDetails_iterEnd(void) {
 void coreInit(void) {
     allocReminder();
     initDday();
-
+    setUserName("Gildong_Hong");
+    
     load();
     /* dummy datas just for leap year / month limit check */
     leapYear     = (monthPtr)malloc(sizeof(month));
@@ -1694,10 +1697,10 @@ void __launchOptions(int argc, char* argv[]){
 
 /* For Bookmark Features */
 toDoPtr getBookMarked(unsigned long long src, int distance) {
+    /* src: YYYYMMDDHHMM */
     toDoPtr retVal = NULL;
     int i;
 
-    src *= 10000;
     src *= 1000; /* to compare with hash */
 
     /* implementing hash */
@@ -1722,6 +1725,7 @@ toDoPtr getBookMarked(unsigned long long src, int distance) {
 }
 
 void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
+    /* today: YYYYMMDDHHMM */
     /* returns *str w/bookmarked todo strings, based on today and number of bookmarks UX layer wants.
        important: this function returns only "upcoming" bookmarks.
         [^: for Time, [[: make new line, ^: tab inside
@@ -1730,7 +1734,7 @@ void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
     char* retstr = NULL;
     char tempstr[50];
     int i;
-    toDoPtr temp;
+    toDoPtr temp; /* bcggd8g6 */
 
     retstr = (char*)malloc(sizeof(char) * 50 * counter); /* alloc, just to be safe */
     if (!retstr) {
@@ -1740,7 +1744,12 @@ void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
 
     for (i = 1; i <= counter; i++) {
         if ((temp = getBookMarked(today, i))) {
-            sprintf(tempstr, "*%d[^%04llu]^%-25s", temp->priority, temp->dateData % 10000, temp->title);
+            if (temp->isShared) {
+                sprintf(tempstr, "*%d@[^%llu]^%-25s", temp->priority, temp->dateData, temp->title);
+            }
+            else {
+                sprintf(tempstr, "*%d[^%llu]^%-25s", temp->priority, temp->dateData, temp->title);
+            }
         }
         strcat(retstr, tempstr);
     }
@@ -1855,7 +1864,7 @@ int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_d
 
     /* actual editing start */
     /*                                                    Don't allow users to edit system default holiday */
-    if (t_day != 1234 || (dtmp->toDoArr)[pageNum - 1]->dateData == 9999)              (dtmp->toDoArr)[pageNum - 1]->dateData = t_day;
+    if (t_day != 1234 || (dtmp->toDoArr)[pageNum - 1]->dateData != 9999)              (dtmp->toDoArr)[pageNum - 1]->dateData = t_day;
     if (t_title[0] != '\0')                                                           strcpy((dtmp->toDoArr)[pageNum - 1]->title, t_title);
     if (t_details[0] != '\0')                                                         strcpy((dtmp->toDoArr)[pageNum - 1]->details, t_details);
     if (t_priority != -1)                                                             (dtmp->toDoArr)[pageNum - 1]->priority = t_priority;
@@ -2210,7 +2219,8 @@ void getDday(int* slot1, char* title1, int* slot2, char* title2) { /* returns NU
         dt.tm_mday = ((dStack->dDayArr)[0].dateData / 10000) % 100;
         *slot1 = julian_day(&today) - julian_day(&dt);
         //printf("%d %d %d to %d %d %d\n", dt.tm_year, dt.tm_mon, dt.tm_mday, today->tm_year, today->tm_mon, today->tm_mday);
-        strcpy(title1, (dStack->dDayArr)[0].title);
+        strncpy(title1, (dStack->dDayArr)[0].title, 17);
+        if (strlen(title1) == 17) strcat(title1, "...");
     }
 
     /* D- Handling */
@@ -2228,7 +2238,8 @@ void getDday(int* slot1, char* title1, int* slot2, char* title2) { /* returns NU
         dt.tm_mday = ((dStack->dDayArr)[1].dateData / 10000) % 100;
         //printf("%d %d %d to %d %d %d\n", dt.tm_year, dt.tm_mon, dt.tm_mday, today->tm_year, today->tm_mon, today->tm_mday);
         *slot2 = julian_day(&today) - julian_day(&dt);
-        strcpy(title2, (dStack->dDayArr)[1].title);
+        strncpy(title2, (dStack->dDayArr)[1].title, 17);
+        if (strlen(title2) == 17) strcat(title2, "...");
     }
 
     return;
@@ -2319,6 +2330,7 @@ void clearAll(void) {
 }
 /* 0519 added for network features */
 void setUserName(char* myName) {
+    memset(userName, 0x00, sizeof(userName));
     strcpy(userName, myName);
 
     return;
@@ -2412,4 +2424,7 @@ int getFromServer_Highlevel(char* shareCode) {
 }
 int getFromServer(toDoPtr target, char* shareCode) {
     return cli_getToDoDataFromServer(target, shareCode);
+}
+char* getUserName(void) {
+    return userName;
 }
