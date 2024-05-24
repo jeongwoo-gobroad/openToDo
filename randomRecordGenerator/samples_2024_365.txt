@@ -1,0 +1,1460 @@
+202401031931
+3
+Reading Time
+Dive into a new novel.
+202411140751
+0
+Coffee Break
+Catch up with a friend at a cafe.
+202406012146
+1
+Read Articles
+Stay updated with the latest tech news.
+202407041207
+1
+Read Articles
+Stay updated with the latest tech news.
+202404061751
+0
+Check Emails
+Reply to urgent messages and organize inbox.
+202412301603
+0
+Code Review
+Examine the latest commits before the end of the day.
+202411041955
+3
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202408151850
+2
+Plan Trip
+Research and book accommodations for summer vacation.
+202407050558
+2
+Bedtime
+Wind down by 10 PM and review plans for tomorrow.
+202407060630
+2
+Laundry
+Wash clothes and prepare outfits for the week.
+202410222253
+3
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202409012306
+3
+Yoga Class
+Relaxing mind and body with instructor Lee.
+202403090348
+2
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202407161140
+0
+Code Review
+Examine the latest commits before the end of the day.
+202403141456
+1
+Code Review
+Examine the latest commits before the end of the day.
+202404240655
+3
+Movie Night
+Watch the latest movie at the theater.
+202409192352
+3
+Morning Jog
+Start the day with a 30-minute run in the park.
+202410021638
+2
+Reading Time
+Dive into a new novel.
+202408011940
+3
+Laundry
+Wash clothes and prepare outfits for the week.
+202407261417
+0
+Plan Trip
+Research and book accommodations for summer vacation.
+202406201843
+1
+Read Articles
+Stay updated with the latest tech news.
+202404061109
+3
+Yoga Class
+Relaxing mind and body with instructor Lee.
+202407121804
+3
+Book Club
+Read and discuss 1984 by George Orwell.
+202403271256
+0
+Code Review
+Examine the latest commits before the end of the day.
+202408120943
+2
+Guitar Practice
+Learn new chords and practice the song Yesterday.
+202405051556
+3
+Read Articles
+Stay updated with the latest tech news.
+202407010436
+1
+Shopping
+Visit the mall for some shopping.
+202402250716
+3
+Cook Dinner
+Try a new recipe for pasta with homemade sauce.
+202412060353
+0
+Code Review
+Examine the latest commits before the end of the day.
+202405110344
+0
+Team Discussion
+Discuss project updates and next steps.
+202411071208
+1
+Shopping
+Visit the mall for some shopping.
+202408070502
+0
+Shopping
+Visit the mall for some shopping.
+202412161756
+2
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202410141912
+2
+Morning Jog
+Start the day with a 30-minute run in the park.
+202402152128
+0
+Shopping
+Visit the mall for some shopping.
+202406220644
+1
+Write Report
+Summarize findings from the recent survey.
+202405301800
+1
+Family Gathering
+Enjoy a family dinner.
+202405020032
+2
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202403281343
+3
+Client Meeting
+Present Q2 marketing strategy and get feedback.
+202403241044
+3
+Study Session
+Prepare for upcoming exams.
+202410040445
+3
+Shopping
+Visit the mall for some shopping.
+202405052227
+3
+Dentist Appointment
+Teeth cleaning session at 3 PM with Dr. Smith.
+202411070024
+1
+Reading Time
+Dive into a new novel.
+202401210823
+2
+Morning Jog
+Start the day with a 30-minute run in the park.
+202403311024
+0
+Morning Jog
+Start the day with a 30-minute run in the park.
+202412290617
+0
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202407211640
+2
+Family Gathering
+Enjoy a family dinner.
+202403131700
+2
+Lunch Appointment
+Meet with a colleague for lunch.
+202411131214
+3
+Laundry
+Wash clothes and prepare outfits for the week.
+202408151902
+1
+Coffee Break
+Catch up with a friend at a cafe.
+202407281909
+0
+Lunch Appointment
+Meet with a colleague for lunch.
+202408211011
+2
+Morning Jog
+Start the day with a 30-minute run in the park.
+202406210529
+1
+Coffee Break
+Catch up with a friend at a cafe.
+202401290117
+3
+Travel Booking
+Reserve summer vacation flights.
+202401070306
+2
+Bedtime
+Wind down by 10 PM and review plans for tomorrow.
+202402160023
+0
+Lunch with Mentor
+Meet at noon at Cafe Luna to discuss career plans.
+202405142346
+0
+Reading Time
+Dive into a new novel.
+202409100951
+2
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202401101013
+2
+Lunch Appointment
+Meet with a colleague for lunch.
+202410042106
+2
+Check Emails
+Reply to urgent messages and organize inbox.
+202405151517
+0
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202405262054
+0
+Write Report
+Summarize findings from the recent survey.
+202410190054
+2
+Coffee Break
+Catch up with a friend at a cafe.
+202404072145
+3
+Movie Night
+Watch the latest movie at the theater.
+202408191832
+3
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202406282116
+3
+Cook Dinner
+Try a new recipe for pasta with homemade sauce.
+202401170147
+2
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202410140544
+1
+Laundry
+Wash clothes and prepare outfits for the week.
+202406111559
+2
+Laundry
+Wash clothes and prepare outfits for the week.
+202404300318
+2
+Movie Night
+Watch the latest movie at the theater.
+202407311219
+0
+Lunch Appointment
+Meet with a colleague for lunch.
+202409261314
+2
+Client Meeting
+Present Q2 marketing strategy and get feedback.
+202409090101
+1
+Write Report
+Summarize findings from the recent survey.
+202411060713
+0
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202405030432
+0
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202401061335
+2
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202403191515
+0
+Study Session
+Prepare for upcoming exams.
+202406301431
+2
+Bedtime
+Wind down by 10 PM and review plans for tomorrow.
+202406280953
+2
+Coffee Break
+Catch up with a friend at a cafe.
+202403151005
+1
+Family Gathering
+Enjoy a family dinner.
+202412112251
+2
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202411251623
+3
+Team Meeting
+Discuss project milestones and delegate tasks.
+202407151122
+0
+Client Meeting
+Present Q2 marketing strategy and get feedback.
+202407100852
+1
+Gym Workout
+Hit the gym for a workout session.
+202402201336
+0
+Study Time
+Focus on algorithms and data structures.
+202412052053
+2
+Code Review
+Examine the latest commits before the end of the day.
+202408241134
+0
+Dentist Appointment
+Teeth cleaning session at 3 PM with Dr. Smith.
+202405221230
+1
+Bedtime
+Wind down by 10 PM and review plans for tomorrow.
+202401021540
+2
+Laundry
+Wash clothes and prepare outfits for the week.
+202410082331
+3
+Lunch with Mentor
+Meet at noon at Cafe Luna to discuss career plans.
+202404030428
+0
+Reading Time
+Dive into a new novel.
+202401290226
+0
+Shopping
+Visit the mall for some shopping.
+202404120956
+3
+Bedtime
+Wind down by 10 PM and review plans for tomorrow.
+202411181825
+3
+Plan Trip
+Research and book accommodations for summer vacation.
+202412070848
+3
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202405282146
+0
+Plan Trip
+Research and book accommodations for summer vacation.
+202410110435
+1
+Write Report
+Summarize findings from the recent survey.
+202409090333
+1
+Check Emails
+Reply to urgent messages and organize inbox.
+202411051609
+3
+Plan Trip
+Research and book accommodations for summer vacation.
+202403041016
+2
+Plan Trip
+Research and book accommodations for summer vacation.
+202404190702
+0
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202411300353
+2
+Code Review
+Examine the latest commits before the end of the day.
+202401191842
+2
+Guitar Practice
+Learn new chords and practice the song Yesterday.
+202404131026
+2
+Bedtime
+Wind down by 10 PM and review plans for tomorrow.
+202403312356
+1
+Family Gathering
+Enjoy a family dinner.
+202410161910
+0
+Cook Dinner
+Try a new recipe for pasta with homemade sauce.
+202411061827
+3
+Bedtime
+Wind down by 10 PM and review plans for tomorrow.
+202402051233
+1
+Morning Jog
+Start the day with a 30-minute run in the park.
+202405081800
+3
+Gym Workout
+Hit the gym for a workout session.
+202401102328
+2
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202407021947
+0
+Code Review
+Examine the latest commits before the end of the day.
+202405250307
+0
+Book Club
+Read and discuss 1984 by George Orwell.
+202403161352
+1
+Lunch with Mentor
+Meet at noon at Cafe Luna to discuss career plans.
+202410290449
+2
+Morning Jog
+Start the day with a 30-minute run in the park.
+202401102212
+0
+Reading Time
+Dive into a new novel.
+202411301421
+3
+Team Meeting
+Discuss project milestones and delegate tasks.
+202412020354
+3
+Book Club
+Read and discuss 1984 by George Orwell.
+202406160454
+3
+Team Discussion
+Discuss project updates and next steps.
+202411272304
+3
+Plan Trip
+Research and book accommodations for summer vacation.
+202401150244
+1
+Morning Jog
+Start the day with a 30-minute run in the park.
+202409110838
+0
+Shopping
+Visit the mall for some shopping.
+202405070314
+2
+Code Review
+Examine the latest commits before the end of the day.
+202412250523
+3
+Read Articles
+Stay updated with the latest tech news.
+202408170542
+0
+Team Discussion
+Discuss project updates and next steps.
+202405241014
+0
+Check Emails
+Reply to urgent messages and organize inbox.
+202407102046
+3
+Morning Jog
+Start the day with a 30-minute run in the park.
+202410080050
+3
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202407152013
+1
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202408022153
+0
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202409232116
+3
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202407261432
+2
+Movie Night
+Watch the latest movie at the theater.
+202404230031
+2
+Coffee Break
+Catch up with a friend at a cafe.
+202401280309
+2
+Guitar Practice
+Learn new chords and practice the song Yesterday.
+202412050010
+1
+Laundry
+Wash clothes and prepare outfits for the week.
+202412220659
+2
+Plan Trip
+Research and book accommodations for summer vacation.
+202404150712
+0
+Guitar Practice
+Learn new chords and practice the song Yesterday.
+202403160929
+1
+Lunch with Mentor
+Meet at noon at Cafe Luna to discuss career plans.
+202401041910
+3
+Lunch Appointment
+Meet with a colleague for lunch.
+202410032231
+1
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202406142230
+2
+Team Meeting
+Discuss project milestones and delegate tasks.
+202402101310
+0
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202404310513
+1
+Client Meeting
+Present Q2 marketing strategy and get feedback.
+202403070135
+3
+Lunch with Mentor
+Meet at noon at Cafe Luna to discuss career plans.
+202403191346
+2
+Cook Dinner
+Try a new recipe for pasta with homemade sauce.
+202407060926
+1
+Code Review
+Examine the latest commits before the end of the day.
+202411031544
+2
+Team Meeting
+Discuss project milestones and delegate tasks.
+202409311239
+3
+Code Review
+Examine the latest commits before the end of the day.
+202405042227
+2
+Guitar Practice
+Learn new chords and practice the song Yesterday.
+202410140846
+2
+Cook Dinner
+Try a new recipe for pasta with homemade sauce.
+202405121716
+2
+Yoga Class
+Relaxing mind and body with instructor Lee.
+202407310102
+2
+Reading Time
+Dive into a new novel.
+202412101956
+2
+Travel Booking
+Reserve summer vacation flights.
+202411172200
+2
+Laundry
+Wash clothes and prepare outfits for the week.
+202412281647
+3
+Movie Night
+Watch the latest movie at the theater.
+202407061254
+3
+Team Discussion
+Discuss project updates and next steps.
+202410170743
+2
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202404131139
+2
+Study Session
+Prepare for upcoming exams.
+202402262041
+1
+Team Discussion
+Discuss project updates and next steps.
+202405062208
+2
+Shopping
+Visit the mall for some shopping.
+202406180833
+1
+Plan Trip
+Research and book accommodations for summer vacation.
+202406101212
+1
+Family Gathering
+Enjoy a family dinner.
+202409311213
+3
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202410230004
+3
+Guitar Practice
+Learn new chords and practice the song Yesterday.
+202404282316
+3
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202401141856
+2
+Client Meeting
+Present Q2 marketing strategy and get feedback.
+202408291705
+3
+Laundry
+Wash clothes and prepare outfits for the week.
+202409251918
+2
+Coffee Break
+Catch up with a friend at a cafe.
+202401202329
+0
+Write Report
+Summarize findings from the recent survey.
+202403071306
+1
+Movie Night
+Watch the latest movie at the theater.
+202409111358
+3
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202401211817
+1
+Code Review
+Examine the latest commits before the end of the day.
+202410090857
+2
+Book Club
+Read and discuss 1984 by George Orwell.
+202403030422
+1
+Bedtime
+Wind down by 10 PM and review plans for tomorrow.
+202406100816
+2
+Dentist Appointment
+Teeth cleaning session at 3 PM with Dr. Smith.
+202408170025
+0
+Morning Jog
+Start the day with a 30-minute run in the park.
+202408241229
+1
+Book Club
+Read and discuss 1984 by George Orwell.
+202401091620
+3
+Lunch Appointment
+Meet with a colleague for lunch.
+202409150117
+3
+Family Gathering
+Enjoy a family dinner.
+202401281827
+3
+Yoga Class
+Relaxing mind and body with instructor Lee.
+202410180228
+0
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202405021551
+0
+Client Meeting
+Present Q2 marketing strategy and get feedback.
+202409021636
+2
+Reading Time
+Dive into a new novel.
+202408130133
+1
+Cook Dinner
+Try a new recipe for pasta with homemade sauce.
+202410221707
+1
+Write Report
+Summarize findings from the recent survey.
+202401301405
+2
+Travel Booking
+Reserve summer vacation flights.
+202405080120
+1
+Lunch with Mentor
+Meet at noon at Cafe Luna to discuss career plans.
+202403190530
+2
+Read Articles
+Stay updated with the latest tech news.
+202408231714
+3
+Coffee Break
+Catch up with a friend at a cafe.
+202401252157
+2
+Team Meeting
+Discuss project milestones and delegate tasks.
+202408230053
+0
+Yoga Class
+Relaxing mind and body with instructor Lee.
+202403011419
+0
+Guitar Practice
+Learn new chords and practice the song Yesterday.
+202410291740
+3
+Gym Workout
+Hit the gym for a workout session.
+202406160458
+3
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202410222057
+1
+Lunch with Mentor
+Meet at noon at Cafe Luna to discuss career plans.
+202409301532
+1
+Yoga Class
+Relaxing mind and body with instructor Lee.
+202404160003
+1
+Lunch Appointment
+Meet with a colleague for lunch.
+202401020454
+3
+Family Gathering
+Enjoy a family dinner.
+202405301145
+2
+Reading Time
+Dive into a new novel.
+202407161336
+1
+Laundry
+Wash clothes and prepare outfits for the week.
+202404301047
+1
+Dentist Appointment
+Teeth cleaning session at 3 PM with Dr. Smith.
+202409281302
+3
+Morning Jog
+Start the day with a 30-minute run in the park.
+202407220120
+0
+Check Emails
+Reply to urgent messages and organize inbox.
+202405271627
+2
+Dentist Appointment
+Teeth cleaning session at 3 PM with Dr. Smith.
+202403151256
+1
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202406232106
+3
+Cook Dinner
+Try a new recipe for pasta with homemade sauce.
+202405091232
+1
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202407141654
+1
+Study Session
+Prepare for upcoming exams.
+202404310808
+0
+Book Club
+Read and discuss 1984 by George Orwell.
+202409191625
+3
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202401161554
+1
+Coffee Break
+Catch up with a friend at a cafe.
+202402311126
+1
+Client Meeting
+Present Q2 marketing strategy and get feedback.
+202407180457
+0
+Bedtime
+Wind down by 10 PM and review plans for tomorrow.
+202412021857
+1
+Dentist Appointment
+Teeth cleaning session at 3 PM with Dr. Smith.
+202403310547
+0
+Lunch Appointment
+Meet with a colleague for lunch.
+202409221138
+2
+Cook Dinner
+Try a new recipe for pasta with homemade sauce.
+202402211926
+1
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202406301651
+3
+Movie Night
+Watch the latest movie at the theater.
+202410161237
+2
+Movie Night
+Watch the latest movie at the theater.
+202401211121
+3
+Cook Dinner
+Try a new recipe for pasta with homemade sauce.
+202407270458
+2
+Lunch with Mentor
+Meet at noon at Cafe Luna to discuss career plans.
+202408051222
+1
+Dentist Appointment
+Teeth cleaning session at 3 PM with Dr. Smith.
+202409111042
+1
+Dentist Appointment
+Teeth cleaning session at 3 PM with Dr. Smith.
+202404170521
+0
+Team Discussion
+Discuss project updates and next steps.
+202411130344
+3
+Yoga Class
+Relaxing mind and body with instructor Lee.
+202403122359
+1
+Reading Time
+Dive into a new novel.
+202410280609
+3
+Coffee Break
+Catch up with a friend at a cafe.
+202407041002
+2
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202404202251
+0
+Morning Jog
+Start the day with a 30-minute run in the park.
+202408082031
+3
+Lunch Appointment
+Meet with a colleague for lunch.
+202412171158
+3
+Lunch Appointment
+Meet with a colleague for lunch.
+202403261606
+2
+Check Emails
+Reply to urgent messages and organize inbox.
+202406311816
+3
+Reading Time
+Dive into a new novel.
+202407031121
+3
+Study Time
+Focus on algorithms and data structures.
+202408032120
+0
+Write Report
+Summarize findings from the recent survey.
+202408171817
+3
+Laundry
+Wash clothes and prepare outfits for the week.
+202408281500
+3
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202411210142
+1
+Team Meeting
+Discuss project milestones and delegate tasks.
+202402050932
+0
+Family Gathering
+Enjoy a family dinner.
+202410190456
+2
+Bedtime
+Wind down by 10 PM and review plans for tomorrow.
+202401201323
+0
+Study Time
+Focus on algorithms and data structures.
+202410022110
+0
+Cook Dinner
+Try a new recipe for pasta with homemade sauce.
+202406110817
+3
+Lunch Appointment
+Meet with a colleague for lunch.
+202404170906
+2
+Team Meeting
+Discuss project milestones and delegate tasks.
+202407252301
+1
+Yoga Class
+Relaxing mind and body with instructor Lee.
+202410191303
+2
+Travel Booking
+Reserve summer vacation flights.
+202404211709
+1
+Check Emails
+Reply to urgent messages and organize inbox.
+202412191421
+3
+Family Gathering
+Enjoy a family dinner.
+202403231029
+2
+Dentist Appointment
+Teeth cleaning session at 3 PM with Dr. Smith.
+202407060424
+1
+Travel Booking
+Reserve summer vacation flights.
+202403030518
+1
+Laundry
+Wash clothes and prepare outfits for the week.
+202411302306
+0
+Gym Workout
+Hit the gym for a workout session.
+202403041718
+1
+Bedtime
+Wind down by 10 PM and review plans for tomorrow.
+202404131139
+2
+Book Club
+Read and discuss 1984 by George Orwell.
+202405132204
+2
+Gym Workout
+Hit the gym for a workout session.
+202412290900
+1
+Plan Trip
+Research and book accommodations for summer vacation.
+202408041704
+3
+Study Session
+Prepare for upcoming exams.
+202410311024
+0
+Bedtime
+Wind down by 10 PM and review plans for tomorrow.
+202409021856
+1
+Bedtime
+Wind down by 10 PM and review plans for tomorrow.
+202403242033
+0
+Family Gathering
+Enjoy a family dinner.
+202409260925
+1
+Team Meeting
+Discuss project milestones and delegate tasks.
+202403221326
+2
+Cook Dinner
+Try a new recipe for pasta with homemade sauce.
+202406061703
+0
+Check Emails
+Reply to urgent messages and organize inbox.
+202403190008
+3
+Team Meeting
+Discuss project milestones and delegate tasks.
+202401052144
+3
+Morning Jog
+Start the day with a 30-minute run in the park.
+202409152022
+0
+Lunch Appointment
+Meet with a colleague for lunch.
+202404071958
+2
+Coffee Break
+Catch up with a friend at a cafe.
+202409210549
+3
+Reading Time
+Dive into a new novel.
+202402041448
+2
+Coffee Break
+Catch up with a friend at a cafe.
+202407231659
+0
+Plan Trip
+Research and book accommodations for summer vacation.
+202406151237
+3
+Client Meeting
+Present Q2 marketing strategy and get feedback.
+202407130518
+0
+Dentist Appointment
+Teeth cleaning session at 3 PM with Dr. Smith.
+202410052356
+2
+Morning Jog
+Start the day with a 30-minute run in the park.
+202412270720
+1
+Client Meeting
+Present Q2 marketing strategy and get feedback.
+202410250558
+2
+Coffee Break
+Catch up with a friend at a cafe.
+202408251700
+1
+Team Discussion
+Discuss project updates and next steps.
+202406080641
+3
+Guitar Practice
+Learn new chords and practice the song Yesterday.
+202405020409
+2
+Study Session
+Prepare for upcoming exams.
+202409101107
+1
+Travel Booking
+Reserve summer vacation flights.
+202410300257
+1
+Team Discussion
+Discuss project updates and next steps.
+202406021236
+2
+Study Time
+Focus on algorithms and data structures.
+202405101300
+2
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202412030655
+0
+Dentist Appointment
+Teeth cleaning session at 3 PM with Dr. Smith.
+202404271750
+0
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202404141120
+0
+Code Review
+Examine the latest commits before the end of the day.
+202406260703
+2
+Movie Night
+Watch the latest movie at the theater.
+202411190134
+3
+Team Discussion
+Discuss project updates and next steps.
+202405071735
+0
+Bedtime
+Wind down by 10 PM and review plans for tomorrow.
+202407100034
+3
+Client Meeting
+Present Q2 marketing strategy and get feedback.
+202410280354
+0
+Check Emails
+Reply to urgent messages and organize inbox.
+202407100508
+0
+Gym Workout
+Hit the gym for a workout session.
+202403061232
+3
+Team Meeting
+Discuss project milestones and delegate tasks.
+202408311950
+3
+Team Discussion
+Discuss project updates and next steps.
+202402201100
+1
+Gym Workout
+Hit the gym for a workout session.
+202404032326
+1
+Code Review
+Examine the latest commits before the end of the day.
+202401301314
+2
+Gym Workout
+Hit the gym for a workout session.
+202405310925
+2
+Write Report
+Summarize findings from the recent survey.
+202410022257
+1
+Family Gathering
+Enjoy a family dinner.
+202409061445
+0
+Coffee Break
+Catch up with a friend at a cafe.
+202406030202
+0
+Client Meeting
+Present Q2 marketing strategy and get feedback.
+202402260241
+0
+Book Club
+Read and discuss 1984 by George Orwell.
+202405200713
+0
+Laundry
+Wash clothes and prepare outfits for the week.
+202405042244
+1
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202407061114
+1
+Code Review
+Examine the latest commits before the end of the day.
+202403080604
+0
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202402251953
+1
+Study Session
+Prepare for upcoming exams.
+202403291008
+0
+Team Discussion
+Discuss project updates and next steps.
+202408132145
+3
+Morning Jog
+Start the day with a 30-minute run in the park.
+202403151549
+1
+Study Time
+Focus on algorithms and data structures.
+202405290304
+1
+Yoga Class
+Relaxing mind and body with instructor Lee.
+202401020452
+2
+Study Time
+Focus on algorithms and data structures.
+202408190811
+1
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202401290702
+0
+Lunch Appointment
+Meet with a colleague for lunch.
+202402240857
+2
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202406152321
+0
+Lunch with Mentor
+Meet at noon at Cafe Luna to discuss career plans.
+202405160332
+3
+Bedtime
+Wind down by 10 PM and review plans for tomorrow.
+202407171601
+2
+Travel Booking
+Reserve summer vacation flights.
+202407261428
+0
+Travel Booking
+Reserve summer vacation flights.
+202407171143
+1
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202402121628
+3
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202403230242
+3
+Read Articles
+Stay updated with the latest tech news.
+202411032222
+2
+Movie Night
+Watch the latest movie at the theater.
+202402131421
+1
+Laundry
+Wash clothes and prepare outfits for the week.
+202404192003
+0
+Cook Dinner
+Try a new recipe for pasta with homemade sauce.
+202406211612
+0
+Plan Trip
+Research and book accommodations for summer vacation.
+202407220257
+3
+Shopping
+Visit the mall for some shopping.
+202401070702
+2
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202402241456
+2
+Team Discussion
+Discuss project updates and next steps.
+202403010537
+1
+Family Gathering
+Enjoy a family dinner.
+202407120028
+3
+Laundry
+Wash clothes and prepare outfits for the week.
+202404050832
+1
+Code Review
+Examine the latest commits before the end of the day.
+202402181152
+1
+Reading Time
+Dive into a new novel.
+202408190402
+2
+Movie Night
+Watch the latest movie at the theater.
+202401171652
+3
+Dentist Appointment
+Teeth cleaning session at 3 PM with Dr. Smith.
+202407162150
+0
+Code Review
+Examine the latest commits before the end of the day.
+202407300932
+3
+Guitar Practice
+Learn new chords and practice the song Yesterday.
+202403290246
+0
+Check Emails
+Reply to urgent messages and organize inbox.
+202410250517
+0
+Lunch Appointment
+Meet with a colleague for lunch.
+202409190619
+3
+Family Gathering
+Enjoy a family dinner.
+202410090846
+2
+Study Time
+Focus on algorithms and data structures.
+202405192000
+3
+Travel Booking
+Reserve summer vacation flights.
+202408110226
+3
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202408170654
+0
+Write Report
+Summarize findings from the recent survey.
+202409100718
+2
+Yoga Class
+Relaxing mind and body with instructor Lee.
+202405310058
+2
+Shopping
+Visit the mall for some shopping.
+202406160437
+1
+Write Report
+Summarize findings from the recent survey.
+202409130824
+2
+Dentist Appointment
+Teeth cleaning session at 3 PM with Dr. Smith.
+202403020924
+3
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202403171828
+2
+Study Session
+Prepare for upcoming exams.
+202402300835
+2
+Team Discussion
+Discuss project updates and next steps.
+202408011438
+1
+Check Emails
+Reply to urgent messages and organize inbox.
+202412072012
+0
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202401241818
+0
+Study Time
+Focus on algorithms and data structures.
+202404072300
+1
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202408070022
+0
+Family Gathering
+Enjoy a family dinner.
+202412131510
+1
+Movie Night
+Watch the latest movie at the theater.
+202409290031
+0
+Yoga Class
+Relaxing mind and body with instructor Lee.
+202401282008
+3
+Call Parents
+Catch up with family at 8 PM for half an hour.
+202409231018
+1
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202402030511
+3
+Grocery Shopping
+Buy vegetables, bread, and milk for the week.
+202405210720
+2
+Laundry
+Wash clothes and prepare outfits for the week.
+202408081554
+0
+Check Emails
+Reply to urgent messages and organize inbox.
+202403101047
+1
+Client Meeting
+Present Q2 marketing strategy and get feedback.
+202405052002
+1
+Cook Dinner
+Try a new recipe for pasta with homemade sauce.
+202403231403
+2
+Gym Session
+Leg day workout followed by 20 mins of cardio.
+202405290720
+0
+Morning Jog
+Start the day with a 30-minute run in the park.

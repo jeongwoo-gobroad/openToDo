@@ -8,6 +8,8 @@
 #include <arpa/inet.h>  
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <netinet/in.h>
+#include <netdb.h>
  
 #define MAXLINE 1024
 
@@ -38,7 +40,9 @@ typedef struct connection {
 typedef connection* connPtr;
 
 static connPtr conn;
-static const char* default_ip = "175.201.149.127";
+//static const char* default_ip = "175.201.149.127";
+static char* default_addr = "jeongwookimpage.iptime.org";
+static const int port = 7227;
 
 /* client level function declared here */
 int cli_init(void);
@@ -136,22 +140,22 @@ void cli_close(void) {
 
     return;
 }
-int cli_serverConnect(char* ipaddr) {
-    if (ipaddr == NULL) {
-        strcpy(conn->ipaddr, default_ip); /* default server ip address if not given */
-    }
-    else {
-        strcpy(conn->ipaddr, ipaddr);
-    }
+int cli_serverConnect(char* addr) {
+    struct hostent* hostPtr;
 
-    if ((conn->server_sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1){
+    hostPtr = gethostbyname(addr);
+    if (hostPtr == NULL) errOcc("gethostbyname");
+
+    memset(&(conn->serveraddr), 0x00, sizeof(conn->serveraddr));
+    bcopy(hostPtr->h_addr, (struct sockaddr*)&conn->serveraddr, hostPtr->h_length);
+
+    if ((conn->server_sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
         errOcc("socket");
         return 1;
     }
  
     conn->serveraddr.sin_family = AF_INET;
-    conn->serveraddr.sin_addr.s_addr = inet_addr(conn->ipaddr);
-    conn->serveraddr.sin_port = htons(7227); /* Port: 7227 fixed */
+    conn->serveraddr.sin_port = htons(port); /* Port: 7227 fixed */
  
     conn->client_len = sizeof(conn->serveraddr);
  
@@ -169,11 +173,16 @@ int cli_pushToDoDataToServer(toDoPtr target, char* code) {
     char buf[MAXLINE] = {'\0', };
 
     cli_init();
-    rtn = cli_serverConnect(NULL);
+    rtn = cli_serverConnect(default_addr);
     if (rtn) return 2; /* cannot connect */
 
     /* sending 'input' request to the server */
     if (write(conn->server_sockfd, "input", 6) <= 0){
+        return 2;
+    }
+
+    /* just for R/W safety */
+    if (read(conn->server_sockfd, buf, MAXLINE) < 0) {
         return 2;
     }
 
@@ -183,7 +192,7 @@ int cli_pushToDoDataToServer(toDoPtr target, char* code) {
     sprintf(buf, "@%-15s[*%llu[[%d]*%-25s]]%s", target->userName, target->dateData, target->priority, target->title, target->details);
     //printf("%s\n", buf);
     /* send to the server */
-    (rtn = write(conn->server_sockfd, buf, MAXLINE));
+    (rtn = write(conn->server_sockfd, buf, strlen(buf)));
     if (rtn < 0) return 2;
     
 
@@ -206,11 +215,16 @@ int cli_getToDoDataFromServer(toDoPtr target, const char* code) {
     int i = 0;
 
     cli_init();
-    rtn = cli_serverConnect(NULL);
+    rtn = cli_serverConnect(default_addr);
     if (rtn) return 2; /* cannot connect */
 
     /* sending get request to the server */
-    if (write(conn->server_sockfd, "receive", 8) < 0){
+    if (write(conn->server_sockfd, "receive", strlen("receive")) < 0){
+        return 2;
+    }
+
+    /* just for R/W safety */
+    if (read(conn->server_sockfd, buf, MAXLINE) < 0) {
         return 2;
     }
 
@@ -230,13 +244,15 @@ int cli_getToDoDataFromServer(toDoPtr target, const char* code) {
         return 1; /* no such data */
     }
 
+    //printf("buffer: %s\n", buf);
+
     ptr = buf;
     /* then split markup string */
     while (*ptr) {
         if (*ptr == '@') {
             ptr++;
             strncpy(target->userName, ptr, 15);
-            ptr += 14;
+            ptr += 15;
         }
         else if (*ptr == '[') {
             ptr++;
@@ -246,11 +262,12 @@ int cli_getToDoDataFromServer(toDoPtr target, const char* code) {
                 strncpy(tempDate, ptr, 12);
                 //printf("%s\n", tempDate);
                 target->dateData = atoll(tempDate);
-                ptr += 11;
+                ptr += 12;
             }
             else if (*ptr == '[') {
                 ptr++;
                 target->priority = (int)*ptr - 48;
+                ptr++;
                 //target->priority = 0;
                 //indexing++;
             }
@@ -260,14 +277,14 @@ int cli_getToDoDataFromServer(toDoPtr target, const char* code) {
             if (*ptr == '*') {
                 ptr++;
                 strncpy(target->title, ptr, 25);
-                ptr += 24;
+                ptr += 25;
             }
             else if (*ptr == ']') {
                 ptr++;
                 break;
             }
         }
-        ptr++;
+        //ptr++;
     }
     while (*ptr) {
         (target->details)[i++] = *ptr;

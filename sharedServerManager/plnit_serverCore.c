@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <signal.h>
+#include <netdb.h>
 
 #define PORT    7227
 #define MAXLINE 1024
@@ -73,44 +74,58 @@ void setSigHandler(void);
 int main(void){
     int socket_fd, accepted_fd;
     struct sockaddr_in host_addr, client_addr;
+    struct hostent*    hostPtr;
+    char hostname[BUFSIZ];
     socklen_t size;
-    int recv_length;
     //int btw;
 
     char buffer[MAXLINE];
     perToDoPtr rtn;
     char* temp;
 
-    socket_fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+    socket_fd = socket(PF_INET, SOCK_STREAM, 0);
+    if (socket_fd == -1) {
+        errOcc("socket");
+    }
 
+    gethostname(hostname, BUFSIZ);
+    hostPtr = gethostbyname(hostname);
+
+    memset(&host_addr, 0x00, sizeof(host_addr));
+    bcopy(hostPtr->h_addr, (struct sockaddr*)&host_addr, hostPtr->h_length);
     host_addr.sin_family = AF_INET;
     host_addr.sin_port = htons(PORT);
     host_addr.sin_addr.s_addr = 0;
-    memset(&(host_addr.sin_zero), 0, 8);
 
-    bind(socket_fd, (struct sockaddr *)&host_addr, sizeof(struct sockaddr));
+    if (bind(socket_fd, (struct sockaddr *)&host_addr, sizeof(struct sockaddr)) != 0) {
+        errOcc("bind");
+    }
 
-    listen(socket_fd, 3);
+    if (listen(socket_fd, 1) != 0) {
+        errOcc("listen");
+    }
 
     initServerDB();
     setSigHandler();
 
-    puts("-------------openToDo(pln_it) Server Program v 1.0-------------");
+    puts("-------------openToDo(pln_it) Server Program v 1.5-------------");
 
     while (1){
-        size = sizeof(struct sockaddr_in);
         accepted_fd = accept(socket_fd, (struct sockaddr *)&client_addr, &size);
 
         printf("Client Info : IP %s, Port %d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
         /* receive */
-        recv_length = 1;
-        //printf("Received: [%s]\n", buffer);
-        while ((recv_length = read(accepted_fd, buffer, MAXLINE)) > 0) {
+        while (read(accepted_fd, buffer, MAXLINE) > 0) {
+            if (strcmp(buffer, "") == 0) continue;;
             printf("Received: [%s]\n", buffer);
             if (checkMode(buffer) == PUT) {
                 puts("insert mode...");
                 memset(buffer, 0x00, MAXLINE);
+
+                /* just for R/W safety */
+                write(accepted_fd, "1", strlen("1"));
+
                 /* read from client */
                 read(accepted_fd, buffer, MAXLINE);
                 printf("buffer: %s\n", buffer);
@@ -125,6 +140,9 @@ int main(void){
                 writeToFile();
             }
             else if (checkMode(buffer) == GET) {
+                /* just for R/W safety */
+                write(accepted_fd, "1", strlen("1"));
+
                 memset(buffer, 0x00, MAXLINE);
                 /* read from client */
                 read(accepted_fd, buffer, MAXLINE);
@@ -139,45 +157,15 @@ int main(void){
                 }
                 memset(buffer, 0x00, MAXLINE);
             }
-        } 
-        
-
-
-        recv_length = recv(accepted_fd, &buffer, MAXLINE, 0);
-        while (recv_length > 0){
-                if (buffer[0] == '*') { /* key input request */
-                    printf("Key-Value : %.4s - %s\n", buffer + 1, buffer + 6);
-                }
-                /* key output request */
-                /* data backup request */
-                /* data receive request */
-                //printf("From Client : %s\n", buffer);
-                recv_length = recv(accepted_fd,&buffer, MAXLINE, 0);
         }
+
+        close(accepted_fd);
     }
 
     safeExit(0);
 
     return 0;
 }
-
-/*
-typedef struct personalToDo {
-    char accessKey[9];
-
-    ull dateData;
-    int priority;
-    char title[26];
-    char details[61];
-} personalToDo;
-typedef personalToDo* perToDoPtr;
-
-typedef struct sharedDB {
-    perToDoPtr* arr;
-    int maxindex;
-}
-*/
-
 /* serverside db management */
 void       initServerDB(void) {
     ssvc.arr = NULL;
@@ -342,7 +330,7 @@ int   markupStringToData(char* user, ull* d_data, int* p_data, char* t_data, cha
         if (*indexing == '@') {
             indexing++;
             strncpy(user, indexing, 15);
-            indexing += 14;
+            indexing += 15;
         }
         else if (*indexing == '[') {
             indexing++;
@@ -352,12 +340,12 @@ int   markupStringToData(char* user, ull* d_data, int* p_data, char* t_data, cha
                 strncpy(tempDate, indexing, 12);
                 //printf("%s\n", tempDate);
                 *d_data = atoll(tempDate);
-                indexing += 11;
+                indexing += 12;
             }
             else if (*indexing == '[') {
                 indexing++;
                 *p_data = (int)*indexing - 48;
-                //indexing++;
+                indexing++;
             }
         }
         else if (*indexing == ']') {
@@ -365,7 +353,7 @@ int   markupStringToData(char* user, ull* d_data, int* p_data, char* t_data, cha
             if (*indexing == '*') {
                 indexing++;
                 strncpy(t_data, indexing, 25);
-                indexing += 24;
+                indexing += 25;
             }
             else if (*indexing == ']') {
                 //puts("wow");
@@ -373,7 +361,7 @@ int   markupStringToData(char* user, ull* d_data, int* p_data, char* t_data, cha
                 break;
             }
         }
-        indexing++;
+        //indexing++;
     }
     while (*indexing) {
         dt_data[i++] = *indexing;
