@@ -109,6 +109,7 @@ void print_date_BookMark(unsigned long long targetDate);
 void printReminderControl(int how);
 void print_userName();
 void getSharedTodo();
+void change_userName();
 /*-----Display control--------------------------------------------------------------*/
 void clearGivenCalendarArea(/*index of pos_sc_date*/int row, int col);
 void clearGivenRowCols(int fromRow, int fromCol, int toRow, int toCol);
@@ -169,6 +170,7 @@ int shareWhileIterate(unsigned long long src, int pageNum, char* shareCode);
 int getFromServer_Highlevel(char* shareCode);
 /* 0524 added */
 char* getUserName(void);
+void setUserName(char* myName);
 /*-------------------------------------------------------*/
 
 int main(int argc, char* argv[]) {
@@ -259,7 +261,10 @@ int main(int argc, char* argv[]) {
                     print_date_NumOfSchedule(selectDate); /* refresh screen */
                     print_date_BookMark(selectDate); /* to refresh */
                     print_UpcomingBookMark(todayDate); /* to refresh */
-                } 
+                }
+                else if (c == '.') {
+                    change_userName();
+                }
                 else continue;
                 print_commandLine(mode);
                 refresh();
@@ -330,6 +335,9 @@ int main(int argc, char* argv[]) {
                     print_date_NumOfSchedule(selectDate); /* to refresh */
                     print_date_ToDoWithdetails(selectDate, 0, &page); /* to refresh */
                     print_date_BookMark(selectDate); /* to refresh */
+                }
+                else if (c == '.') {
+                    change_userName();
                 }
                 /* error handling */
                 else if (page == 0) {
@@ -2050,24 +2058,24 @@ void print_Dday() {
 
     if (dday1_str[0] != '\0') { /*D+*/
         if (dday1 != 0) {
-            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 9 + nNum, "D%+d: %.18s", dday1, dday1_str);
+            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 8 + nNum, "D%+d: %.18s", dday1, dday1_str);
         }
         else {
-            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 9 + nNum, "D-day: %.18s", dday1_str);
+            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 8 + nNum, "D-day: %.18s", dday1_str);
         }
     }
     else{
-        mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 9 + nNum, "D+ Not Set");
+        mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 8 + nNum, "D+ Not Set");
     }
-    addstr(" | ");
+    mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 8 + 24 + nNum, " | ");
     if (dday2_str[0] != '\0') { /*D-*/
         if (dday2 != 0)
-            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 9 + 26 + nNum, "D%+d: %.18s", dday2, dday2_str);
+            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 8 + 27 + nNum, "D%+d: %.18s", dday2, dday2_str);
         else
-            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 9 + 26 + nNum, "D-day: %.18s", dday2_str);
+            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 8 + 27 + nNum, "D-day: %.18s", dday2_str);
     }
     else {
-        mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 9 + 26 + nNum, "D- Not Set");
+        mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 8 + 27 + nNum, "D- Not Set");
     }
 
     return;
@@ -2107,6 +2115,7 @@ void print_userName() {
     char str[26] = { '\0', };
     sprintf(str, "username: %.15s", name);
     attron(A_DIM);
+    mvprintw(pos_SLL_stt.row + 3, pos_SLL_stt.col, "Press [.] to set username");
     mvprintw(pos_SLR_end.row + 2, pos_SLR_end.col + 1 - 24, "%25s", str);
     attroff(A_DIM);
 }
@@ -2151,4 +2160,35 @@ void getSharedTodo() {
 
     move(LINES - 1, COLS - 1);
     setInputModeSigHandler(OFF);
+}
+void change_userName() {
+    char temp[16];
+
+    memset(temp, 0x00, 16);
+
+    clearGivenNonCalendarArea(SLL);
+
+    standout();
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Current Username: %s", getUserName());
+    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "change to(blank: do not change)");
+    standend();
+    addstr(": ");
+
+    refresh();
+    nocbreak(); // icanonon
+    echo();
+
+    getstr(temp);
+    if (temp[0] == '\0') {
+        return;
+    }
+
+    setUserName(temp);
+
+    clearGivenNonCalendarArea(SLL);
+
+    refresh();
+
+    cbreak();
+    noecho();
 }

@@ -164,7 +164,7 @@ int cli_serverConnect(char* addr) {
 
     if (getaddrinfo(addr, "7227", &hints, &serverinfo) != 0) {
         errOcc("getaddrinfo");
-    }
+    } /* wasted so much time on this... gethostbyname() is deprecated!! */
 
     memset(&(conn->serveraddr), 0x00, sizeof(conn->serveraddr));
     //memcpy(&conn->serveraddr.sin_addr.s_addr, &hostPtr->h_addr_list[0], hostPtr->h_length);
@@ -178,7 +178,7 @@ int cli_serverConnect(char* addr) {
         return 1;
     }
  
-    if (connect(conn->server_sockfd, (struct sockaddr *)&(serverinfo->ai_addr), sizeof(struct sockaddr)) == -1){
+    if (connect(conn->server_sockfd, (struct sockaddr *)(serverinfo->ai_addr), sizeof(struct sockaddr)) == -1){
         //errOcc("connect");
         return 1; /* failed */
     }
