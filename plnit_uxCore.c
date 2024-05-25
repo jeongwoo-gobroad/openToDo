@@ -2124,19 +2124,20 @@ void print_userName() {
 
 void getSharedTodo() {
     char shareCode[9] = { '\0', };
+
     nocbreak();  // canonical 모드로 전환
     echo();  // 입력한 키를 화면에 보이도록 설정
     clearGivenNonCalendarArea(SLL);
-    setInputModeSigHandler(ON);
+    //setInputModeSigHandler(ON);
 
-    standout();
-    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "^C to quit get shared mode");
-    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "press enter to continue");
-    getch(); /* wait for user input */
+    //standout();
+    //mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "^C to quit get shared mode");
+    //mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "press enter to continue");
+    //getch(); /* wait for user input */
 
-    standend();
-    if (inputModeForceQuit) return;
-    clearGivenNonCalendarArea(SLL);
+    //standend();
+    //if (inputModeForceQuit) return;
+    //clearGivenNonCalendarArea(SLL);
 
     standout();
     mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Enter the shareCode");
@@ -2144,12 +2145,9 @@ void getSharedTodo() {
     standend();
 
     getstr(shareCode);//시각 입력
-    if (inputModeForceQuit) return;
+    //if (inputModeForceQuit) return;
     //if (strcmp(t, "e") == 0) return;
-    clearGivenNonCalendarArea(SLL);
-
-    cbreak();  // 다시 non-canonical 모드로 전환
-    noecho();
+    //clearGivenNonCalendarArea(SLL);
 
     switch (getFromServer_Highlevel(shareCode)) {
     case 0:
@@ -2159,9 +2157,29 @@ void getSharedTodo() {
     case 2:
         popup("Cannot Get Shared Data!", NULL, "Cannot connect to server", 3); break;
     }
+    
+    //popup("Test", NULL, shareCode, 3);
+    popup("1", NULL, "1", 2);
+    clearGivenNonCalendarArea(SLL);
+    popup("2", NULL, "2", 2);
+    /*
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Press ENTER to continue");
+    move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
+    getch(c);
+    */
+    fflush(NULL);
+    popup("3", NULL, "3", 2);
 
     move(LINES - 1, COLS - 1);
-    setInputModeSigHandler(OFF);
+    popup("4", NULL, "4", 2);
+
+    cbreak();  // 다시 non-canonical 모드로 전환
+    popup("5", NULL, "5", 2);
+    noecho();
+    //setInputModeSigHandler(OFF);
+    popup("6", NULL, "6", 2);
+
+    return;
 }
 void change_userName() {
     char temp[16];
@@ -2193,4 +2211,6 @@ void change_userName() {
 
     cbreak();
     noecho();
+
+    move(LINES - 1, COLS - 1);
 }
