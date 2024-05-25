@@ -157,8 +157,9 @@ int cli_serverConnect(char* addr) {
     if (hostPtr == NULL) errOcc("gethostbyname");
 
     memset(&(conn->serveraddr), 0x00, sizeof(conn->serveraddr));
-    //bcopy(hostPtr->h_addr_list[0], (struct sockaddr*)&conn->serveraddr, );
-    memcpy(&hostPtr->h_addr_list[0], (struct sockaddr*)&conn->serveraddr, hostPtr->h_length);
+    //memcpy(&conn->serveraddr.sin_addr.s_addr, &hostPtr->h_addr_list[0], hostPtr->h_length);
+    printf("addr: %s\n", (hostPtr->h_addr_list[0]));
+    conn->serveraddr.sin_addr.s_addr = inet_addr(hostPtr->h_addr_list[0]);
     conn->serveraddr.sin_family = AF_INET;
     conn->serveraddr.sin_port = htons(port); /* Port: 7227 fixed */
 
