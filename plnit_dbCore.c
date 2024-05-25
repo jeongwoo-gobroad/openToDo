@@ -2220,7 +2220,7 @@ void getDday(int* slot1, char* title1, int* slot2, char* title2) { /* returns NU
         *slot1 = julian_day(&today) - julian_day(&dt);
         //printf("%d %d %d to %d %d %d\n", dt.tm_year, dt.tm_mon, dt.tm_mday, today->tm_year, today->tm_mon, today->tm_mday);
         strncpy(title1, (dStack->dDayArr)[0].title, 15);
-        if (strlen(title1) == 15) strcat(title1, "...");
+        if (strlen(title1) == 15) strcat(title1, "...\0");
     }
 
     /* D- Handling */
@@ -2239,7 +2239,7 @@ void getDday(int* slot1, char* title1, int* slot2, char* title2) { /* returns NU
         //printf("%d %d %d to %d %d %d\n", dt.tm_year, dt.tm_mon, dt.tm_mday, today->tm_year, today->tm_mon, today->tm_mday);
         *slot2 = julian_day(&today) - julian_day(&dt);
         strncpy(title2, (dStack->dDayArr)[1].title, 15);
-        if (strlen(title2) == 15) strcat(title2, "...");
+        if (strlen(title2) == 15) strcat(title2, "...\0");
     }
 
     return;
@@ -2345,7 +2345,7 @@ int isSharedToDoExisting(unsigned long long targetDate) {
 
     if (!dtmp) return 0; /* no record at first */
 
-    return dtmp->sharedToDoExists; /* 1: shared, 2: being shared */
+    return ((dtmp)->sharedToDoExists); /* 1: shared, 2: being shared */
 }
 int shareWhileIterate(unsigned long long src, int pageNum, char* shareCode) {
     /* src = YYYYMMDD, (dtmp->toDoArr)[pageNum - 1] */
