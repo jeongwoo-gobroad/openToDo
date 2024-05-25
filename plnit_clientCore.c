@@ -153,25 +153,21 @@ void cli_close(void) {
 int cli_serverConnect(char* addr) {
     struct hostent* hostPtr;
 
-    hostPtr = gethostbyaddr(addr, 4, AF_INET);
+    hostPtr = gethostbyname(addr);
     if (hostPtr == NULL) errOcc("gethostbyname");
 
     memset(&(conn->serveraddr), 0x00, sizeof(conn->serveraddr));
     //bcopy(hostPtr->h_addr_list[0], (struct sockaddr*)&conn->serveraddr, );
-    //memcpy(&hostPtr->h_addr_list[0], (struct sockaddr*)&conn->serveraddr, sizeof(hostPtr->h_addr_list[0]));
-    conn->serveraddr.sin_addr.s_addr = inet_addr(hostPtr->h_addr_list[0]);
+    memcpy(&hostPtr->h_addr_list[0], (struct sockaddr*)&conn->serveraddr, hostPtr->h_length);
+    conn->serveraddr.sin_family = AF_INET;
+    conn->serveraddr.sin_port = htons(port); /* Port: 7227 fixed */
 
     if ((conn->server_sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
         errOcc("socket");
         return 1;
     }
  
-    conn->serveraddr.sin_family = AF_INET;
-    conn->serveraddr.sin_port = htons(port); /* Port: 7227 fixed */
- 
-    conn->client_len = sizeof(conn->serveraddr);
- 
-    if (connect(conn->server_sockfd, (struct sockaddr *)&(conn->serveraddr), sizeof(conn->serveraddr)) == -1){
+    if (connect(conn->server_sockfd, (struct sockaddr *)&(conn->serveraddr), sizeof(struct sockaddr_in)) == -1){
         //errOcc("connect");
         return 1; /* failed */
     }
