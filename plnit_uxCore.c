@@ -2159,25 +2159,25 @@ void getSharedTodo() {
     }
     
     //popup("Test", NULL, shareCode, 3);
-    popup("1", NULL, "1", 2);
+    //popup("1", NULL, "1", 2);
     clearGivenNonCalendarArea(SLL);
-    popup("2", NULL, "2", 2);
+    //popup("2", NULL, "2", 2);
     /*
     mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Press ENTER to continue");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     getch(c);
     */
     fflush(NULL);
-    popup("3", NULL, "3", 2);
+    //popup("3", NULL, "3", 2);
 
     move(LINES - 1, COLS - 1);
-    popup("4", NULL, "4", 2);
+    //popup("4", NULL, "4", 2);
 
     cbreak();  // 다시 non-canonical 모드로 전환
-    popup("5", NULL, "5", 2);
+    //popup("5", NULL, "5", 2);
     noecho();
     //setInputModeSigHandler(OFF);
-    popup("6", NULL, "6", 2);
+    //popup("6", NULL, "6", 2);
 
     return;
 }
