@@ -158,7 +158,8 @@ int cli_serverConnect(char* addr) {
 
     memset(&(conn->serveraddr), 0x00, sizeof(conn->serveraddr));
     //bcopy(hostPtr->h_addr_list[0], (struct sockaddr*)&conn->serveraddr, );
-    memcpy(&hostPtr->h_addr_list[0], (struct sockaddr*)&conn->serveraddr, sizeof(hostPtr->h_addr_list[0]));
+    //memcpy(&hostPtr->h_addr_list[0], (struct sockaddr*)&conn->serveraddr, sizeof(hostPtr->h_addr_list[0]));
+    conn->serveraddr.sin_addr.s_addr = inet_addr(hostPtr->h_addr_list[0]);
 
     if ((conn->server_sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
         errOcc("socket");
