@@ -85,6 +85,11 @@ int __clDebug(void) {
             memset(buf, 0x00, MAXLINE);
             sprintf(buf, "@%-15s[*%llu[[%d]*%-25s]]%s", un, dt, pr, tt, dtl);
 
+            /* just for R/W safety */
+            if (read(conn->server_sockfd, buf, MAXLINE) < 0) {
+                return 2;
+            }
+
             if (write(conn->server_sockfd, buf, MAXLINE) <= 0){
                 errOcc("write");
                 return 1;
@@ -104,6 +109,11 @@ int __clDebug(void) {
             }
             printf("input code: ");
             scanf("%s", buf);
+
+            /* just for R/W safety */
+            if (read(conn->server_sockfd, buf, MAXLINE) < 0) {
+                return 2;
+            }
 
             if (write(conn->server_sockfd, buf, MAXLINE) <= 0){
                 errOcc("write");
@@ -159,7 +169,7 @@ int cli_serverConnect(char* addr) {
  
     conn->client_len = sizeof(conn->serveraddr);
  
-    if (connect(conn->server_sockfd, (struct sockaddr *)&(conn->serveraddr), conn->client_len) == -1){
+    if (connect(conn->server_sockfd, (struct sockaddr *)&(conn->serveraddr), sizeof(conn->serveraddr)) == -1){
         //errOcc("connect");
         return 1; /* failed */
     }

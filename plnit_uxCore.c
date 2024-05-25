@@ -116,7 +116,7 @@ void clearGivenNonCalendarArea(/*pre-defined Macros*/int area);
 void save_UXPart(void);
 void load_UXPart(void);
 void reminder_extends_popup(int signum);
-char getCommandScreen(char* context, char availToken[]);
+char getCommandScreen(const char* context, char availToken[]);
 /*-----Signal handling--------------------------------------------------------------*/
 void setInputModeSigHandler(int status); /* Global Variable */
 void inputMode_sigHndl(int signum);         int inputModeForceQuit;
@@ -161,7 +161,7 @@ void popDday(void);
 void setDdayWhileIterate(unsigned long long src, int pageNum, int mode);
 int isHoliday(unsigned long long target);
 int isSharedToDoExisting(unsigned long long targetDate);
-void Set_Dday(unsigned long long targetDate, int pageNum, int mode);
+void Set_Dday(unsigned long long targetDate, int pageNum);
 int checkDdayWhileIterate(unsigned long long src, int pageNum, int mode);
 void print_Dday(void);
 void delDdayStack(int whatto);
@@ -315,11 +315,8 @@ int main(int argc, char* argv[]) {
                     /* don't break */
                     /* maybe some pageIterator refresh needed here */
                 }
-                else if (c == '+' && page != 0) {
-                    Set_Dday(selectDate, page, 0);
-                }
-                else if (c == '-' && page != 0) {
-                    Set_Dday(selectDate, page, 1);
+                else if (c == 'D' && page != 0) {
+                    Set_Dday(selectDate, page);
                 }
                 else if (c == 'S') {
                     switch (shareWhileIterate(selectDate / 10000, page, shareCode)) {
@@ -892,7 +889,7 @@ void print_commandLine(int mode) {
         sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'i', "upwards", 'j', "left", 'k', "downwards", 'l', "right", 's', "select", 'g', "get shared", 'z', "save", 'x', "load", 'q', "set rmdr", 'w', "del rmdr");
         break;
     case 1:
-        sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'I', "insert", 'd', "delete", 'm', "modify", '+', "D+", '-', "D-", 'S', "share", 'e', "exit");
+        sprintf(commands, "%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s%c%-10s", 'I', "insert", 'd', "delete", 'm', "modify", 'D', "D-day", 'S', "share", 'e', "exit");
         break;
     default:
         break;
@@ -1860,7 +1857,16 @@ void print_date_BookMark(unsigned long long targetDate) {
             else {
                 move(pos_SC_date[i][j].row, pos_SC_date[i][j].col + 4 * nNum - 2);
                 chkColorPair = isBookMarked(targetDate / 1000000 * 100 + date);
-                if (chkColorPair) printColorStrip("  ", chkColorPair);
+                isShared = isSharedToDoExisting(targetDate / 1000000 * 100 + date);
+                if (chkColorPair || isShared) {
+                    if (chkColorPair) { /*북마크가 있는 경우*/
+                        if (isShared) printColorStrip("@ ", chkColorPair);
+                        else printColorStrip("  ", chkColorPair);
+                    }
+                    else { /*북마크가 없고 공유일정이 있는 경우*/
+                        printColorStrip("@ ", chkColorPair);
+                    }
+                }
                 else {
                     printColorStrip("  ", -1);
                 }
@@ -1870,7 +1876,7 @@ void print_date_BookMark(unsigned long long targetDate) {
     return;
 }
 
-char getCommandScreen(char* context, char availToken[]) {
+char getCommandScreen(const char* context, char availToken[]) {
     /*
     ---------------------------------------
     * @           SUL          @|@   SUR      
@@ -2041,20 +2047,39 @@ void print_Dday() {
     int dday1, dday2; char dday1_str[19]; char dday2_str[19];
     clearGivenRowCols(pos_SUL_stt.row, pos_SUL_stt.col + 9, pos_SUL_end.row, pos_SUL_end.col);
     getDday(&dday1, dday1_str, &dday2, dday2_str);
-    char str[27] = { '\0', };
-    sprintf(str, "D%+d: %.18s|", dday1, dday1_str);
-    if (dday1_str[0] != '\0') {
-        mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 9, "%27s", str);
+
+    if (dday1_str[0] != '\0') { /*D+*/
+        if (dday1 != 0) {
+            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 9 + nNum, "D%+d: %.18s", dday1, dday1_str);
+        }
+        else {
+            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 9 + nNum, "D-day: %.18s", dday1_str);
+        }
     }
-    if (dday2_str[0] != '\0') {
-        mvprintw(pos_SUL_stt.row, pos_SUL_end.col - 26 + 1, "D%+d: %s", dday2, dday2_str);
+    else{
+        mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 9 + nNum, "D+ Not Set");
     }
+    addstr(" | ");
+    if (dday2_str[0] != '\0') { /*D-*/
+        if (dday2 != 0)
+            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 9 + 26 + nNum, "D%+d: %.18s", dday2, dday2_str);
+        else
+            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 9 + 26 + nNum, "D-day: %.18s", dday2_str);
+    }
+    else {
+        mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 9 + 26 + nNum, "D- Not Set");
+    }
+
+    return;
 }
 
-void Set_Dday(unsigned long long targetDate, int pageNum, int mode) {
-    int caseN = 0;
+void Set_Dday(unsigned long long targetDate, int pageNum) {
+    int caseN = 0, mode = 0; /*mode 0 if D+, mode 1 if D-*/
     char yorn;
     char context[BUFSIZ] = { '\0', };
+
+    if ((int)(targetDate / 10000) - (int)(todayDate / 10000) > 0) mode = 1; //오늘 이후의 날들은 D-
+
     caseN = checkDdayWhileIterate(targetDate / 10000, pageNum, mode);
     if (caseN == 1) {
         strcat(context, "Same content alert. Do you want to delete it? (Y/N)");
