@@ -264,6 +264,7 @@ int main(int argc, char* argv[]) {
                 }
                 else if (c == '.') {
                     change_userName();
+                    print_userName();
                 }
                 else continue;
                 print_commandLine(mode);
@@ -338,6 +339,7 @@ int main(int argc, char* argv[]) {
                 }
                 else if (c == '.') {
                     change_userName();
+                    print_userName();
                 }
                 /* error handling */
                 else if (page == 0) {
