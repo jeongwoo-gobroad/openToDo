@@ -1731,32 +1731,31 @@ void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
         [^: for Time, [[: make new line, ^: tab inside
         ]^: for title, ]]: for details, *: for bookmarks
     */
-    char* retstr = NULL;
-    char tempstr[50];
+    char retstr[BUFSIZ];
+    char tempstr[100];
     int i;
     toDoPtr temp; /* bcggd8g6 */
+    toDoPtr compare;
 
-    retstr = (char*)malloc(sizeof(char) * 50 * counter); /* alloc, just to be safe */
-    if (!retstr) {
-        errOcc("malloc");
-    }
+    memset(retstr, 0x00, BUFSIZ);
+    memset(tempstr, 0x00, 100);
+
     retstr[0] = '\0';
 
     for (i = 1; i <= counter; i++) {
-        if ((temp = getBookMarked(today, i))) {
+        if ((temp = getBookMarked(today, i)) && temp != compare) {
             if (temp->isShared) {
                 sprintf(tempstr, "*%d@[^%llu]^%-25s", temp->priority, temp->dateData, temp->title);
             }
             else {
                 sprintf(tempstr, "*%d[^%llu]^%-25s", temp->priority, temp->dateData, temp->title);
             }
+            compare = temp;
         }
         strcat(retstr, tempstr);
     }
 
     strcpy(str, retstr);
-
-    free(retstr);
 
     return;
 }
