@@ -1864,7 +1864,7 @@ int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_d
 
     /* actual editing start */
     /*                                                    Don't allow users to edit system default holiday */
-    if (t_day != 1234 || (dtmp->toDoArr)[pageNum - 1]->dateData != 9999)              (dtmp->toDoArr)[pageNum - 1]->dateData = t_day;
+    if (t_day != 1234 && (dtmp->toDoArr)[pageNum - 1]->dateData != 9999)              (dtmp->toDoArr)[pageNum - 1]->dateData = t_day;
     if (t_title[0] != '\0')                                                           strcpy((dtmp->toDoArr)[pageNum - 1]->title, t_title);
     if (t_details[0] != '\0')                                                         strcpy((dtmp->toDoArr)[pageNum - 1]->details, t_details);
     if (t_priority != -1)                                                             (dtmp->toDoArr)[pageNum - 1]->priority = t_priority;
@@ -2219,8 +2219,8 @@ void getDday(int* slot1, char* title1, int* slot2, char* title2) { /* returns NU
         dt.tm_mday = ((dStack->dDayArr)[0].dateData / 10000) % 100;
         *slot1 = julian_day(&today) - julian_day(&dt);
         //printf("%d %d %d to %d %d %d\n", dt.tm_year, dt.tm_mon, dt.tm_mday, today->tm_year, today->tm_mon, today->tm_mday);
-        strncpy(title1, (dStack->dDayArr)[0].title, 17);
-        if (strlen(title1) == 17) strcat(title1, "...");
+        strncpy(title1, (dStack->dDayArr)[0].title, 15);
+        if (strlen(title1) == 15) strcat(title1, "...");
     }
 
     /* D- Handling */
@@ -2238,8 +2238,8 @@ void getDday(int* slot1, char* title1, int* slot2, char* title2) { /* returns NU
         dt.tm_mday = ((dStack->dDayArr)[1].dateData / 10000) % 100;
         //printf("%d %d %d to %d %d %d\n", dt.tm_year, dt.tm_mon, dt.tm_mday, today->tm_year, today->tm_mon, today->tm_mday);
         *slot2 = julian_day(&today) - julian_day(&dt);
-        strncpy(title2, (dStack->dDayArr)[1].title, 17);
-        if (strlen(title2) == 17) strcat(title2, "...");
+        strncpy(title2, (dStack->dDayArr)[1].title, 15);
+        if (strlen(title2) == 15) strcat(title2, "...");
     }
 
     return;
