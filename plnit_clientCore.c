@@ -153,7 +153,7 @@ void cli_close(void) {
 int cli_serverConnect(char* addr) {
     struct hostent* hostPtr;
 
-    hostPtr = gethostbyname(addr);
+    hostPtr = gethostbyaddr(addr, 4, AF_INET);
     if (hostPtr == NULL) errOcc("gethostbyname");
 
     memset(&(conn->serveraddr), 0x00, sizeof(conn->serveraddr));
