@@ -9,22 +9,33 @@ an openToDo project: (aka Plan-it Project)
   
 1. How To Build
 
-    gcc -Wall plnit_dbCore.c plnit_uxCore.c -o [program_name] -lcurses
+    1) Use Automated Script
+
+          $ chmod 777 *
+
+          $ ./bp.sh
+
+          $ ./pln
+
+    2) Explicit build method
+
+          gcc -Wall plnit_dbCore.c plnit_uxCore.c -o [program_name] -lcurses
 
     todos.sv is a save file for testing. Feel free to use it.
 
+    public.dsv is a system default save file for implementation of public holidays. It CANNOT be altered or deleted.
+
 3. Launch Options
+
     Plan_it: ./pln [options] [argument 1...]
    
           [options]:  NONE: Launch Plan_it in Normal Mode.
    
-          [options]:    -d: Launch Plan_it in Core Part Debugging Mode.
+          [options]:    -d: using CLI interface, Launch Plan_it in Core Part Debugging Mode.
    
-          [options]:   -in: using CLI interface, you can insert data with arguments -> Cannot use now
+          [options]:   -cl: using CLI interface, Launch Plan_it in Client Part Debugging Mode.
    
           -----------------------------------------------------------------------
-   
-          [arguments]: [YYYYMMDD][HHMM][Priority_Num][Title][Details]
    
   
 4. Version History
@@ -129,7 +140,7 @@ an openToDo project: (aka Plan-it Project)
           (Server) 초대코드 및 마크업 스트링 기반의 공유 시스템 구현, proof-of-concept 단계.
 
 
-    0.0.9: [current]
+    0.0.9:
 
           (Server) 초대코드 및 마크업 스트링 기반의 공유 시스템 구현, proof-of-concept 단계.
 
@@ -152,3 +163,31 @@ an openToDo project: (aka Plan-it Project)
           (UX) getCommandScreen() 범용 함수 구현
 
           (UX) UX 음영 및 색 조합 관련 개선으로 가독성 향상
+
+    0.1.0: [current]
+
+          (Server-Client Interaction Protocol) 안정적인 통신 프로토콜 구현으로 데이터 손실 및 버퍼 언더/오버런 해결.
+
+          (Client) 초대코드 및 마크업 스트링 기반의 공유 시스템 구현, API화 완료.
+
+          (Core) DB 구조 업그레이드, 이전 버전과 저장 파일 호환 불가.
+
+          (Core) 유저 이름 기반 개인화 시스템 구성.
+
+          (Core) Default 레코드 생성 프로그램 업데이트
+
+          (Core) 메모리 안정성 강화: 구조체 포인터 할당 관련 Memory-safe 액션 추가.
+
+          (Core) 메모리 안정성 강화: 반복 Save-load시 Valgrind-safe 함.
+
+          (Core) 메모리 안정성 강화: 라이브러리 콜 간 Stack smashing 문제 해결.
+
+          (UX / Core) 스마트 D-day 설정 및 출력 기능 구현
+
+          (UX / Core) 현재 시각 기준의 정밀한 [다가오는 북마크] 기능 구현
+
+          (UX) 북마크 삽입 질의시 북마크 스트립 관련 직관성 향상.
+
+          (UX) 공유 일정에 대한 북마크 스트립 추가 강조 기능 구현.
+
+          (UX) 커서 및 음영, 색 조합 관련 개선으로 가독성 향상
