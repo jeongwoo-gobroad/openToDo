@@ -285,7 +285,7 @@ int cli_getToDoDataFromServer(toDoPtr target, const char* code) {
             }
             else if (*ptr == '[') {
                 ptr++;
-                target->priority = (int)*ptr - 48;
+                target->priority = (int)(*ptr) - 48;
                 ptr++;
                 //target->priority = 0;
                 //indexing++;
@@ -314,7 +314,7 @@ int cli_getToDoDataFromServer(toDoPtr target, const char* code) {
     target->isShared = 1;
 
     cli_close();
-    //printf("@%-15s[*%llu[[%d]*%-25s]]%s", target->userName, target->dateData, target->priority, target->title, target->details);
+    //printf("@%-15s[*%llu[[%d]*%s]]%s", target->userName, target->dateData, target->priority, target->title, target->details);
 
     return 0;
 }

@@ -45,6 +45,7 @@ const char keyPool[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a',
 /*---size: 22-------*/  'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', };
 const char* bin_save = "accesspairs.ssv";
 static int storefp = 0;
+static char returnString[BUFSIZ];
 /*------------------*/
 
 /* serverside db management */
@@ -62,7 +63,7 @@ int        readFromFile(void);
 /* client management functions */
 int   checkMode(char* str);
 int   markupStringToData(char* user, ull* d_data, int* p_data, char* t_data, char* dt_data, char* targetString);
-char* dataToMarkUpString(perToDoPtr target);
+void  dataToMarkUpString(perToDoPtr target);
 /*-----------------------------*/
 
 /*----------others----------*/
@@ -81,7 +82,6 @@ int main(void){
 
     char buffer[MAXLINE];
     perToDoPtr rtn;
-    char* temp;
 
     socket_fd = socket(PF_INET, SOCK_STREAM, 0);
     if (socket_fd == -1) {
@@ -151,9 +151,8 @@ int main(void){
                     write(accepted_fd, "NOSUCHDATA", 11);
                 }
                 else {
-                    temp = dataToMarkUpString(rtn);
-                    write(accepted_fd, temp, strlen(temp));
-                    free(temp);
+                    dataToMarkUpString(rtn);
+                    write(accepted_fd, returnString, strlen(returnString));
                 }
                 memset(buffer, 0x00, MAXLINE);
             }
@@ -371,16 +370,12 @@ int   markupStringToData(char* user, ull* d_data, int* p_data, char* t_data, cha
     
     return 0;
 }
-char* dataToMarkUpString(perToDoPtr target) {
-    char* temp;
+void dataToMarkUpString(perToDoPtr target) {
+    memset(returnString, 0x00, BUFSIZ);
 
-    temp = (char*)malloc(sizeof(char) * BUFSIZ);
+    sprintf(returnString, "@%-15s[*%llu[[%d]*%-25s]]%s", target->userName, target->dateData, target->priority, target->title, target->details);
 
-    if (temp == NULL) errOcc("dTMUS");
-
-    sprintf(temp, "@%-15s[*%llu[[%d]*%-25s]]%s", target->userName, target->dateData, target->priority, target->title, target->details);
-
-    return temp;
+    return;
 }
 /*-----------------------------*/
 

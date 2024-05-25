@@ -533,6 +533,11 @@ toDoPtr create_Node(unsigned long long date, int priority_num, const char* title
 
     newOne = (toDoPtr)malloc(sizeof(toDo));
 
+    memset(newOne->title, 0x00, 26);
+    memset(newOne->details, 0x00, 61);
+    memset(newOne->userName, 0x00, 16);
+    memset(newOne->code, 0x00, 9);
+
     if (newOne == NULL) {
         errOcc("malloc"); /* err hndling */
     }
@@ -1731,19 +1736,20 @@ void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
         [^: for Time, [[: make new line, ^: tab inside
         ]^: for title, ]]: for details, *: for bookmarks
     */
-    char retstr[BUFSIZ];
-    char tempstr[100];
+    char retstr[BUFSIZ] = {'\0', };
+    char tempstr[100] = {'\0', };
     int i;
     toDoPtr temp; /* bcggd8g6 */
-    toDoPtr compare;
+    toDoPtr compare = NULL;
 
-    memset(retstr, 0x00, BUFSIZ);
-    memset(tempstr, 0x00, 100);
+    //memset(retstr, 0x00, BUFSIZ);
+    //memset(tempstr, 0x00, 100);
 
     retstr[0] = '\0';
 
     for (i = 1; i <= counter; i++) {
         if ((temp = getBookMarked(today, i)) && temp != compare) {
+            memset(tempstr, 0x00, 100);
             if (temp->isShared) {
                 sprintf(tempstr, "*%d@[^%llu]^%-25s", temp->priority, temp->dateData, temp->title);
             }
@@ -1751,8 +1757,8 @@ void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
                 sprintf(tempstr, "*%d[^%llu]^%-25s", temp->priority, temp->dateData, temp->title);
             }
             compare = temp;
+            strcat(retstr, tempstr);
         }
-        strcat(retstr, tempstr);
     }
 
     strcpy(str, retstr);
@@ -2401,10 +2407,12 @@ void deBookMarkInDate(unsigned long long src) {
 int getFromServer_Highlevel(char* shareCode) {
     int rtn;
     toDoPtr temp = (toDoPtr)malloc(sizeof(toDo));
+    memset(temp->title, 0x00, 26);
+    memset(temp->details, 0x00, 61);
 
     if (temp == NULL) errOcc("gFS_Hl err");
 
-    if ((rtn = getFromServer(temp, shareCode)) == 1) {
+    if ((rtn = cli_getToDoDataFromServer(temp, shareCode)) == 1) {
         free(temp);
         return 1; /* no such data */
     }
@@ -2417,6 +2425,7 @@ int getFromServer_Highlevel(char* shareCode) {
             deBookMarkInDate(temp->dateData / 10000);
         }
         insert(&key, temp);
+        //printf("%s\n", temp->title);
     }
 
     return 0;
