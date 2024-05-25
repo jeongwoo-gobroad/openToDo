@@ -151,15 +151,25 @@ void cli_close(void) {
     return;
 }
 int cli_serverConnect(char* addr) {
-    struct hostent* hostPtr;
+    //struct hostent* hostPtr;
+    struct addrinfo hints;
+    struct addrinfo* serverinfo;
 
-    hostPtr = gethostbyname(addr);
-    if (hostPtr == NULL) errOcc("gethostbyname");
+    //hostPtr = gethostbyname(addr);
+    //if (hostPtr == NULL) errOcc("gethostbyname");
+
+    memset(&hints, 0x00, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+
+    if (getaddrinfo(addr, "7227", &hints, &serverinfo) != 0) {
+        errOcc("getaddrinfo");
+    }
 
     memset(&(conn->serveraddr), 0x00, sizeof(conn->serveraddr));
     //memcpy(&conn->serveraddr.sin_addr.s_addr, &hostPtr->h_addr_list[0], hostPtr->h_length);
-    printf("addr: %s\n", (hostPtr->h_addr_list[0]));
-    conn->serveraddr.sin_addr.s_addr = inet_addr(hostPtr->h_addr_list[0]);
+    //printf("addr: %s\n", (hostPtr->h_addr_list[0]));
+    //conn->serveraddr.sin_addr.s_addr = inet_addr(hostPtr->h_addr_list[0]);
     conn->serveraddr.sin_family = AF_INET;
     conn->serveraddr.sin_port = htons(port); /* Port: 7227 fixed */
 
@@ -168,7 +178,7 @@ int cli_serverConnect(char* addr) {
         return 1;
     }
  
-    if (connect(conn->server_sockfd, (struct sockaddr *)&(conn->serveraddr), sizeof(struct sockaddr_in)) == -1){
+    if (connect(conn->server_sockfd, (struct sockaddr *)&(serverinfo->ai_addr), sizeof(struct sockaddr)) == -1){
         //errOcc("connect");
         return 1; /* failed */
     }
