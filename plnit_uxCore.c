@@ -258,7 +258,8 @@ int main(int argc, char* argv[]) {
                     print_date_ToDoSummarized(selectDate); /* to refresh */
                     print_date_NumOfSchedule(selectDate); /* refresh screen */
                     print_date_BookMark(selectDate); /* to refresh */
-                }
+                    print_UpcomingBookMark(todayDate); /* to refresh */
+                } 
                 else continue;
                 print_commandLine(mode);
                 refresh();
@@ -380,7 +381,7 @@ void edit_plan(unsigned long long targetDate, int* page){
     clearGivenNonCalendarArea(SLL);
 
     standout();
-    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Date&Time (Format:YYYYMMDDHHMM, 1234:no edit)");
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Date Data (Format:YYYYMMDDHHMM, Blank:no edit)");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
     getstr(t);//날짜, 시간 입력
@@ -416,7 +417,12 @@ void edit_plan(unsigned long long targetDate, int* page){
     clearGivenNonCalendarArea(SLL);
      
     bookmark = atoi(b);
-    date_2 = strtoull(t, NULL, 10);
+    if (t[0] == '\0') {
+        date_2 = 1234;
+    }
+    else {
+        date_2 = strtoull(t, NULL, 10);
+    }
 
     input_2 = editWhileIterate(targetDate / 10000, input_1 , date_2, title, details, bookmark);
         
@@ -754,15 +760,21 @@ void print_date(unsigned long long targetDate) {
     for (int i = 0; i < 7; i++) {
         if (i >= stt_col) {
             if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
-                standout();
+                attron(COLOR_PAIR(9));
             }
             if (i == 6) {
                 attron(A_BOLD);
-                attron(COLOR_PAIR(3));
+                if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
+                    attron(COLOR_PAIR(4));
+                }
+                else  attron(COLOR_PAIR(3));
             }
             if (isHoliday(targetDate / 1000000 * 100 + date) || i == 0) {
                 attron(A_BOLD);
-                attron(COLOR_PAIR(1));
+                if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
+                    attron(COLOR_PAIR(2));
+                }
+                else  attron(COLOR_PAIR(1));
             }
             mvprintw(pos_SC_date[0][i].row, pos_SC_date[0][i].col, "%-2d", date);
             standend();
@@ -782,15 +794,21 @@ void print_date(unsigned long long targetDate) {
             }
             else {
                 if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
-                    standout();
+                    attron(COLOR_PAIR(9));
                 }
                 if (j == 6) {
                     attron(A_BOLD);
-                    attron(COLOR_PAIR(3));
+                    if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
+                        attron(COLOR_PAIR(4));
+                    }
+                    else  attron(COLOR_PAIR(3));
                 }
                 if (isHoliday(targetDate / 1000000 * 100 + date) || j == 0) {
                     attron(A_BOLD);
-                    attron(COLOR_PAIR(1));
+                    if (targetDate / 1000000 * 100 + date == todayDate / 10000) {
+                        attron(COLOR_PAIR(2));
+                    }
+                    else  attron(COLOR_PAIR(1));
                 }
                 mvprintw(pos_SC_date[i][j].row, pos_SC_date[i][j].col, "%-2d", date);
                 standend();
@@ -1637,17 +1655,14 @@ void print_UpcomingBookMark(unsigned long long today) {
             if (*strbuf == '^') {
                 strbuf++;
                 mvprintw(row, col++, " ");
-                if (isShared) {
-                    printColorStrip("  ", chkColorPair);
-                }
-                else {
-                    printColorStrip("  ", chkColorPair);
-                }
+                if (isShared) printColorStrip("@ ", chkColorPair);
+                else printColorStrip("  ", chkColorPair);
                 col += 2;
                 if (chkColorPair) attron(A_BOLD);
                 mvprintw(row, col, " %.25s", strbuf);
                 if (chkColorPair) attroff(A_BOLD);
                 chkColorPair = 0;
+                isShared = 0;
                 row += 2;
                 strbuf += 25;
             }
@@ -2023,38 +2038,40 @@ void reminder_extends_popup(int signum) {
 }
 
 void print_Dday() {
-    int dday1, dday2; char dday1_str[30]; char dday2_str[30];
+    int dday1, dday2; char dday1_str[19]; char dday2_str[19];
     clearGivenRowCols(pos_SUL_stt.row, pos_SUL_stt.col + 9, pos_SUL_end.row, pos_SUL_end.col);
     getDday(&dday1, dday1_str, &dday2, dday2_str);
+    char str[27] = { '\0', };
+    sprintf(str, "D%+d: %.18s|", dday1, dday1_str);
     if (dday1_str[0] != '\0') {
-        mvprintw(pos_SUL_stt.row, pos_SUL_stt.col+14, "D%+d: %s", dday1, dday1_str);
+        mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 9, "%27s", str);
     }
     if (dday2_str[0] != '\0') {
-        mvprintw(pos_SUL_stt.row, pos_SUL_end.col-38, "D%+d: %s", dday2, dday2_str);
+        mvprintw(pos_SUL_stt.row, pos_SUL_end.col - 26 + 1, "D%+d: %s", dday2, dday2_str);
     }
 }
 
 void Set_Dday(unsigned long long targetDate, int pageNum, int mode) {
-    int caseN=0;
+    int caseN = 0;
     char yorn;
-    char context[BUFSIZ] = {'\0', };
-    caseN = checkDdayWhileIterate(targetDate/10000, pageNum, mode);
+    char context[BUFSIZ] = { '\0', };
+    caseN = checkDdayWhileIterate(targetDate / 10000, pageNum, mode);
     if (caseN == 1) {
-        strcat(context, "Same content alert : Do you want to delete it? Y/N");
+        strcat(context, "Same content alert. Do you want to delete it? (Y/N)");
         if ((yorn = getCommandScreen(context, "yYnN")) == 'Y' || yorn == 'y') {
             delDdayStack(mode);
         }
     }
     else if (caseN == 2) {
-        strcat(context, "Override alert : Do you want to override it? Y/N");
+        strcat(context, "Override alert. Do you want to override it? (Y/N)");
         if ((yorn = getCommandScreen(context, "yYnN")) == 'Y' || yorn == 'y') {
-            setDdayWhileIterate(targetDate/10000, pageNum, mode);
+            setDdayWhileIterate(targetDate / 10000, pageNum, mode);
         }
     }
-    else{
-        setDdayWhileIterate(targetDate/10000, pageNum, mode);
+    else {
+        setDdayWhileIterate(targetDate / 10000, pageNum, mode);
     }
-    
+
     print_Dday();
 
     return;
