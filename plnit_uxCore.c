@@ -2089,7 +2089,7 @@ void print_Dday() {
             mvprintw(pos_SUL_stt.row, pos_SUL_end.col - 26 + 1, "D-day: %.18s", dday2_str);
     }
     else {
-        mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 8 + 27 + nNum, "D- Not Set");
+        mvprintw(pos_SUL_stt.row, pos_SUL_end.col - 26 + 1, "D- Not Set");
     }
 
     return;
