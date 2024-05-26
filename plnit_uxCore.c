@@ -110,6 +110,7 @@ void printReminderControl(int how);
 void print_userName();
 void getSharedTodo();
 void change_userName();
+void print_below(void);
 /*-----Display control--------------------------------------------------------------*/
 void clearGivenCalendarArea(/*index of pos_sc_date*/int row, int col);
 void clearGivenRowCols(int fromRow, int fromCol, int toRow, int toCol);
@@ -268,6 +269,9 @@ int main(int argc, char* argv[]) {
                     change_userName();
                     print_userName();
                 }
+                else if (c == '0') {
+                    initScreen();
+                }
                 else continue;
                 print_commandLine(mode);
                 refresh();
@@ -349,6 +353,10 @@ int main(int argc, char* argv[]) {
                 else if (page == 0) {
                     /* just wait till user adds a record or exit */
                 }
+                else if (c == '0') {
+                    mode--;
+                    initScreen();
+                }
                 else {
                     continue;
                 }
@@ -367,6 +375,7 @@ int main(int argc, char* argv[]) {
         }
         
         print_commandLine(mode);
+        print_below();
         refresh();
     }
 
@@ -2122,6 +2131,10 @@ void print_userName() {
     mvprintw(pos_SLL_stt.row + 3, pos_SLL_stt.col, "Press [.] to set username");
     mvprintw(pos_SLR_end.row + 2, pos_SLR_end.col + 1 - 24, "%25s", str);
     attroff(A_DIM);
+}
+
+void print_below(void) {
+    mvprintw(pos_SLL_stt.row + 3, (pos_SLL_stt.col + pos_SLR_end.col) / 2 - strlen("Press [0]: Go to current date") / 2, "Press [0]: Go to current date");
 }
 
 void getSharedTodo() {
