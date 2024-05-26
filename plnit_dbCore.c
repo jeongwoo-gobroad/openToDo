@@ -2234,6 +2234,9 @@ void getDday(int* slot1, char* title1, int* slot2, char* title2) { /* returns NU
         dt.tm_mon = (((dStack->dDayArr)[0].dateData / 10000) % 10000) / 100 - 1; /* struct tm's day range: [1, 31], but month: [0, 11] why??? */
         dt.tm_mday = ((dStack->dDayArr)[0].dateData / 10000) % 100;
         *slot1 = julian_day(&today) - julian_day(&dt);
+        if (*slot1 == 0) {
+            *slot1 = 1; /* For the purpose of calculating the D-day according to social conventions */
+        }
         //printf("%d %d %d to %d %d %d\n", dt.tm_year, dt.tm_mon, dt.tm_mday, today->tm_year, today->tm_mon, today->tm_mday);
         if (strlen((dStack->dDayArr)[0].title) <= 18) {
             strcpy(title1, (dStack->dDayArr)[0].title);
