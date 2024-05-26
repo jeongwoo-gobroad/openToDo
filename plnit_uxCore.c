@@ -214,6 +214,7 @@ int main(int argc, char* argv[]) {
 
     initPosVar();
     initScreen();
+    print_below();
     select_highlightOn(selectDate);
     
     //printf("Works");
