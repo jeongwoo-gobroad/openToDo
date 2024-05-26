@@ -271,6 +271,7 @@ int __dbDebug(void) {
 
     allocReminder();
     initDday();
+    initSaveMem();
     setUserName("Gildong_Hong");
 
     /* dummy datas just for leap year / month limit check */
@@ -281,7 +282,7 @@ int __dbDebug(void) {
     thirty_one   = (dayPtr)malloc(sizeof(day));
 
     while (r) {
-        puts("Plan_it DB Core Debugger Menu");
+        puts("Plan_it DB Core Debugger Menu | v 0.1.0 build 12");
         puts("Basic operation: ");
         puts("(0) to set username\n(1) to insert\n(2) to print all");
         puts("(3) to save\n(4) to load\n(-1) to quit");
@@ -807,7 +808,7 @@ int insert(yearGrp* db, toDoPtr targetData) {
         dd->isHoliday = 1; /* set holiday */
     }
 
-    if (targetData->isShared == 1) {
+    if (targetData->isShared) {
         dd->sharedToDoExists = 1; /* shared content inside */
     }
 
@@ -1291,6 +1292,11 @@ int load(void) {
         errOcc("open");
     }
 
+    /* read username */
+    if ((chunk = read(fd_bin, userName, sizeof(userName))) == -1) {
+        errOcc("read");
+    }
+
     /* read reminder */
     if ((chunk = read(fd_bin, rmdr, sizeof(reminder))) == -1) {
         errOcc("read");
@@ -1347,6 +1353,11 @@ int save(void) {
 
     if (fd_bin == -1 || fd_hr == NULL) {
         errOcc("open");
+    }
+
+    /* username write */
+    if ((written = write(fd_bin, userName, sizeof(userName))) != sizeof(userName)) {
+        errOcc("write");
     }
 
     quickSort_byHashNum(saveLink->toDoData, 0, saveLink->maxIndex); /* sort by hash, then save. */
@@ -2224,8 +2235,13 @@ void getDday(int* slot1, char* title1, int* slot2, char* title2) { /* returns NU
         dt.tm_mday = ((dStack->dDayArr)[0].dateData / 10000) % 100;
         *slot1 = julian_day(&today) - julian_day(&dt);
         //printf("%d %d %d to %d %d %d\n", dt.tm_year, dt.tm_mon, dt.tm_mday, today->tm_year, today->tm_mon, today->tm_mday);
-        strncpy(title1, (dStack->dDayArr)[0].title, 15);
-        if (strlen(title1) == 15) strcat(title1, "...\0");
+        if (strlen((dStack->dDayArr)[0].title) <= 18) {
+            strcpy(title1, (dStack->dDayArr)[0].title);
+        }
+        else {
+            strncpy(title1, (dStack->dDayArr)[0].title, 15);
+            strcat(title1, "...\0");
+        }
     }
 
     /* D- Handling */
@@ -2243,8 +2259,13 @@ void getDday(int* slot1, char* title1, int* slot2, char* title2) { /* returns NU
         dt.tm_mday = ((dStack->dDayArr)[1].dateData / 10000) % 100;
         //printf("%d %d %d to %d %d %d\n", dt.tm_year, dt.tm_mon, dt.tm_mday, today->tm_year, today->tm_mon, today->tm_mday);
         *slot2 = julian_day(&today) - julian_day(&dt);
-        strncpy(title2, (dStack->dDayArr)[1].title, 15);
-        if (strlen(title2) == 15) strcat(title2, "...\0");
+        if (strlen((dStack->dDayArr)[1].title) <= 18) {
+            strcpy(title2, (dStack->dDayArr)[1].title);
+        }
+        else {
+            strncpy(title2, (dStack->dDayArr)[1].title, 15);
+            strcat(title2, "...\0");
+        }
     }
 
     return;
@@ -2335,8 +2356,21 @@ void clearAll(void) {
 }
 /* 0519 added for network features */
 void setUserName(char* myName) {
+    int i = 0;
+
     memset(userName, 0x00, sizeof(userName));
     strcpy(userName, myName);
+
+    if (saveLink == NULL) {
+        return;
+    }
+
+    /* remap names */
+    for (i = 0; i <= saveLink->maxIndex; i++) {
+        if ((saveLink->toDoData)[i]->isShared == 0) { /* if not shared */
+            strcpy((saveLink->toDoData)[i]->userName, userName);
+        }
+    }
 
     return;
 }

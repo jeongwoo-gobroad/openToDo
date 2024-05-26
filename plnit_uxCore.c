@@ -229,7 +229,9 @@ int main(int argc, char* argv[]) {
     while (1) {
         move(LINES - 1, COLS - 1); /* get rid of cursor */
         if (mode == 0) {
+            move(LINES - 1, COLS - 1);
             while (1) {
+                move(LINES - 1, COLS - 1);
                 c = getch();
                 if (c == 's') {
                     mode++;
@@ -304,6 +306,7 @@ int main(int argc, char* argv[]) {
                     print_date_NumOfSchedule(selectDate); /* refresh screen */
                     print_date_ToDoWithdetails(selectDate, 0, &page); /* to refresh */
                     print_date_BookMark(selectDate); /* to refresh */
+                    print_Dday(); /* to refresh */
                     /* don't break */
                 }
                 /* delete record */
@@ -317,6 +320,7 @@ int main(int argc, char* argv[]) {
                     print_date_NumOfSchedule(selectDate); /* to refresh */
                     print_date_ToDoWithdetails(selectDate, 0, &page); /* to refresh */
                     print_date_BookMark(selectDate); /* to refresh */
+                    print_Dday(); /* to refresh */
                     /* delete related functions */
                     /* don't break */
                     /* maybe some pageIterator refresh needed here */
@@ -2057,24 +2061,22 @@ void print_Dday() {
     int dday1, dday2; char dday1_str[19]; char dday2_str[19];
     clearGivenRowCols(pos_SUL_stt.row, pos_SUL_stt.col + 9, pos_SUL_end.row, pos_SUL_end.col);
     getDday(&dday1, dday1_str, &dday2, dday2_str);
-
+    char str[27] = { '\0', };
+    sprintf(str, "D%+d: %.18s|", dday1, dday1_str);
     if (dday1_str[0] != '\0') { /*D+*/
-        if (dday1 != 0) {
-            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 8 + nNum, "D%+d: %.18s", dday1, dday1_str);
-        }
-        else {
-            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 8 + nNum, "D-day: %.18s", dday1_str);
-        }
+        mvprintw(pos_SUL_stt.row, pos_SUL_end.col - 53 + 1, "%27s", str); 
+        /* d+는 보통 d-day의 개념이 없기 때문에 따로 안나눠도될것같습니다
+        * 수능같이 미래의 일의 경우에 해당 날이 되면 d-day로 표시하여 해당 날이 되었다는 의미로 쓰입니다
+        */
     }
     else{
-        mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 8 + nNum, "D+ Not Set");
+        mvprintw(pos_SUL_stt.row, pos_SUL_end.col - 53 + 1, "%27s", "D+ Not Set|");
     }
-    mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 8 + 24 + nNum, " | ");
     if (dday2_str[0] != '\0') { /*D-*/
         if (dday2 != 0)
-            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 8 + 27 + nNum, "D%+d: %.18s", dday2, dday2_str);
+            mvprintw(pos_SUL_stt.row, pos_SUL_end.col - 26 + 1, "D%+d: %.18s", dday2, dday2_str);
         else
-            mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 8 + 27 + nNum, "D-day: %.18s", dday2_str);
+            mvprintw(pos_SUL_stt.row, pos_SUL_end.col - 26 + 1, "D-day: %.18s", dday2_str);
     }
     else {
         mvprintw(pos_SUL_stt.row, pos_SUL_stt.col + 8 + 27 + nNum, "D- Not Set");
@@ -2189,7 +2191,7 @@ void change_userName() {
     clearGivenNonCalendarArea(SLL);
 
     standout();
-    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Current Username: %s", getUserName());
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Current Username: %.15s", getUserName());
     mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "change to(blank: do not change)");
     standend();
     addstr(": ");
@@ -2199,6 +2201,9 @@ void change_userName() {
     echo();
 
     getstr(temp);
+    cbreak();
+    noecho();
+    move(LINES - 1, COLS - 1);
     if (temp[0] == '\0') {
         return;
     }
@@ -2208,9 +2213,4 @@ void change_userName() {
     clearGivenNonCalendarArea(SLL);
 
     refresh();
-
-    cbreak();
-    noecho();
-
-    move(LINES - 1, COLS - 1);
 }
