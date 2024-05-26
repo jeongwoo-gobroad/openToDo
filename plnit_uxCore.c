@@ -1161,8 +1161,8 @@ void select_date(char c) {
 
 void get_todo() {
     char t[5]; // 문자열을 위한 배열 선언
-    char title[31];
-    char details[256];
+    char title[26];
+    char details[61];
     char b[2]; int bookmark; int time;
 
     nocbreak();  // canonical 모드로 전환
