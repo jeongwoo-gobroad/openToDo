@@ -1581,7 +1581,7 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
                     }
                     else {
                         length = strlen(strbuf); 
-                        if (pos_SUR_end.col - col + 1 < length) // 남은 단어의 길이가 남은 공간보다 길다면
+                        if (pos_SUR_end.col - col + 1 < length && pos_SUR_end.col - pos_SUR_stt.col + 1 < length) // 남은 단어의 길이가 남은 공간보다 길다면
                             length = pos_SUR_end.col - col + 1;
                     }
                     if (length != 0 && pos_SUR_end.col - col + 1 < length) {
