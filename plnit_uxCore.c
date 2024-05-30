@@ -350,13 +350,14 @@ int main(int argc, char* argv[]) {
                     change_userName();
                     print_userName();
                 }
-                /* error handling */
-                else if (page == 0) {
-                    /* just wait till user adds a record or exit */
-                }
                 else if (c == '0') {
                     mode--;
                     initScreen();
+                    break;
+                }
+                /* error handling */
+                else if (page == 0) {
+                    /* just wait till user adds a record or exit */
                 }
                 else {
                     continue;
@@ -365,7 +366,6 @@ int main(int argc, char* argv[]) {
                 print_commandLine(mode);
                 refresh();
             }
-            getTodaySchedule_withDetails_iterEnd(); /* iterator init */
         }
         else if (mode == 2) {
             //if (c == 'e') mode--;
@@ -390,8 +390,8 @@ int main(int argc, char* argv[]) {
 
 void edit_plan(unsigned long long targetDate, int* page){
     char t[13]; // 문자열을 위한 배열 선언
-    char title[31];
-    char details[256];
+    char title[26];
+    char details[61];
     char b[2]; int bookmark; 
     unsigned long long date_2;
     int input_2; 
@@ -405,7 +405,7 @@ void edit_plan(unsigned long long targetDate, int* page){
     mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Date Data (Format:YYYYMMDDHHMM, Blank:no edit)");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
-    getstr(t);//날짜, 시간 입력
+    getnstr(t, 12); t[12] = '\0'; fflush(stdin);//날짜, 시간 입력
     //if (strcmp(t, "e") == 0) return;
 
     clearGivenNonCalendarArea(SLL);
@@ -413,14 +413,14 @@ void edit_plan(unsigned long long targetDate, int* page){
     mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Title (Blank:no edit)");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
-    getstr(title);
+    getnstr(title, 25); title[25] = '\0'; fflush(stdin);
 
     clearGivenNonCalendarArea(SLL);
     standout();
     mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "Type edited Details (Blank:no edit)");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
-    getstr(details);
+    getnstr(details, 60); details[60] = '\0'; fflush(stdin);
 
 
     clearGivenNonCalendarArea(SLL);
@@ -434,7 +434,7 @@ void edit_plan(unsigned long long targetDate, int* page){
     standend();
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
-    getstr(b);
+    getnstr(b, 1); b[1] = '\0'; fflush(stdin);
     clearGivenNonCalendarArea(SLL);
      
     bookmark = atoi(b);
@@ -626,6 +626,7 @@ pos_SC_date;
     print_Year_Month(selectDate / 1000000);
     
     print_date(selectDate);
+    select_highlightOn();
     print_date_NumOfSchedule(selectDate);
     print_date_BookMark(selectDate);
     print_commandLine(0);
@@ -1184,7 +1185,7 @@ void get_todo() {
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
     
-    getstr(t);//시각 입력
+    getnstr(t, 4); t[4] = '\0'; fflush(stdin);//시각 입력
     if (inputModeForceQuit) return;
     //if (strcmp(t, "e") == 0) return;
     clearGivenNonCalendarArea(SLL);
@@ -1194,7 +1195,7 @@ void get_todo() {
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
     
-    getstr(title);
+    getnstr(title, 25); title[25] = '\0'; fflush(stdin);
     if (inputModeForceQuit) return;
     clearGivenNonCalendarArea(SLL);
     
@@ -1203,7 +1204,7 @@ void get_todo() {
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
     
-    getstr(details);
+    getnstr(details, 60); details[60] = '\0'; fflush(stdin);
     if (inputModeForceQuit) return;
     clearGivenNonCalendarArea(SLL);
 
@@ -1216,7 +1217,7 @@ void get_todo() {
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
     
-    getstr(b);
+    getnstr(b, 1); b[1] = '\0'; fflush(stdin);
     if (inputModeForceQuit) return;
 
     cbreak();  // 다시 non-canonical 모드로 전환
@@ -1578,7 +1579,11 @@ void print_date_ToDoWithdetails(unsigned long long targetDate, int status, int* 
                     if (ptr != NULL) {
                         length = ptr - strbuf; //구분자가 오기 전까지의 길이 저장
                     }
-                    else length = strlen(strbuf);
+                    else {
+                        length = strlen(strbuf); 
+                        if (pos_SUR_end.col - col + 1 < length) // 남은 단어의 길이가 남은 공간보다 길다면
+                            length = pos_SUR_end.col - col + 1;
+                    }
                     if (length != 0 && pos_SUR_end.col - col + 1 < length) {
                         //첫번째로 구분자가 오지 않을 때 남은 공간이 구분자가 오기 전의 단어 길이보다 적을 때
                         row++;
@@ -1986,7 +1991,7 @@ void printReminderControl(int how) {
         move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
         standend();
         refresh();
-        getstr(info);
+        getnstr(info, 30); info[30] = '\0'; fflush(stdin);
 
         clearGivenNonCalendarArea(SLL);
         standout();
@@ -1994,7 +1999,7 @@ void printReminderControl(int how) {
         move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
         standend();
         refresh();
-        getstr(temparr);
+        getnstr(temparr, 9); temparr[9] = '\0';
         delta = atol(temparr);
 
         clearGivenNonCalendarArea(SLL);
@@ -2003,7 +2008,7 @@ void printReminderControl(int how) {
         move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
         standend();
         refresh();
-        getstr(temparr);
+        getnstr(temparr, 9); temparr[9] = '\0';
         repeat = atoi(temparr);
 
         clearGivenNonCalendarArea(SLL);
@@ -2012,7 +2017,7 @@ void printReminderControl(int how) {
         move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
         standend();
         refresh();
-        getstr(temparr);
+        getnstr(temparr, 9); temparr[9] = '\0';
         interval = atoi(temparr);
 
         setReminder(time(NULL), delta, repeat, info, interval);
@@ -2160,7 +2165,7 @@ void getSharedTodo() {
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
 
-    getstr(shareCode);//시각 입력
+    getnstr(shareCode, 8); fflush(stdin);//시각 입력
     //if (inputModeForceQuit) return;
     //if (strcmp(t, "e") == 0) return;
     //clearGivenNonCalendarArea(SLL);
@@ -2214,7 +2219,7 @@ void change_userName() {
     nocbreak(); // icanonon
     echo();
 
-    getstr(temp);
+    getnstr(temp, 15); temp[15] = '\0'; fflush(stdin);
     cbreak();
     noecho();
     move(LINES - 1, COLS - 1);
