@@ -1,7 +1,10 @@
-Reminder has not set yet.
+Reminder Title: Wow
+Reminder Start: Thu May 30 17:11:00 2024
+ | Reminder End: Thu May 30 17:13:00 2024
 
-#0: 0, 
-#1: 0, 
+
+#0: 20240516, Bedtime
+#1: 20240726, Plan Trip
 Records of the Year 2024:
     -> Records of the Month 01:
         --> Records of the Day 01:
@@ -25,6 +28,8 @@ Records of the Year 2024:
         --> Records of the Day 07:
            [ 1 Record(s) in this day. ]
              > [BookMarked]03:06 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
+        --> Records of the Day 08:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 09:
            [ 1 Record(s) in this day. ]
              > [BookMarked]16:20 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
@@ -32,6 +37,12 @@ Records of the Year 2024:
            [ 2 Record(s) in this day. ]
              > [BookMarked]10:13 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
              >             22:12 -> Title: Reading Time, Details: Dive into a new novel.
+        --> Records of the Day 11:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 12:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 13:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 14:
            [ 1 Record(s) in this day. ]
              > [BookMarked]18:56 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
@@ -44,6 +55,8 @@ Records of the Year 2024:
         --> Records of the Day 17:
            [ 1 Record(s) in this day. ]
              > [BookMarked]01:47 -> Title: Call Parents, Details: Catch up with family at 8 PM for half an hour.
+        --> Records of the Day 18:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 19:
            [ 1 Record(s) in this day. ]
              > [BookMarked]18:42 -> Title: Guitar Practice, Details: Learn new chords and practice the song Yesterday.
@@ -54,16 +67,34 @@ Records of the Year 2024:
         --> Records of the Day 21:
            [ 1 Record(s) in this day. ]
              > [BookMarked]08:23 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
+        --> Records of the Day 22:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 23:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 24:
            [ 1 Record(s) in this day. ]
              >             18:18 -> Title:   Study Time, Details: Focus on algorithms and data structures.
         --> Records of the Day 25:
            [ 1 Record(s) in this day. ]
              > [BookMarked]21:57 -> Title: Team Meeting, Details: Discuss project milestones and delegate tasks.
+        --> Records of the Day 26:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 27:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]03:09 -> Title: Guitar Practice, Details: Learn new chords and practice the song Yesterday.
+        --> Records of the Day 29:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 30:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 31:
+           [ 0 Record(s) in this day. ]
     -> Records of the Month 02:
+        --> Records of the Day 01:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 02:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 03:
            [ 1 Record(s) in this day. ]
              > [BookMarked]05:11 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
@@ -74,6 +105,12 @@ Records of the Year 2024:
            [ 2 Record(s) in this day. ]
              >             09:32 -> Title: Family Gathering, Details: Enjoy a family dinner.
              > [BookMarked]12:33 -> Title:  Morning Jog, Details: Start the day with a 30-minute run in the park.
+        --> Records of the Day 06:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 07:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 08:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 09:
            [ 1 Record(s) in this day. ]
              >             99:99 -> Title: Lunar New Year, Details: Lunar New Year Holiday
@@ -91,15 +128,21 @@ Records of the Year 2024:
         --> Records of the Day 13:
            [ 1 Record(s) in this day. ]
              > [BookMarked]14:21 -> Title:      Laundry, Details: Wash clothes and prepare outfits for the week.
+        --> Records of the Day 14:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 15:
            [ 1 Record(s) in this day. ]
              >             21:28 -> Title:     Shopping, Details: Visit the mall for some shopping.
         --> Records of the Day 16:
            [ 1 Record(s) in this day. ]
              >             00:23 -> Title: Lunch with Mentor, Details: Meet at noon at Cafe Luna to discuss career plans.
+        --> Records of the Day 17:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 18:
            [ 1 Record(s) in this day. ]
              > [BookMarked]11:52 -> Title: Reading Time, Details: Dive into a new novel.
+        --> Records of the Day 19:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 20:
            [ 2 Record(s) in this day. ]
              > [BookMarked]11:00 -> Title:  Gym Workout, Details: Hit the gym for a workout session.
@@ -107,6 +150,10 @@ Records of the Year 2024:
         --> Records of the Day 21:
            [ 1 Record(s) in this day. ]
              > [BookMarked]19:26 -> Title: Call Parents, Details: Catch up with family at 8 PM for half an hour.
+        --> Records of the Day 22:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 23:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 24:
            [ 1 Record(s) in this day. ]
              > [BookMarked]08:57 -> Title:  Gym Session, Details: Leg day workout followed by 20 mins of cardio.
@@ -117,6 +164,12 @@ Records of the Year 2024:
            [ 2 Record(s) in this day. ]
              >             02:41 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
              > [BookMarked]20:41 -> Title: Team Discussion, Details: Discuss project updates and next steps.
+        --> Records of the Day 27:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 28:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 29:
+           [ 0 Record(s) in this day. ]
     -> Records of the Month 03:
         --> Records of the Day 01:
            [ 3 Record(s) in this day. ]
@@ -132,6 +185,8 @@ Records of the Year 2024:
         --> Records of the Day 04:
            [ 1 Record(s) in this day. ]
              > [BookMarked]10:16 -> Title:    Plan Trip, Details: Research and book accommodations for summer vacation.
+        --> Records of the Day 05:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 06:
            [ 1 Record(s) in this day. ]
              > [BookMarked]12:32 -> Title: Team Meeting, Details: Discuss project milestones and delegate tasks.
@@ -147,6 +202,8 @@ Records of the Year 2024:
         --> Records of the Day 10:
            [ 1 Record(s) in this day. ]
              > [BookMarked]10:47 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
+        --> Records of the Day 11:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 12:
            [ 1 Record(s) in this day. ]
              > [BookMarked]23:59 -> Title: Reading Time, Details: Dive into a new novel.
@@ -165,10 +222,16 @@ Records of the Year 2024:
         --> Records of the Day 17:
            [ 1 Record(s) in this day. ]
              > [BookMarked]18:28 -> Title: Study Session, Details: Prepare for upcoming exams.
+        --> Records of the Day 18:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 19:
            [ 2 Record(s) in this day. ]
              > [BookMarked]13:46 -> Title:  Cook Dinner, Details: Try a new recipe for pasta with homemade sauce.
              >             15:15 -> Title: Study Session, Details: Prepare for upcoming exams.
+        --> Records of the Day 20:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 21:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 22:
            [ 1 Record(s) in this day. ]
              > [BookMarked]13:26 -> Title:  Cook Dinner, Details: Try a new recipe for pasta with homemade sauce.
@@ -179,6 +242,8 @@ Records of the Year 2024:
            [ 2 Record(s) in this day. ]
              > [BookMarked]10:44 -> Title: Study Session, Details: Prepare for upcoming exams.
              >             20:33 -> Title: Family Gathering, Details: Enjoy a family dinner.
+        --> Records of the Day 25:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 26:
            [ 1 Record(s) in this day. ]
              > [BookMarked]16:06 -> Title: Check Emails, Details: Reply to urgent messages and organize inbox.
@@ -188,11 +253,23 @@ Records of the Year 2024:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]13:43 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
+        --> Records of the Day 29:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 30:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 31:
+           [ 0 Record(s) in this day. ]
     -> Records of the Month 04:
+        --> Records of the Day 01:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 02:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 03:
            [ 2 Record(s) in this day. ]
              >             04:28 -> Title: Reading Time, Details: Dive into a new novel.
              > [BookMarked]23:26 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
+        --> Records of the Day 04:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 05:
            [ 1 Record(s) in this day. ]
              > [BookMarked]08:32 -> Title:  Code Review, Details: Examine the latest commits before the end of the day.
@@ -203,9 +280,15 @@ Records of the Year 2024:
         --> Records of the Day 07:
            [ 1 Record(s) in this day. ]
              > [BookMarked]21:45 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
+        --> Records of the Day 08:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 09:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 10:
            [ 1 Record(s) in this day. ]
              >             99:99 -> Title: General Election, Details: General Election
+        --> Records of the Day 11:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 12:
            [ 1 Record(s) in this day. ]
              > [BookMarked]09:56 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
@@ -225,6 +308,8 @@ Records of the Year 2024:
            [ 2 Record(s) in this day. ]
              >             05:21 -> Title: Team Discussion, Details: Discuss project updates and next steps.
              > [BookMarked]09:06 -> Title: Team Meeting, Details: Discuss project milestones and delegate tasks.
+        --> Records of the Day 18:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 19:
            [ 2 Record(s) in this day. ]
              >             07:02 -> Title: Grocery Shopping, Details: Buy vegetables, bread, and milk for the week.
@@ -235,18 +320,28 @@ Records of the Year 2024:
         --> Records of the Day 21:
            [ 1 Record(s) in this day. ]
              > [BookMarked]17:09 -> Title: Check Emails, Details: Reply to urgent messages and organize inbox.
+        --> Records of the Day 22:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 23:
            [ 1 Record(s) in this day. ]
              > [BookMarked]00:31 -> Title: Coffee Break, Details: Catch up with a friend at a cafe.
         --> Records of the Day 24:
            [ 1 Record(s) in this day. ]
              > [BookMarked]06:55 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
+        --> Records of the Day 25:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 26:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 27:
            [ 1 Record(s) in this day. ]
              >             17:50 -> Title: Call Parents, Details: Catch up with family at 8 PM for half an hour.
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]23:16 -> Title: Call Parents, Details: Catch up with family at 8 PM for half an hour.
+        --> Records of the Day 29:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 30:
+           [ 0 Record(s) in this day. ]
     -> Records of the Month 05:
         --> Records of the Day 01:
            [ 0 Record(s) in this day. ]
@@ -350,19 +445,31 @@ Records of the Year 2024:
         --> Records of the Day 03:
            [ 1 Record(s) in this day. ]
              >             02:02 -> Title: Client Meeting, Details: Present Q2 marketing strategy and get feedback.
+        --> Records of the Day 04:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 05:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 06:
            [ 2 Record(s) in this day. ]
              >             99:99 -> Title: Memorial Day, Details: Memorial Day
              >             17:03 -> Title: Check Emails, Details: Reply to urgent messages and organize inbox.
+        --> Records of the Day 07:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 08:
            [ 1 Record(s) in this day. ]
              > [BookMarked]06:41 -> Title: Guitar Practice, Details: Learn new chords and practice the song Yesterday.
+        --> Records of the Day 09:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 10:
            [ 1 Record(s) in this day. ]
              > [BookMarked]12:12 -> Title: Family Gathering, Details: Enjoy a family dinner.
         --> Records of the Day 11:
            [ 1 Record(s) in this day. ]
              > [BookMarked]15:59 -> Title:      Laundry, Details: Wash clothes and prepare outfits for the week.
+        --> Records of the Day 12:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 13:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 14:
            [ 1 Record(s) in this day. ]
              > [BookMarked]22:30 -> Title: Team Meeting, Details: Discuss project milestones and delegate tasks.
@@ -373,9 +480,13 @@ Records of the Year 2024:
         --> Records of the Day 16:
            [ 1 Record(s) in this day. ]
              > [BookMarked]04:54 -> Title: Team Discussion, Details: Discuss project updates and next steps.
+        --> Records of the Day 17:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 18:
            [ 1 Record(s) in this day. ]
              > [BookMarked]08:33 -> Title:    Plan Trip, Details: Research and book accommodations for summer vacation.
+        --> Records of the Day 19:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 20:
            [ 1 Record(s) in this day. ]
              > [BookMarked]18:43 -> Title: Read Articles, Details: Stay updated with the latest tech news.
@@ -389,12 +500,22 @@ Records of the Year 2024:
         --> Records of the Day 23:
            [ 1 Record(s) in this day. ]
              > [BookMarked]21:06 -> Title:  Cook Dinner, Details: Try a new recipe for pasta with homemade sauce.
+        --> Records of the Day 24:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 25:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 26:
            [ 1 Record(s) in this day. ]
              > [BookMarked]07:03 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
+        --> Records of the Day 27:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              > [BookMarked]21:16 -> Title:  Cook Dinner, Details: Try a new recipe for pasta with homemade sauce.
+        --> Records of the Day 29:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 30:
+           [ 0 Record(s) in this day. ]
     -> Records of the Month 07:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
@@ -414,10 +535,18 @@ Records of the Year 2024:
         --> Records of the Day 06:
            [ 1 Record(s) in this day. ]
              > [BookMarked]06:30 -> Title:      Laundry, Details: Wash clothes and prepare outfits for the week.
+        --> Records of the Day 07:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 08:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 09:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 10:
            [ 2 Record(s) in this day. ]
              >             05:08 -> Title:  Gym Workout, Details: Hit the gym for a workout session.
              > [BookMarked]08:52 -> Title:  Gym Workout, Details: Hit the gym for a workout session.
+        --> Records of the Day 11:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 12:
            [ 1 Record(s) in this day. ]
              > [BookMarked]18:04 -> Title:    Book Club, Details: Read and discuss 1984 by George Orwell.
@@ -442,6 +571,10 @@ Records of the Year 2024:
         --> Records of the Day 18:
            [ 1 Record(s) in this day. ]
              >             04:57 -> Title:      Bedtime, Details: Wind down by 10 PM and review plans for tomorrow.
+        --> Records of the Day 19:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 20:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 21:
            [ 1 Record(s) in this day. ]
              > [BookMarked]16:40 -> Title: Family Gathering, Details: Enjoy a family dinner.
@@ -452,6 +585,8 @@ Records of the Year 2024:
         --> Records of the Day 23:
            [ 1 Record(s) in this day. ]
              >             16:59 -> Title:    Plan Trip, Details: Research and book accommodations for summer vacation.
+        --> Records of the Day 24:
+           [ 0 Record(s) in this day. ]
         --> Records of the Day 25:
            [ 1 Record(s) in this day. ]
              > [BookMarked]23:01 -> Title:   Yoga Class, Details: Relaxing mind and body with instructor Lee.
@@ -466,6 +601,12 @@ Records of the Year 2024:
         --> Records of the Day 28:
            [ 1 Record(s) in this day. ]
              >             19:09 -> Title: Lunch Appointment, Details: Meet with a colleague for lunch.
+        --> Records of the Day 29:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 30:
+           [ 0 Record(s) in this day. ]
+        --> Records of the Day 31:
+           [ 0 Record(s) in this day. ]
     -> Records of the Month 08:
         --> Records of the Day 01:
            [ 1 Record(s) in this day. ]
