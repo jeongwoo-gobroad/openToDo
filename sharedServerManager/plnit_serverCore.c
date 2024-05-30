@@ -1,6 +1,5 @@
 // KNU CSE 2021114026 Jeongwoo Kim
-// recent update: 240509 v0.0.7
-#include <stdio.h>
+// recent update: 240525 v 1.0.1
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>

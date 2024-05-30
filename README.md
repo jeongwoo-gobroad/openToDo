@@ -9,17 +9,25 @@ an openToDo project: (aka Plan-it Project)
   
 1. How To Build
 
-    1) Use Automated Script
+    1) makefile
 
           $ chmod 777 *
 
-          $ ./bp.sh
+          $ make
+            
+            1.1) makefile PHONY targets
 
-          $ ./pln
+                  1.1.1) make refresh
+
+                        Deletes the compilation residue, including executable file.
+                  
+                  1.1.2) make cleanup
+
+                        Deletes the compilation residue, exclugind executable file.
 
     2) Explicit build method
 
-          gcc -Wall plnit_dbCore.c plnit_uxCore.c -o [program_name] -lcurses
+          $ gcc -Wall [COMPILE_ALL_HEADERS_AND_SOURCES] -lcurses
 
     todos.sv is a save file for testing. Feel free to use it.
 
@@ -193,6 +201,8 @@ an openToDo project: (aka Plan-it Project)
           (UX) 커서 및 음영, 색 조합 관련 개선으로 가독성 향상
 
     1.0.1: [current]
+
+          (Build) makefile 및 소스 분할, API 라이브러리화 적용
 
           (Core) 세이브 파일 구조 업그레이드, 이전 버전과 저장 파일 호환 불가.
 
