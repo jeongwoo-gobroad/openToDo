@@ -336,7 +336,7 @@ toDoPtr create_Node(unsigned long long date, int priority_num, const char* title
     strcpy(newOne->title, title);
     strcpy(newOne->details, info);
     strcpy(newOne->userName, userName);
-    strcpy(newOne->code, "---------");
+    strcpy(newOne->code, "--------");
 
     return newOne;
 }
@@ -429,7 +429,7 @@ monthPtr findMonth(int target, yearPtr db) {
             ((db->months)[target]->dates[0]) = twenty_Eight;
         }
     }
-    else if (((db->months)[target]->dates[0]) == NULL) {
+    if ((target != 2) && ((db->months)[target]->dates[0]) == NULL) {
         /* month limit alloc */
         if (target == 1 || (target == 3 || (target == 5 || (target == 7 || (target == 8 || (target == 10 || (target == 12))))))) {
             ((db->months)[target]->dates[0]) = thirty_one;
@@ -561,15 +561,15 @@ int insert(yearGrp* db, toDoPtr targetData) {
         free(targetData); /* since it's already allocated! */
         return 2;
     }
-    if ((mm->dates)[0] == thirty && date > 30) {
+    else if ((mm->dates)[0] == thirty && date > 30) {
         free(targetData); /* since it's already allocated! */
         return 2;
     }
-    if ((mm->dates)[0] == twenty_Nine && date > 29) {
+    else if ((mm->dates)[0] == twenty_Nine && date > 29) {
         free(targetData); /* since it's already allocated! */
         return 2;
     }
-    if ((mm->dates)[0] == twenty_Eight && date > 28) {
+    else if ((mm->dates)[0] == twenty_Eight && date > 28) {
         free(targetData); /* since it's already allocated! */
         return 2;
     }
@@ -1039,13 +1039,14 @@ void coreInit(void) {
     initDday();
     setUserName("Gildong_Hong");
     
-    load();
     /* dummy datas just for leap year / month limit check */
     leapYear     = (monthPtr)malloc(sizeof(month));
     twenty_Eight = (dayPtr)malloc(sizeof(day));
     twenty_Nine  = (dayPtr)malloc(sizeof(day));
     thirty       = (dayPtr)malloc(sizeof(day));
     thirty_one   = (dayPtr)malloc(sizeof(day));
+
+    load();
 
     return;
 }
@@ -1073,7 +1074,7 @@ int load(void) {
     initSaveMem(); /* erases nodes and hashLinks */
     initDday();
 
-    fd_bin = open(bin_fileName, O_CREAT | O_RDWR); /* if exists, then read, or not, then creat */
+    fd_bin = open(bin_fileName, O_CREAT | O_RDONLY); /* if exists, then read, or not, then creat */
     if (fd_bin == -1) {
         errOcc("open");
     }
@@ -1134,7 +1135,7 @@ int save(void) {
 
     ifAlreadyLoaded = 0;
 
-    fd_bin = open(bin_fileName, O_CREAT | O_WRONLY | O_TRUNC, 0641);
+    fd_bin = open(bin_fileName, O_WRONLY | O_TRUNC | O_CREAT, 0644);
     fd_hr = fopen(hr_fileName, "w+");
 
     if (fd_bin == -1 || fd_hr == NULL) {

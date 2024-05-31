@@ -1940,8 +1940,8 @@ void reminder_extends_popup(int signum) {
     memset(str, 0x00, 127);
 
     if (rmdr->repeatCounter == 0) {
-        popup("Reminder Expired!", NULL, "", 3);
         turnOffReminder();
+        popup("Reminder Expired!", NULL, "", 3);
 
         return;
     }
