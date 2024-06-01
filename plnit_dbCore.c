@@ -1074,7 +1074,7 @@ int load(void) {
     initSaveMem(); /* erases nodes and hashLinks */
     initDday();
 
-    fd_bin = open(bin_fileName, O_CREAT | O_RDONLY); /* if exists, then read, or not, then creat */
+    fd_bin = open(bin_fileName, O_CREAT | O_RDWR, 0644); /* if exists, then read, or not, then creat */
     if (fd_bin == -1) {
         errOcc("open");
     }

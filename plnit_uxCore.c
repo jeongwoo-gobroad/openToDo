@@ -1052,8 +1052,8 @@ void get_todo() {
     setInputModeSigHandler(ON);
 
     standout();
-    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "^C to quit insert mode");
-    mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "press enter to continue");
+    mvprintw(pos_SLL_stt.row, pos_SLL_stt.col, "press enter to continue");
+    //mvprintw(pos_SLL_stt.row + 1, pos_SLL_stt.col, "press enter to continue");
     getch(); /* wait for user input */
 
     standend();
