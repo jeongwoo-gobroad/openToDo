@@ -1251,6 +1251,10 @@ void load_UXPart(void) {
     addstr("Press Enter to continue.");
     getch();
 
+    initScreen();
+    print_UpcomingBookMark(todayDate);
+    print_commandLine(0);
+
     return;
 }
 
