@@ -78,6 +78,7 @@ int main(void){
     char hostname[BUFSIZ];
     socklen_t size;
     //int btw;
+    int safety;
 
     char buffer[MAXLINE];
     perToDoPtr rtn;

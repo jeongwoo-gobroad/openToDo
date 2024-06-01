@@ -1067,7 +1067,7 @@ int load(void) {
     toDoPtr buf = NULL;
 
     if (ifAlreadyLoaded) {
-        return 1;
+        //return 1;
     }
 
     freeAllMem(); /* erases node entry */
@@ -1657,7 +1657,8 @@ int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_d
 
     sortGivenDateToDos(dtmp, 2); /* being ready for index-based iteration */
 
-    if (t_priority == 1 && dtmp->isBookMarkExists != 0 && (dtmp->toDoArr)[pageNum - 1]->priority != 1) {
+    /*  try                 already exists?                not trying to fix the bookmarked one? */
+    if (t_priority != -1 && dtmp->isBookMarkExists != 0 && !((dtmp->toDoArr)[pageNum - 1]->priority)) {
         return 1; /* if already bookmarked todo exists */
     }
 
