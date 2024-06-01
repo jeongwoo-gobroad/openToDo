@@ -1568,6 +1568,7 @@ void getBookMarkedInDate(unsigned long long today, int counter, char* str) {
 int deleteRecord(dayPtr when, int index) {
     int i;
     int svidx = -1;
+    int isFound = 0;
 
     if (index > when->maxIndex || (index < 0 || when->maxIndex == -1)) {
         return 1; /* err hndl: no such record exists */
@@ -1587,6 +1588,19 @@ int deleteRecord(dayPtr when, int index) {
     /* free in the tree structure */
     if ((when->toDoArr)[index]->priority != 0) { /* to support multi colored bookmarks */
         when->isBookMarkExists = 0; /* erase bookmark when target has the key */
+    }
+    if ((when->toDoArr)[index]->isShared != 0) { /* if something is being shared */
+        for (i = 0; i <= when->maxIndex; i++) {
+            if (i == index) continue;
+
+            if ((when->toDoArr)[i]->isShared != 0) {
+                isFound++;
+            }
+        }
+
+        if (isFound == 0) {
+            when->sharedToDoExists = 0;
+        }
     }
 
     free((when->toDoArr)[index]);
