@@ -1135,7 +1135,7 @@ int save(void) {
 
     ifAlreadyLoaded = 0;
 
-    fd_bin = open(bin_fileName, O_WRONLY | O_TRUNC | O_CREAT, 0644);
+    fd_bin = open(bin_fileName, O_RDWR | O_TRUNC | O_CREAT);
     fd_hr = fopen(hr_fileName, "w+");
 
     if (fd_bin == -1 || fd_hr == NULL) {

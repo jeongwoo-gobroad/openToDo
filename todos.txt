@@ -499,8 +499,6 @@ Records of the Year 2024:
            [ 1 Record(s) in this day. ]
              > [BookMarked]03:18 -> Title:  Movie Night, Details: Watch the latest movie at the theater.
     -> Records of the Month 05:
-        --> Records of the Day 01:
-           [ 0 Record(s) in this day. ]
         --> Records of the Day 02:
            [ 3 Record(s) in this day. ]
              > [BookMarked]00:32 -> Title:  Gym Session, Details: Leg day workout followed by 20 mins of cardio.
@@ -571,8 +569,6 @@ Records of the Year 2024:
            [ 2 Record(s) in this day. ]
              >             04:26 -> Title: Read Articles, Details: Stay updated with the latest tech news.
              > [BookMarked]23:25 -> Title: Write Report, Details: Summarize findings from the recent survey.
-        --> Records of the Day 18:
-           [ 0 Record(s) in this day. ]
         --> Records of the Day 19:
            [ 1 Record(s) in this day. ]
              > [BookMarked]20:00 -> Title: Travel Booking, Details: Reserve summer vacation flights.
