@@ -1660,6 +1660,13 @@ int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_d
     //src /= 10000;
 
     yearPtr ytmp; monthPtr mtmp; dayPtr dtmp;
+    toDoPtr newInsert = (toDoPtr)malloc(sizeof(toDo));
+
+    memset(newInsert, 0x00, sizeof(toDo));
+
+    if (newInsert == NULL) {
+        errOcc("editWhileIterate_malloc");
+    }
 
     ytmp = findYear(src / 10000, &key);
     mtmp = findMonth(src % 10000 / 100, ytmp);
@@ -1671,8 +1678,8 @@ int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_d
 
     sortGivenDateToDos(dtmp, 2); /* being ready for index-based iteration */
 
-    /*  try                 already exists?                not trying to fix the bookmarked one? */
-    if (t_priority != -1 && dtmp->isBookMarkExists != 0 && !((dtmp->toDoArr)[pageNum - 1]->priority)) {
+    /*  try                                    already exists?                not trying to fix the bookmarked one? */
+    if (t_priority != 0 && t_priority != -1 && dtmp->isBookMarkExists == 1 && !((dtmp->toDoArr)[pageNum - 1]->priority)) {
         return 1; /* if already bookmarked todo exists */
     }
 
@@ -1682,7 +1689,7 @@ int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_d
 
     /* actual editing start */
     /*                                                    Don't allow users to edit system default holiday */
-    if (t_day != 1234 && (dtmp->toDoArr)[pageNum - 1]->dateData != 9999)              (dtmp->toDoArr)[pageNum - 1]->dateData = t_day;
+    if (t_day != 1234 && (dtmp->toDoArr)[pageNum - 1]->dateData % 10000 != 9999)      (dtmp->toDoArr)[pageNum - 1]->dateData = t_day;
     if (t_title[0] != '\0')                                                           strcpy((dtmp->toDoArr)[pageNum - 1]->title, t_title);
     if (t_details[0] != '\0')                                                         strcpy((dtmp->toDoArr)[pageNum - 1]->details, t_details);
     if (t_priority != -1)                                                             (dtmp->toDoArr)[pageNum - 1]->priority = t_priority;
@@ -1691,13 +1698,16 @@ int editWhileIterate(unsigned long long src, int pageNum, unsigned long long t_d
         dtmp->isBookMarkExists = 1; /* if it has passed the test at the first */
     }
     
+    memcpy(newInsert, (dtmp->toDoArr)[pageNum - 1], sizeof(toDo));
+    deleteRecord(dtmp, pageNum - 1);
+
     /* don't use deletion based editing anymore; we actually edit it */
     //deleteRecord(dtmp, pageNum - 1);
 
     /* insert does the thing about bookmark check */
     //insert(&key, create_Node(t_day, t_priority, t_title, t_details));
 
-    return 0; /* safely executed: 0 */
+    return insert(&key, newInsert);; /* safely executed: 0 */
 }
 /* For Reminder Features - 0.0.5 added */
 void reminderHandler(int signum) {
