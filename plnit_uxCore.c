@@ -272,7 +272,7 @@ void edit_plan(unsigned long long targetDate, int* page){
     char t[13]; // 문자열을 위한 배열 선언
     char title[26];
     char details[61];
-    char b[2]; int bookmark; 
+    char b[3]; int bookmark; 
     unsigned long long date_2;
     int input_2; 
     int input_1 = *page;
@@ -309,15 +309,22 @@ void edit_plan(unsigned long long targetDate, int* page){
     addstr(" (1:"); printColorStrip("  ", 1); standout();
     addstr(" 2:"); printColorStrip("  ", 2); standout();
     addstr(" 3:"); printColorStrip("  ", 3); standout();
-    addstr(" 0:no bookmark, -1:no edit)");
+    addstr(" 0:no bookmark, Blank: no edit)");
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
     move(pos_SLL_stt.row + 1, pos_SLL_stt.col);
     standend();
-    getnstr(b, 1); b[1] = '\0'; fflush(stdin);
+    getnstr(b, 2); b[2] = '\0'; fflush(stdin);
     clearGivenNonCalendarArea(SLL);
-     
-    bookmark = atoi(b);
+    
+    if (b[0] == '\0') {
+        bookmark = -1;
+        //puts("wow");
+    }
+    else {
+        bookmark = atoi(b);
+    }
+
     if (t[0] == '\0') {
         date_2 = 1234;
     }
@@ -678,7 +685,7 @@ void print_date(unsigned long long targetDate) {
                 }
                 else  attron(COLOR_PAIR(1));
             }
-            mvprintw(pos_SC_date[0][i].row, pos_SC_date[0][i].col, "%-2d", date);
+            mvprintw(pos_SC_date[0][i].row, pos_SC_date[0][i].col, "%d", date);
             standend();
             attrset(A_NORMAL);
             date++;
@@ -712,7 +719,7 @@ void print_date(unsigned long long targetDate) {
                     }
                     else  attron(COLOR_PAIR(1));
                 }
-                mvprintw(pos_SC_date[i][j].row, pos_SC_date[i][j].col, "%-2d", date);
+                mvprintw(pos_SC_date[i][j].row, pos_SC_date[i][j].col, "%d", date);
                 standend();
                 attrset(A_NORMAL);
             }
