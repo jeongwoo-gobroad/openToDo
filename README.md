@@ -27,7 +27,7 @@ an openToDo project: (aka Plan-it Project)
                   
                   1.1.2) make cleanup
 
-                        Deletes the compilation residue, exclugind executable file.
+                        Deletes the compilation residue, excluding executable file.
 
     2) Explicit build method
 
