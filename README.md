@@ -229,4 +229,10 @@ an openToDo project: (aka Plan-it Project)
 
           (Core) 북마크 관련 레거시 코드 충돌 문제 해결.
 
+          (Core) 타 일자로의 수정 액션 관련 이슈 해결.
+
+          (Core) 수정 메소드에 memcpy 관련 액션 추가.
+
           (UX) 로드 관련 문제 해결.
+
+          (UX) 수정 방식 개선.
