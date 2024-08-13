@@ -7,6 +7,8 @@ an openToDo project: (aka Plan-it Project)
   리눅스 환경을 위한, 터미널 기반에서 구동되는 달력형 일정 관리 프로그램입니다.
   ncurses 라이브러리를 활용한, pseudo-GUI 환경을 제공합니다.
 
+  Demonstration Video: https://youtu.be/kHII943qwfw
+
 0. Manual
       
       README folder 내부의 README.txt를 참고해주시면 감사하겠습니다.
